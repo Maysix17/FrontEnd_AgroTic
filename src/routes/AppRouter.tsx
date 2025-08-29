@@ -1,0 +1,35 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+// Páginas
+import LoginPage from "../pages/LoginPage";
+import MapRegisterPage from "../pages/MapRegisterPage";
+import RecoverPasswordPage from "../pages/RecoverPasswordPage";
+import RegisterPage from "../pages/RegisterPage"; 
+import Menu from "../components/organisms/Menu"; 
+
+const AppRouter = () => {
+  return (
+    <Router>
+      <Routes>
+        {/* Redirigir la raíz al login */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Página de inicio de sesión */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Página de registro de usuario */}
+        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Página de recuperación de contraseña */}
+        <Route path="/recover-password" element={<RecoverPasswordPage />} />
+
+        {/* Página de registro de mapas */}
+        <Route path="/map-register" element={<MapRegisterPage />} />
+
+        {/* Menú principal */}
+        <Route path="/menu" element={<Menu />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default AppRouter;
