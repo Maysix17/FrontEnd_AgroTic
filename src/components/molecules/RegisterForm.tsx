@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import PrimaryButton from "../atoms/PrimaryButton";
 import TextInput from "../atoms/TextInput";
+import type { RegisterFormProps} from "../../interfaces/Register";
 
-const RegisterForm: React.FC = () => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     nombres: "",
@@ -22,7 +23,9 @@ const RegisterForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Datos de registro:", formData);
-    // Aquí puedes hacer fetch/axios a tu API para registrar
+    if (onRegister) {
+      onRegister(formData); 
+    }
   };
 
   return (
@@ -33,28 +36,24 @@ const RegisterForm: React.FC = () => {
         value={formData.nombres}
         onChange={handleFieldChange("nombres")}
       />
-
       <TextInput
         label="Apellidos"
         placeholder="Ingrese un apellido"
         value={formData.apellidos}
         onChange={handleFieldChange("apellidos")}
       />
-
       <TextInput
         label="DNI"
         placeholder="Ingrese DNI"
         value={formData.dni}
         onChange={handleFieldChange("dni")}
       />
-
       <TextInput
         label="Teléfono"
         placeholder="Ingrese un teléfono"
         value={formData.telefono}
         onChange={handleFieldChange("telefono")}
       />
-
       <TextInput
         label="Contraseña"
         type="password"
@@ -80,6 +79,7 @@ const RegisterForm: React.FC = () => {
 };
 
 export default RegisterForm;
+
 
 
 

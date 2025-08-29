@@ -1,8 +1,9 @@
 import React from "react";
 import { Card, CardHeader, CardBody } from "@heroui/react";
 import RegisterForm from "../molecules/RegisterForm";
+import type { RegisterFormProps } from "../../interfaces/Register";
 
-const RegisterCard: React.FC = () => {
+const RegisterCard: React.FC<RegisterFormProps> = ({ onRegister }) => {
   return (
     <Card className="p-6 w-full max-w-sm shadow-lg">
       <CardHeader className="flex flex-col items-center text-center">
@@ -10,10 +11,12 @@ const RegisterCard: React.FC = () => {
         <p className="text-sm text-gray-500">Regístrate para continuar</p>
       </CardHeader>
       <CardBody>
-        <RegisterForm />
+        <RegisterForm onRegister={onRegister} />
       </CardBody>
     </Card>
   );
 };
 
 export default RegisterCard;
+
+
