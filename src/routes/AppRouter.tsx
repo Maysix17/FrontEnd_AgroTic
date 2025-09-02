@@ -5,6 +5,8 @@ import MapRegisterPage from "../pages/MapRegisterPage";
 import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage"; 
 import Menu from "../components/organisms/Menu"; 
+import TablePage from "../pages/TablePage"
+import Calendario from "../pages/Calendario"
 
 const AppRouter = () => {
   return (
@@ -27,6 +29,10 @@ const AppRouter = () => {
 
         {/* Menú principal */}
         <Route path="/menu" element={<Menu />} />
+
+        <Route path="/table" element={<TablePage />} />
+
+        <Route path="/date" element={<Calendario />} />
       </Routes>
     </Router>
   );

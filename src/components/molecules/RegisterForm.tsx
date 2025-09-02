@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import PrimaryButton from "../atoms/PrimaryButton";
-import TextInput from "../atoms/TextInput";
-import type { RegisterFormProps} from "../../interfaces/Register";
+import UserInputs from "../atoms/UserInputs";
+import type { RegisterFormProps } from "../../interfaces/Register";
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
   const navigate = useNavigate();
@@ -14,52 +14,27 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
     password: "",
   });
 
-  const handleFieldChange =
-    (field: keyof typeof formData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setFormData({ ...formData, [field]: e.target.value });
-    };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Datos de registro:", formData);
     if (onRegister) {
-      onRegister(formData); 
+      onRegister(formData);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TextInput
-        label="Nombres"
-        placeholder="Ingrese un nombre"
-        value={formData.nombres}
-        onChange={handleFieldChange("nombres")}
-      />
-      <TextInput
-        label="Apellidos"
-        placeholder="Ingrese un apellido"
-        value={formData.apellidos}
-        onChange={handleFieldChange("apellidos")}
-      />
-      <TextInput
-        label="DNI"
-        placeholder="Ingrese DNI"
-        value={formData.dni}
-        onChange={handleFieldChange("dni")}
-      />
-      <TextInput
-        label="Teléfono"
-        placeholder="Ingrese un teléfono"
-        value={formData.telefono}
-        onChange={handleFieldChange("telefono")}
-      />
-      <TextInput
-        label="Contraseña"
-        type="password"
-        placeholder="Ingrese contraseña"
-        value={formData.password}
-        onChange={handleFieldChange("password")}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <UserInputs
+        nombres={formData.nombres}
+        setNombres={(val) => setFormData({ ...formData, nombres: val })}
+        apellidos={formData.apellidos}
+        setApellidos={(val) => setFormData({ ...formData, apellidos: val })}
+        dni={formData.dni}
+        setDni={(val) => setFormData({ ...formData, dni: val })}
+        telefono={formData.telefono}
+        setTelefono={(val) => setFormData({ ...formData, telefono: val })}
+        password={formData.password}
+        setPassword={(val) => setFormData({ ...formData, password: val })}
       />
 
       <PrimaryButton

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import TextInput from "../atoms/TextInput";
 import PrimaryButton from "../atoms/PrimaryButton";
+import UserInputs from "../atoms/UserInputs";
 import type { LoginFormProps } from "../../types/login.types";
 
 const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
@@ -10,27 +10,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!dni || !password) {
+      setMessage("Por favor, complete todos los campos.");
+      return;
+    }
+
     console.log("DNI:", dni, "Password:", password);
 
-    // siempre ejecuta login aunque no haya datos
     onLogin();
-    setMessage(""); 
+    setMessage("");
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TextInput
-        label="DNI"
-        placeholder="Ingrese DNI"
-        value={dni}
-        onChange={(e) => setDni(e.target.value)}
-      />
-      <TextInput
-        label="Contraseña"
-        type="password"
-        placeholder="Ingrese contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <UserInputs
+        dni={dni}
+        setDni={setDni}
+        password={password}
+        setPassword={setPassword}
       />
 
       {message && <p className="text-center text-red-500">{message}</p>}
@@ -45,7 +43,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
         href="/register"
         className="text-xs mt-2 text-gray-500 hover:underline w-full text-center block"
       >
-        ¿No tienes una cuenta? Registrate
+        ¿No tienes una cuenta? Regístrate
       </a>
       <a
         href="/recover-password"
@@ -58,6 +56,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 };
 
 export default LoginForm;
+
 
 
 
