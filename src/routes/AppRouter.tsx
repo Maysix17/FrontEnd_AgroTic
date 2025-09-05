@@ -7,6 +7,7 @@ import RegisterPage from "../pages/RegisterPage";
 import Menu from "../components/organisms/Menu"; 
 import TablePage from "../pages/TablePage"
 import Calendario from "../pages/Calendario"
+import BotonPage from "../pages/BotonPage";
 
 const AppRouter = () => {
   return (
@@ -33,6 +34,8 @@ const AppRouter = () => {
         <Route path="/table" element={<TablePage />} />
 
         <Route path="/date" element={<Calendario />} />
+        {/* Boton */}
+        <Route path="/fitosanitario" element={<BotonPage />} />
       </Routes>
     </Router>
   );

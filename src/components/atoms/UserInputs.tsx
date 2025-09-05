@@ -1,7 +1,7 @@
 // src/components/molecules/UserInputs.tsx
 import React from "react";
 import TextInput from "../atoms/TextInput";
-import type { UserInputsProps } from "../../interfaces/UserInputsProps";
+import type { UserInputsProps } from "../../types/UserInputsProps";
 
 const UserInputs: React.FC<UserInputsProps> = ({
   dni, setDni,

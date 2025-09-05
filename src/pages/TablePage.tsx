@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import ResultsTable from "../components/organisms/ResultsTable";
 import InputSearch from "../components/atoms/InputSearch";
-import type { ResultItem } from "../interfaces/ResultItem";
+import type { ResultItem } from "../types/ResultItem";
 
 const TablePage: React.FC = () => {
   const [results] = useState<ResultItem[]>([

@@ -1,5 +1,5 @@
 import React from "react";
-import type { InputSearchProps } from "../../interfaces/InputSearchProps";
+import type { InputSearchProps } from "../../types/InputSearchProps";
 
 const InputSearch: React.FC<InputSearchProps> = ({ value, onChange, placeholder }) => {
   return (

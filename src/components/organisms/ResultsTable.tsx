@@ -1,7 +1,7 @@
 import React from "react";
 import Table from "../atoms/Table";
 import TableRow from "../molecules/TableRow";
-import type { ResultsTableProps } from "../../interfaces/ResultsTableProps";
+import type { ResultsTableProps } from "../../types/ResultsTableProps";
 
 const ResultsTable: React.FC<ResultsTableProps> = ({ data, onView }) => {
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import type { TableProps } from "../../interfaces/TableProps";
+import type { TableProps } from "../../types/TableProps";
 
 const Table: React.FC<TableProps> = ({ headers, children }) => {
   return (
