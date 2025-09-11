@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import TextInput from "../atoms/TextInput";
 import PrimaryButton from "../atoms/PrimaryButton";
-import UserInputs from "../atoms/UserInputs";
 import type { RecoverPasswordFormProps } from "../../interfaces/Recover";
 
 const RecoverPasswordForm: React.FC<RecoverPasswordFormProps> = ({ onRecover }) => {
@@ -11,7 +11,6 @@ const RecoverPasswordForm: React.FC<RecoverPasswordFormProps> = ({ onRecover }) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password || !confirmPassword) {
       setMessage("Por favor, completa todos los campos.");
       return;
@@ -25,6 +24,7 @@ const RecoverPasswordForm: React.FC<RecoverPasswordFormProps> = ({ onRecover }) 
       return;
     }
 
+    // 👉 Si se pasa un callback externo, se ejecuta
     if (onRecover) {
       onRecover(email, password);
     }
@@ -37,24 +37,34 @@ const RecoverPasswordForm: React.FC<RecoverPasswordFormProps> = ({ onRecover }) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <UserInputs
-        email={email}
-        setEmail={setEmail}
-        password={password}
-        setPassword={setPassword}
-        confirmPassword={confirmPassword}
-        setConfirmPassword={setConfirmPassword}
+    <form onSubmit={handleSubmit}>
+      <TextInput
+        label="Correo electrónico"
+        type="email"
+        placeholder="Ingrese correo electrónico"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
-
+      <TextInput
+        label="Contraseña Nueva"
+        type="password"
+        placeholder="Ingrese contraseña"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <TextInput
+        label="Confirmar Contraseña"
+        type="password"
+        placeholder="Confirme contraseña"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+      />
       {message && <p className="text-center text-red-500">{message}</p>}
-
       <PrimaryButton
         text="Enviar"
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
       />
-
       <a
         href="/login"
         className="text-xs mt-2 text-gray-500 hover:underline w-full text-center block"
