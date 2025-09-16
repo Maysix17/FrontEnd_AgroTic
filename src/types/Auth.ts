@@ -15,3 +15,14 @@ export interface RegisterFormData {
   email: string;
   password: string;
 }
+
+export interface LoginPayload {
+  dni: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  message: string;
+  access_token: string;
+  refresh_token: string;
+}

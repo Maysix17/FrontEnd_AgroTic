@@ -1,5 +1,10 @@
 import apiClient from "../lib/axios/axios";
-import type { RegisterPayload, RegisterFormData } from "../types/Auth";
+import type {
+  RegisterPayload,
+  RegisterFormData,
+  LoginPayload,
+  LoginResponse,
+} from "../types/Auth";
 
 export const registerUser = async (
   formData: RegisterFormData
@@ -20,6 +25,25 @@ export const registerUser = async (
   } catch (error) {
     console.error("Error en el registro:", error);
     // Puedes manejar el error de forma más específica si lo necesitas
+    throw error;
+  }
+};
+
+export const loginUser = async (
+  credentials: LoginPayload
+): Promise<LoginResponse> => {
+  try {
+    const payload = {
+      ...credentials,
+      dni: parseInt(credentials.dni, 10),
+    };
+    const { data } = await apiClient.post<LoginResponse>(
+      "/auth/login",
+      payload
+    );
+    return data;
+  } catch (error) {
+    console.error("Error en el inicio de sesión:", error);
     throw error;
   }
 };

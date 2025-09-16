@@ -1,9 +1,8 @@
 import React from "react";
 import { Card, CardHeader, CardBody } from "@heroui/react";
 import LoginForm from "../molecules/LoginForm";
-import type { LoginCardProps } from "../../interfaces/LoginCard";
 
-const LoginCard: React.FC<LoginCardProps> = ({ onLogin }) => {
+const LoginCard: React.FC = () => {
   return (
     <Card className="p-6 w-full max-w-sm shadow-lg">
       <CardHeader className="flex flex-col items-center text-center">
@@ -11,7 +10,7 @@ const LoginCard: React.FC<LoginCardProps> = ({ onLogin }) => {
         <p className="text-sm text-gray-500">Inicie sesión en tu cuenta</p>
       </CardHeader>
       <CardBody>
-        <LoginForm onLogin={onLogin} />
+        <LoginForm />
       </CardBody>
     </Card>
   );
