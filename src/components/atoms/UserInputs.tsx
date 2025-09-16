@@ -41,15 +41,6 @@ const UserInputs: React.FC<UserInputsProps> = ({
         />
       )}
 
-      {telefono !== undefined && setTelefono && (
-        <TextInput
-          label="Teléfono"
-          placeholder="Ingrese un teléfono"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-        />
-      )}
-
       {email !== undefined && setEmail && (
         <TextInput
           label="Correo electrónico"
@@ -57,6 +48,15 @@ const UserInputs: React.FC<UserInputsProps> = ({
           placeholder="Ingrese correo"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+        />
+      )}
+
+      {telefono !== undefined && setTelefono && (
+        <TextInput
+          label="Teléfono"
+          placeholder="Ingrese un teléfono"
+          value={telefono}
+          onChange={(e) => setTelefono(e.target.value)}
         />
       )}
 
