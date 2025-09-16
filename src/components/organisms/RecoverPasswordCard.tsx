@@ -8,11 +8,10 @@ const RecoverPasswordCard: React.FC = () => {
       <CardHeader className="flex flex-col items-center text-center">
         <h2 className="text-2xl font-bold">Recuperar Contraseña</h2>
         <p className="text-sm text-gray-500">
-          El correo al que le llegará la verificación es el mismo de su registro
+          El correo al que llegará la verificación es el mismo con el que te registraste.
         </p>
       </CardHeader>
       <CardBody>
-        {/* 👇 ya no recibe props */}
         <RecoverPasswordForm />
       </CardBody>
     </Card>
@@ -20,5 +19,3 @@ const RecoverPasswordCard: React.FC = () => {
 };
 
 export default RecoverPasswordCard;
-
-

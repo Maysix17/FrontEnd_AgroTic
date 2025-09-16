@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardBody } from "@heroui/react";
 import RegisterForm from "../molecules/RegisterForm";
-import type { RegisterFormProps } from "../../interfaces/Register";
+import type { RegisterFormProps } from "../../types/Register";
 
 const RegisterCard: React.FC<RegisterFormProps> = ({ onRegister }) => {
   return (
@@ -18,5 +18,3 @@ const RegisterCard: React.FC<RegisterFormProps> = ({ onRegister }) => {
 };
 
 export default RegisterCard;
-
-
