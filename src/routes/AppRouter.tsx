@@ -6,11 +6,13 @@ import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage"; 
 import Menu from "../components/organisms/Menu"; 
 import TablePage from "../pages/TablePage"
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 import Calendario from "../pages/Calendario"
 import BotonPage from "../pages/BotonPage";
 
 const AppRouter = () => {
   return (
+    
     <Router>
       <Routes>
         {/* Redirigir la raíz al login */}
@@ -24,6 +26,12 @@ const AppRouter = () => {
 
         {/* Página de recuperación de contraseña */}
         <Route path="/recover-password" element={<RecoverPasswordPage />} />
+
+        {/* Página para restablecer la contraseña (con y sin token)
+            Esto permite verla en desarrollo y que funcione con el enlace del correo.
+        */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
         {/* Página de registro de mapas */}
         <Route path="/map-register" element={<MapRegisterPage />} />
