@@ -8,6 +8,7 @@ import Menu from "../components/organisms/Menu";
 import TablePage from "../pages/TablePage"
 import Calendario from "../pages/Calendario"
 import BotonPage from "../pages/BotonPage";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 
 const AppRouter = () => {
   return (
@@ -36,6 +37,8 @@ const AppRouter = () => {
         <Route path="/date" element={<Calendario />} />
         {/* Boton */}
         <Route path="/fitosanitario" element={<BotonPage />} />
+        
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
     </Router>
   );
