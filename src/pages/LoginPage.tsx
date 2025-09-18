@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
   const handleLogin = async (payload: { dni: number; password: string }) => {
     try {
       await login(payload);
-      navigate("/menu");
+      navigate("/app");
     } catch (error) {
       console.error("Login failed:", error);
       // Optionally show error message

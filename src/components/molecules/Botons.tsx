@@ -6,7 +6,7 @@ const FitosanitarioButtons: React.FC = () => {
     const [query, setQuery] = useState("");
 
     // Lista de botones
-    const buttons = ["Subir Mapa", "Registrar zona", "Riego", "Fertilización", "Control de Plagas", "Cosecha"];
+    const buttons = ["Subir Mapa", "Registrar zona", "Riego", "Fertilización", "Control de Plagas"];
 
     // Filtrar botones según el input
     const filteredButtons = buttons.filter((b) =>

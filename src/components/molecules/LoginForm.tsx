@@ -16,7 +16,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       return;
     }
 
-    console.log("DNI:", dni, "Password:", password);
 
     onLogin({ dni: parseInt(dni, 10), password });
     setMessage("");

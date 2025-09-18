@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MenuButton from "../molecules/MenuButton.tsx";
 import {
   HomeIcon,
@@ -9,16 +10,23 @@ import {
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
-import MapModal from "../organisms/MapModal";
 import type { MenuItem } from "../../types/Menu.types";
-import FitosanitarioButtons from "../molecules/Botons.tsx";
 import { usePermission } from '../../contexts/PermissionContext';
 
 const Menu: React.FC = () => {
   const { hasPermission, isAuthenticated } = usePermission();
-  const [activeItem, setActiveItem] = useState("");
-  const [isCultivosOpen, setIsCultivosOpen] = useState(false);
-  const [showFitosanitario, setShowFitosanitario] = useState(false);
+  const navigate = useNavigate();
+
+  const getRoute = (label: string) => {
+    switch (label) {
+      case "Inicio": return "/app";
+      case "IOT": return "/app/iot";
+      case "Cultivos": return "/app/cultivos";
+      case "Fitosanitario": return "/app/fitosanitario";
+      case "Inventario": return "/app/inventario";
+      default: return "/app";
+    }
+  };
 
   const menuItems: MenuItem[] = [
     { label: "Inicio", icon: HomeIcon },
@@ -28,17 +36,6 @@ const Menu: React.FC = () => {
     { label: "Inventario", icon: DocumentTextIcon },
   ];
 
-  const handleClick = (label: string) => {
-    setActiveItem(label);
-
-    if (label === "Cultivos") {
-      setIsCultivosOpen(true);
-    }
-
-    if (label === "Fitosanitario") {
-      setShowFitosanitario(!showFitosanitario); // alterna mostrar la molecule
-    }
-  };
 
   if (!isAuthenticated) return <div className="flex items-center justify-center h-screen">Loading permissions...</div>;
 
@@ -77,8 +74,7 @@ const Menu: React.FC = () => {
                 key={item.label}
                 icon={item.icon}
                 label={item.label}
-                active={activeItem === item.label}
-                onClick={() => handleClick(item.label)}
+                onClick={() => navigate(getRoute(item.label))}
               />
             ) : null;
           })}
@@ -90,18 +86,6 @@ const Menu: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal de cultivos */}
-      <MapModal
-        isOpen={isCultivosOpen}
-        onClose={() => setIsCultivosOpen(false)}
-      />
-
-      {/* Molecule de Fitosanitario */}
-      {showFitosanitario && (
-        <div className="ml-60 p-8">
-          <FitosanitarioButtons />
-        </div>
-      )}
     </>
   );
 };

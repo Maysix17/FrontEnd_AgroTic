@@ -14,7 +14,7 @@ const RegisterPage: React.FC = () => {
     password: string;
   }) => {
     console.log("Registrando usuario:", data);
-    navigate("/menu");
+    navigate("/app");
   };
 
   return (
