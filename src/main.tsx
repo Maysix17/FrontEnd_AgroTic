@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import AppRouter from "./routes/AppRouter";
+import App from "./App";
 import { HeroUIProvider } from "@heroui/react";
 
 // ⬅️ Importa los estilos globales de HeroUI
@@ -9,7 +9,7 @@ import "./index.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <HeroUIProvider>
-      <AppRouter />
+      <App />
     </HeroUIProvider>
   </React.StrictMode>
 );

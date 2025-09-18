@@ -6,3 +6,8 @@ export type MenuButtonProps = {
   active?: boolean;
   onClick?: () => void;
 };
+
+export type MenuItem = {
+  label: string;
+  icon: React.ElementType<React.SVGProps<SVGSVGElement>>;
+};
