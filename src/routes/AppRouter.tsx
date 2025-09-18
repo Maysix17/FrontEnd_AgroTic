@@ -4,13 +4,9 @@ import LoginPage from "../pages/LoginPage";
 import MapRegisterPage from "../pages/MapRegisterPage";
 import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage";
-import Menu from "../components/organisms/Menu";
-import TablePage from "../pages/TablePage"
-import Calendario from "../pages/Calendario"
-import BotonPage from "../pages/BotonPage";
+import MainLayout from "../components/templates/MainLayout";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ProtectedRoute from "../components/ProtectedRoute";
-
 const AppRouter = () => {
   return (
     <Router>
@@ -30,15 +26,9 @@ const AppRouter = () => {
         {/* Página de registro de mapas */}
         <Route path="/map-register" element={<ProtectedRoute><MapRegisterPage /></ProtectedRoute>} />
 
-        {/* Menú principal */}
-        <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
+        {/* Aplicación principal */}
+        <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
 
-        <Route path="/table" element={<ProtectedRoute><TablePage /></ProtectedRoute>} />
-
-        <Route path="/date" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
-        {/* Boton */}
-        <Route path="/fitosanitario" element={<ProtectedRoute><BotonPage /></ProtectedRoute>} />
-        
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
     </Router>

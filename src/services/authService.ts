@@ -56,7 +56,6 @@ export const loginUser = async (payload: LoginPayload): Promise<DecodedToken> =>
     const response = await apiClient.post("/auth/login", payload);
     const token = response.data.access_token;
 
-    console.log("token successful:", token)
     Cookies.set("access_token", token);
     return jwtDecode<DecodedToken>(token);
   } catch (error) {
