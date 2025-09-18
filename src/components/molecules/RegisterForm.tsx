@@ -1,13 +1,23 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../atoms/PrimaryButton";
 import UserInputs from "../atoms/UserInputs";
 import type { RegisterFormProps } from "../../types/Register";
 import type { RegisterFormData } from "../../types/Auth";
 import { registerUser } from "../../services/authService";
+import Swal from "sweetalert2"; // ✅ Importar SweetAlert2
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
-  const navigate = useNavigate();
+type ErrorState = {
+  nombres?: string;
+  apellidos?: string;
+  dni?: string;
+  telefono?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  general?: string;
+};
+
+const RegisterForm: React.FC<RegisterFormProps> = () => {
   const [formData, setFormData] = useState<RegisterFormData>({
     nombres: "",
     apellidos: "",
@@ -16,24 +26,67 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
     email: "",
     password: "",
   });
-  const [error, setError] = useState<string | null>(null);
+
+  const [errors, setErrors] = useState<ErrorState>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
+    setErrors({});
+
     try {
       const data = await registerUser(formData);
-      console.log("Registro exitoso:", data);
-      if (onRegister) {
-        onRegister(formData);
+
+      // ✅ Mostrar alerta de éxito
+      Swal.fire({
+        icon: "success",
+        title: "¡Registro exitoso!",
+        text: data.message || "Usuario registrado correctamente",
+        confirmButtonText: "Iniciar sesión",
+        confirmButtonColor: "#16a34a", // verde
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/login"; // redirige al login
+        }
+      });
+
+      // Limpiar formulario
+      setFormData({
+        nombres: "",
+        apellidos: "",
+        dni: "",
+        telefono: "",
+        email: "",
+        password: "",
+      });
+    } catch (err: any) {
+      let newErrors: ErrorState = {};
+
+      if (err.response?.data) {
+        const data = err.response.data;
+        if (typeof data.message === "string") {
+          newErrors.general = data.message;
+        } else if (Array.isArray(data.message)) {
+          data.message.forEach((msg: string) => {
+            if (msg.toLowerCase().includes("correo")) newErrors.email = msg;
+            else if (msg.toLowerCase().includes("contraseña")) newErrors.password = msg;
+            else if (msg.toLowerCase().includes("dni")) newErrors.dni = msg;
+            else if (msg.toLowerCase().includes("nombre")) newErrors.nombres = msg;
+            else if (msg.toLowerCase().includes("apellido")) newErrors.apellidos = msg;
+            else if (msg.toLowerCase().includes("teléfono")) newErrors.telefono = msg;
+            else newErrors.general = msg;
+          });
+        } else if (data.error) {
+          newErrors.general = data.error;
+        }
+      } else if (err.request) {
+        newErrors.general = "No se pudo conectar con el servidor.";
+      } else {
+        newErrors.general = `Error inesperado: ${err.message}`;
       }
-      // Opcional: Redirigir al usuario tras un registro exitoso
-      navigate("/login");
-    } catch (err) {
-      setError("Hubo un error al registrar la cuenta. Inténtalo de nuevo.");
-      console.error(err);
+
+      setErrors(newErrors);
     } finally {
       setIsLoading(false);
     }
@@ -41,37 +94,33 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onRegister }) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       <UserInputs
-        nombres={formData.nombres}
+        {...formData}
         setNombres={(val) => setFormData({ ...formData, nombres: val })}
-        apellidos={formData.apellidos}
         setApellidos={(val) => setFormData({ ...formData, apellidos: val })}
-        dni={formData.dni}
         setDni={(val) => setFormData({ ...formData, dni: val })}
-        email={formData.email}
         setEmail={(val) => setFormData({ ...formData, email: val })}
-        telefono={formData.telefono}
         setTelefono={(val) => setFormData({ ...formData, telefono: val })}
-        password={formData.password}
         setPassword={(val) => setFormData({ ...formData, password: val })}
+        errors={errors}
       />
 
+      {errors.general && (
+        <p className="text-red-500 text-sm text-center">{errors.general}</p>
+      )}
+
       <PrimaryButton
-        text="Registrarse"
+        text={isLoading ? "Registrando..." : "Registrarse"}
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"
         disabled={isLoading}
       />
-
-      <a
-        href="/login"
-        className="text-xs mt-2 text-gray-500 hover:underline w-full text-center block"
-      >
-        ¿Ya tienes una cuenta? Iniciar sesión
-      </a>
     </form>
   );
 };
 
 export default RegisterForm;
+
+
+
+
