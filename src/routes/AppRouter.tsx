@@ -3,12 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LoginPage from "../pages/LoginPage";
 import MapRegisterPage from "../pages/MapRegisterPage";
 import RecoverPasswordPage from "../pages/RecoverPasswordPage";
-import RegisterPage from "../pages/RegisterPage"; 
-import Menu from "../components/organisms/Menu"; 
+import RegisterPage from "../pages/RegisterPage";
+import Menu from "../components/organisms/Menu";
 import TablePage from "../pages/TablePage"
 import Calendario from "../pages/Calendario"
 import BotonPage from "../pages/BotonPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const AppRouter = () => {
   return (
@@ -27,16 +28,16 @@ const AppRouter = () => {
         <Route path="/recover-password" element={<RecoverPasswordPage />} />
 
         {/* Página de registro de mapas */}
-        <Route path="/map-register" element={<MapRegisterPage />} />
+        <Route path="/map-register" element={<ProtectedRoute><MapRegisterPage /></ProtectedRoute>} />
 
         {/* Menú principal */}
-        <Route path="/menu" element={<Menu />} />
+        <Route path="/menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
 
-        <Route path="/table" element={<TablePage />} />
+        <Route path="/table" element={<ProtectedRoute><TablePage /></ProtectedRoute>} />
 
-        <Route path="/date" element={<Calendario />} />
+        <Route path="/date" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
         {/* Boton */}
-        <Route path="/fitosanitario" element={<BotonPage />} />
+        <Route path="/fitosanitario" element={<ProtectedRoute><BotonPage /></ProtectedRoute>} />
         
         <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>

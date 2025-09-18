@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import MenuButton from "../molecules/Menu.tsx";
+import MenuButton from "../molecules/MenuButton.tsx";
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -10,13 +10,15 @@ import {
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
 import MapModal from "../organisms/MapModal";
-import type { MenuItem } from "../../interfaces/MenuIten.ts"; 
-import FitosanitarioButtons from "../molecules/Botons.tsx"; 
+import type { MenuItem } from "../../types/Menu.types";
+import FitosanitarioButtons from "../molecules/Botons.tsx";
+import { usePermission } from '../../contexts/PermissionContext';
 
 const Menu: React.FC = () => {
+  const { hasPermission, isAuthenticated } = usePermission();
   const [activeItem, setActiveItem] = useState("");
   const [isCultivosOpen, setIsCultivosOpen] = useState(false);
-  const [showFitosanitario, setShowFitosanitario] = useState(false); 
+  const [showFitosanitario, setShowFitosanitario] = useState(false);
 
   const menuItems: MenuItem[] = [
     { label: "Inicio", icon: HomeIcon },
@@ -38,6 +40,8 @@ const Menu: React.FC = () => {
     }
   };
 
+  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen">Loading permissions...</div>;
+
   return (
     <>
       {/* Sidebar */}
@@ -49,15 +53,35 @@ const Menu: React.FC = () => {
 
         {/* Botones del menú */}
         <div className="flex flex-col gap-2">
-          {menuItems.map((item) => (
-            <MenuButton
-              key={item.label}
-              icon={item.icon}
-              label={item.label}
-              active={activeItem === item.label}
-              onClick={() => handleClick(item.label)}
-            />
-          ))}
+                   {menuItems.map((item) => {
+            let hasPerm = false;
+            switch (item.label) {
+              case "Inicio":
+                hasPerm = hasPermission("Inicio", "acceso_inicio", "ver");
+                break;
+              case "IOT":
+                hasPerm = hasPermission("IOT", "acceso_iot", "ver");
+                break;
+              case "Cultivos":
+                hasPerm = hasPermission("Cultivos", "acceso_cultivos", "ver");
+                break;
+              case "Fitosanitario":
+                hasPerm = hasPermission("Fitosanitario", "acceso_fitosanitario", "ver");
+                break;
+              case "Inventario":
+                hasPerm = hasPermission("Inventario", "acceso_inventario", "ver");
+                break;
+            }
+            return hasPerm ? (
+              <MenuButton
+                key={item.label}
+                icon={item.icon}
+                label={item.label}
+                active={activeItem === item.label}
+                onClick={() => handleClick(item.label)}
+              />
+            ) : null;
+          })}
         </div>
 
         {/* Logo secundario */}

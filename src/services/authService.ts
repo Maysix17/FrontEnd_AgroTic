@@ -1,5 +1,7 @@
 import apiClient from "../lib/axios/axios";
-import type { RegisterPayload, RegisterFormData } from "../types/Auth";
+import type { RegisterPayload, RegisterFormData, LoginPayload, DecodedToken } from "../types/Auth";
+import Cookies from "js-cookie";
+import { jwtDecode } from 'jwt-decode';
 
 export const registerUser = async (
   formData: RegisterFormData
@@ -32,4 +34,53 @@ export const registerUser = async (
     // Puedes manejar el error de forma más específica si lo necesitas
     throw error;
   }
+};
+
+export const logoutUser = async (): Promise<void> => {
+  try {
+    // Clear the access_token and refresh_token cookies
+    Cookies.remove("access_token");
+    Cookies.remove("refresh_token");
+
+    // Placeholder for potential backend logout call
+    // await apiClient.post("/auth/logout");
+
+  } catch (error) {
+    console.error("Error during logout:", error);
+    throw error;
+  }
+};
+
+export const loginUser = async (payload: LoginPayload): Promise<DecodedToken> => {
+  try {
+    const response = await apiClient.post("/auth/login", payload);
+    const token = response.data.access_token;
+
+    console.log("token successful:", token)
+    Cookies.set("access_token", token);
+    return jwtDecode<DecodedToken>(token);
+  } catch (error) {
+    console.error("Login failed:", error);
+    throw error;
+  }
+};
+
+export const refreshToken = async (): Promise<DecodedToken> => {
+  try {
+    const response = await apiClient.post("/auth/refresh");
+    const token = response.data.access_token;
+    Cookies.set("access_token", token);
+    return jwtDecode<DecodedToken>(token);
+  } catch (error) {
+    console.error("Refresh failed:", error);
+    throw error;
+  }
+};
+
+export const getToken = (): string | undefined => {
+  return Cookies.get("access_token");
+};
+
+export const decodeToken = (token: string): DecodedToken => {
+  return jwtDecode<DecodedToken>(token);
 };

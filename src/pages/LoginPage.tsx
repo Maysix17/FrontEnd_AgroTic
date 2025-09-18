@@ -2,13 +2,20 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import LoginCard from "../components/organisms/LoginCard";
 import logo from "../assets/AgroTic.png";
+import { usePermission } from "../contexts/PermissionContext";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { login } = usePermission();
 
-  const handleLogin = () => {
-    // Aquí podrías validar credenciales reales con backend
-    navigate("/menu"); // Redirige al menú en vez de abrir modal
+  const handleLogin = async (payload: { dni: number; password: string }) => {
+    try {
+      await login(payload);
+      navigate("/menu");
+    } catch (error) {
+      console.error("Login failed:", error);
+      // Optionally show error message
+    }
   };
 
   return (

@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardHeader, CardBody } from "@heroui/react";
 import LoginForm from "../molecules/LoginForm";
-import type { LoginCardProps } from "../../interfaces/LoginCard";
+import type { LoginCardProps } from "../../types/login.types";
 
 const LoginCard: React.FC<LoginCardProps> = ({ onLogin }) => {
   return (

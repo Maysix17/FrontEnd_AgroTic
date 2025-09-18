@@ -1,13 +1,12 @@
 import React from "react";
 import AppRouter from "./routes/AppRouter";
-import Boton from "./components/atoms/Boton";
+import { PermissionProvider } from "./contexts/PermissionContext";
 
 function App() {
   return (
-    <>
+    <PermissionProvider>
       <AppRouter />
-      <Boton />
-    </>
+    </PermissionProvider>
   );
 }
 
