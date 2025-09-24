@@ -7,6 +7,7 @@ import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/templates/MainLayout";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import ProtectedRoute from "../components/ProtectedRoute";
+import TipoCultivoPage from "../pages/TipoCultivoPage";
 const AppRouter = () => {
   return (
     <Router>
@@ -30,6 +31,8 @@ const AppRouter = () => {
         <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
 
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        {/* Ruta del formulario */}
+        <Route path="/cultivos/tipo-cultivo" element={<TipoCultivoPage />} />
       </Routes>
     </Router>
   );
