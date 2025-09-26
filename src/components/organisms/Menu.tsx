@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "../molecules/MenuButton";
 import UserButton from "../atoms/UserBoton"; // 1. Importar el UserButton
@@ -13,11 +13,42 @@ import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
 import type { MenuItem } from "../../types/Menu.types";
 import { usePermission } from '../../contexts/PermissionContext';
+import { getModules } from '../../services/moduleService';
+import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
   // 2. Obtener datos y funciones del contexto de permisos/autenticación
-  const { user, hasPermission, isAuthenticated, logout } = usePermission();
+  const { user, permissions, hasPermission, isAuthenticated, logout } = usePermission();
   const navigate = useNavigate();
+  const [modules, setModules] = useState<Modulo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        const fetchedModules = await getModules();
+        setModules(fetchedModules);
+      } catch (error) {
+        console.error('Error fetching modules:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (isAuthenticated) {
+      fetchModules();
+    }
+  }, [isAuthenticated]);
+
+  const getIcon = (label: string) => {
+    switch (label) {
+      case "Inicio": return HomeIcon;
+      case "IOT": return CpuChipIcon;
+      case "Cultivos": return CubeIcon;
+      case "Fitosanitario": return SparklesIcon;
+      case "Inventario": return DocumentTextIcon;
+      default: return HomeIcon;
+    }
+  };
 
   const getRoute = (label: string) => {
     switch (label) {
@@ -35,15 +66,11 @@ const Menu: React.FC = () => {
     navigate("/login");
   };
 
-  const menuItems: MenuItem[] = [
-    { label: "Inicio", icon: HomeIcon },
-    { label: "IOT", icon: CpuChipIcon },
-    { label: "Cultivos", icon: CubeIcon },
-    { label: "Fitosanitario", icon: SparklesIcon },
-    { label: "Inventario", icon: DocumentTextIcon },
-  ];
+  const filteredModules = modules.filter(module =>
+    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver')
+  );
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || loading) {
     return <div className="flex items-center justify-center h-screen">Cargando permisos...</div>;
   }
 
@@ -59,33 +86,16 @@ const Menu: React.FC = () => {
 
         {/* Botones del menú */}
         <div className="flex flex-col gap-2">
-          {menuItems.map((item) => {
-            let hasPerm = false;
-            switch (item.label) {
-              case "Inicio":
-                hasPerm = hasPermission("Inicio", "acceso_inicio", "ver");
-                break;
-              case "IOT":
-                hasPerm = hasPermission("IOT", "acceso_iot", "ver");
-                break;
-              case "Cultivos":
-                hasPerm = hasPermission("Cultivos", "acceso_cultivos", "ver");
-                break;
-              case "Fitosanitario":
-                hasPerm = hasPermission("Fitosanitario", "acceso_fitosanitario", "ver");
-                break;
-              case "Inventario":
-                hasPerm = hasPermission("Inventario", "acceso_inventario", "ver");
-                break;
-            }
-            return hasPerm ? (
+          {filteredModules.map((module) => {
+            const IconComponent = getIcon(module.nombre);
+            return (
               <MenuButton
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                onClick={() => navigate(getRoute(item.label))}
+                key={module.id}
+                icon={IconComponent}
+                label={module.nombre}
+                onClick={() => navigate(getRoute(module.nombre))}
               />
-            ) : null;
+            );
           })}
         </div>
 

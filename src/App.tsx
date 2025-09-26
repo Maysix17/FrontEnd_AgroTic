@@ -1,12 +1,15 @@
 import React from "react";
+import { BrowserRouter } from "react-router-dom";
 import AppRouter from "./routes/AppRouter";
 import { PermissionProvider } from "./contexts/PermissionContext";
 
 function App() {
   return (
-    <PermissionProvider>
-      <AppRouter />
-    </PermissionProvider>
+    <BrowserRouter>
+      <PermissionProvider>
+        <AppRouter />
+      </PermissionProvider>
+    </BrowserRouter>
   );
 }
 

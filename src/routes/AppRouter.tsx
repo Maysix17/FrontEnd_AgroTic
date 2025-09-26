@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 // Páginas
 import LoginPage from "../pages/LoginPage";
 import MapRegisterPage from "../pages/MapRegisterPage";
@@ -10,29 +10,27 @@ import UserProfilePage from "../pages/UserProfilePage";
 import ProtectedRoute from "../components/ProtectedRoute";
 const AppRouter = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Redirigir la raíz al login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+    <Routes>
+      {/* Redirigir la raíz al login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Página de inicio de sesión */}
-        <Route path="/login" element={<LoginPage />} />
+      {/* Página de inicio de sesión */}
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* Página de registro de usuario */}
-        <Route path="/register" element={<RegisterPage />} />
+      {/* Página de registro de usuario */}
+      <Route path="/register" element={<RegisterPage />} />
 
-        {/* Página de recuperación de contraseña */}
-        <Route path="/recover-password" element={<RecoverPasswordPage />} />
+      {/* Página de recuperación de contraseña */}
+      <Route path="/recover-password" element={<RecoverPasswordPage />} />
 
-        {/* Página de perfil de usuario */}
-        <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+      {/* Página de perfil de usuario */}
+      <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
 
-        {/* Aplicación principal */}
-        <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
+      {/* Aplicación principal */}
+      <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
 
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-      </Routes>
-    </Router>
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+    </Routes>
   );
 };
 

@@ -1,19 +1,22 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { logoutUser, loginUser, refreshToken, getToken, decodeToken } from '../services/authService';
-import type { User, Permission, DecodedToken, LoginPayload } from '../types/Auth';
+import { useNavigate } from 'react-router-dom';
+import { logoutUser, loginUser, refreshToken } from '../services/authService';
+import type { Permission, LoginPayload } from '../types/Auth';
+import type { User } from '../types/user';
+import type { Permission as UserPermission } from '../types/user';
 import { setupAxiosInterceptors } from '../lib/axios/axios';
+import { getProfile } from '../services/profileService';
 
 interface PermissionContextType {
-  decodedToken: DecodedToken | null;
-  user: DecodedToken | null;
+  user: User | null;
   permissions: Permission[];
   isAuthenticated: boolean;
   hasPermission: (modulo: string, recurso: string, accion: string) => boolean;
   login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
-  setUser: (user: DecodedToken | null) => void;
+  setUser: (user: User | null) => void;
   setPermissions: (permissions: Permission[]) => void;
 }
 
@@ -24,8 +27,8 @@ interface PermissionProviderProps {
 }
 
 export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children }) => {
-  const [decodedToken, setDecodedToken] = useState<DecodedToken | null>(null);
-  const [user, setUser] = useState<DecodedToken | null>(null);
+  const navigate = useNavigate();
+  const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
@@ -35,12 +38,12 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
 
   const login = async (payload: LoginPayload): Promise<void> => {
     try {
-      const decoded = await loginUser(payload);
-      setDecodedToken(decoded);
-      setUser(decoded);
-      setPermissions(decoded.permisos);
+      await loginUser(payload);
+      const profile = await getProfile();
+      setUser(profile);
+      setPermissions(profile.rol.permisos as unknown as Permission[]);
 
-      console.log('Login successful:', decoded);
+      console.log('Login successful:', profile);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Login failed:', error);
@@ -48,23 +51,25 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
     }
   };
 
-  const refresh = async (): Promise<void> => {
+  const refresh = useCallback(async (): Promise<void> => {
+    console.log('PermissionContext: Starting refresh');
     try {
-      const decoded = await refreshToken();
-      setDecodedToken(decoded);
-      setUser(decoded);
-      setPermissions(decoded.permisos);
+      await refreshToken();
+      console.log('PermissionContext: refreshToken successful');
+      const profile = await getProfile();
+      console.log('PermissionContext: getProfile successful', profile);
+      setUser(profile);
+      setPermissions(profile.rol.permisos as unknown as Permission[]);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error('Refresh failed:', error);
+      console.error('PermissionContext: Refresh failed:', error);
       throw error;
     }
-  };
+  }, []);
 
   const logout = async (): Promise<void> => {
     try {
       await logoutUser();
-      setDecodedToken(null);
       setUser(null);
       setPermissions([]);
       setIsAuthenticated(false);
@@ -75,24 +80,24 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
   };
 
   useEffect(() => {
-    setupAxiosInterceptors(refresh);
-    const token = getToken();
-    if (token) {
+    const init = async () => {
+      // First check auth without interceptor
       try {
-        const decoded = decodeToken(token);
-        setDecodedToken(decoded);
-        setUser(decoded);
-        setPermissions(decoded.permisos);
+        const profile = await getProfile();
+        setUser(profile);
+        setPermissions(profile.rol.permisos as unknown as Permission[]);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Invalid token:', error);
-        // Optionally logout or clear
+        // Not authenticated
+        setIsAuthenticated(false);
       }
-    }
-  }, []);
+      // Then setup interceptor
+      setupAxiosInterceptors(refresh, navigate);
+    };
+    init();
+  }, [refresh, navigate]);
 
   const value: PermissionContextType = {
-    decodedToken,
     user,
     permissions,
     isAuthenticated,

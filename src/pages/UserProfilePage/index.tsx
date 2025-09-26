@@ -14,13 +14,17 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ user }) => {
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    console.log('UserProfilePage: useEffect running, user:', user);
     if (!user) {
       const fetchProfile = async () => {
+        console.log('UserProfilePage: Starting fetchProfile');
         try {
           setLoading(true);
           const profile = await getProfile();
+          console.log('UserProfilePage: fetchProfile successful', profile);
           setUserData(profile);
         } catch (err) {
+          console.log('UserProfilePage: fetchProfile failed', err);
           setError('Error al cargar el perfil');
         } finally {
           setLoading(false);
