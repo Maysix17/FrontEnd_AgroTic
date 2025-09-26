@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import MenuButton from "../molecules/MenuButton.tsx";
+import MenuButton from "../molecules/MenuButton";
+import UserButton from "../atoms/UserBoton"; // 1. Importar el UserButton
 import {
   HomeIcon,
   DocumentTextIcon,
@@ -14,7 +15,8 @@ import type { MenuItem } from "../../types/Menu.types";
 import { usePermission } from '../../contexts/PermissionContext';
 
 const Menu: React.FC = () => {
-  const { hasPermission, isAuthenticated } = usePermission();
+  // 2. Obtener datos y funciones del contexto de permisos/autenticación
+  const { user, hasPermission, isAuthenticated, logout } = usePermission();
   const navigate = useNavigate();
 
   const getRoute = (label: string) => {
@@ -28,6 +30,11 @@ const Menu: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   const menuItems: MenuItem[] = [
     { label: "Inicio", icon: HomeIcon },
     { label: "IOT", icon: CpuChipIcon },
@@ -36,21 +43,23 @@ const Menu: React.FC = () => {
     { label: "Inventario", icon: DocumentTextIcon },
   ];
 
-
-  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen">Loading permissions...</div>;
+  if (!isAuthenticated) {
+    return <div className="flex items-center justify-center h-screen">Cargando permisos...</div>;
+  }
 
   return (
-    <>
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <img src={logo} alt="Logo tic" className="w-40 h-auto mb-2" />
+    <div className="fixed left-0 top-0 h-screen w-64 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
+      <div>
+        {/* Logo y Botón de Usuario */}
+        <div className="flex flex-col items-center mb-8">
+          <img src={logo} alt="Logo tic" className="w-40 h-auto mb-6" />
+          {/* 3. Implementar el UserButton */}
+          
         </div>
 
         {/* Botones del menú */}
         <div className="flex flex-col gap-2">
-                   {menuItems.map((item) => {
+          {menuItems.map((item) => {
             let hasPerm = false;
             switch (item.label) {
               case "Inicio":
@@ -80,13 +89,27 @@ const Menu: React.FC = () => {
           })}
         </div>
 
-        {/* Logo secundario */}
-        <div className="flex flex-col items-center mt-6">
-          <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
-        </div>
+        {/* Botón de Cerrar Sesión */}
+        <button
+          onClick={handleLogout}
+          className="w-full p-2 mt-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        >
+          Cerrar Sesión
+        </button>
       </div>
 
-    </>
+<UserButton
+            onClick={() => navigate('/profile')}
+          />
+      {/* Logo secundario */}
+      <div className="flex flex-col items-center mt-6">
+        <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
+      </div>
+
+      
+    </div>
+
+    
   );
 };
 

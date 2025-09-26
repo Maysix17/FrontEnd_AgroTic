@@ -10,6 +10,7 @@ const CustomButton: React.FC<ButtonProps> = ({ label, onClick }) => {
         >
             {label}
         </Button>
+        
     );
 };
 

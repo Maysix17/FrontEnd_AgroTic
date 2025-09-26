@@ -14,7 +14,7 @@ const MainLayout: React.FC = () => {
       <main className="ml-56 flex-1 p-6">
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivos..." value="" onChange={() => {}} />} />
+          <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
           <Route path="iot" element={<MapRegisterPage />} />
           <Route path="fitosanitario" element={<BotonPage />} />
           <Route path="inventario" element={<TablePage />} />

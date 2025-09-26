@@ -6,6 +6,7 @@ import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/templates/MainLayout";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import UserProfilePage from "../pages/UserProfilePage";
 import ProtectedRoute from "../components/ProtectedRoute";
 const AppRouter = () => {
   return (
@@ -23,8 +24,8 @@ const AppRouter = () => {
         {/* Página de recuperación de contraseña */}
         <Route path="/recover-password" element={<RecoverPasswordPage />} />
 
-        {/* Página de registro de mapas */}
-        <Route path="/map-register" element={<ProtectedRoute><MapRegisterPage /></ProtectedRoute>} />
+        {/* Página de perfil de usuario */}
+        <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
 
         {/* Aplicación principal */}
         <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
