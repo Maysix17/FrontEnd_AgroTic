@@ -73,6 +73,18 @@ const Menu: React.FC = () => {
     module.nombre !== 'usuarios'
   );
 
+  const priorityOrder = ['Inicio', 'IOT', 'Cultivos', 'Inventario'];
+  const sortedFilteredModules = [...filteredModules].sort((a, b) => {
+    const aIndex = priorityOrder.indexOf(a.nombre);
+    const bIndex = priorityOrder.indexOf(b.nombre);
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return 0;
+  });
+
   console.log('Filtered modules count:', filteredModules.length);
   console.log('Filtered modules:', filteredModules.map(m => m.nombre));
 
@@ -92,7 +104,7 @@ const Menu: React.FC = () => {
 
         {/* Botones del menú */}
         <div className="flex flex-col gap-2">
-          {filteredModules.map((module) => {
+          {sortedFilteredModules.map((module) => {
             const IconComponent = getIcon(module.nombre);
             return (
               <MenuButton
