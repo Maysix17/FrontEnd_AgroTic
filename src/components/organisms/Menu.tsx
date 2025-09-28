@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "../molecules/MenuButton";
-import UserButton from "../atoms/UserBoton"; // 1. Importar el UserButton
+import UserModal from "./UserModal";
 import {
   HomeIcon,
   DocumentTextIcon,
   SparklesIcon,
   CubeIcon,
   CpuChipIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
@@ -22,6 +23,7 @@ const Menu: React.FC = () => {
   const navigate = useNavigate();
   const [modules, setModules] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -67,8 +69,12 @@ const Menu: React.FC = () => {
   };
 
   const filteredModules = modules.filter(module =>
-    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver')
+    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') &&
+    module.nombre !== 'usuarios'
   );
+
+  console.log('Filtered modules count:', filteredModules.length);
+  console.log('Filtered modules:', filteredModules.map(m => m.nombre));
 
   if (!isAuthenticated || loading) {
     return <div className="flex items-center justify-center h-screen">Cargando permisos...</div>;
@@ -99,27 +105,25 @@ const Menu: React.FC = () => {
           })}
         </div>
 
-        {/* Botón de Cerrar Sesión */}
-        <button
-          onClick={handleLogout}
-          className="w-full p-2 mt-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-        >
-          Cerrar Sesión
-        </button>
+        {/* Botón de Perfil */}
+        <div className="flex flex-col gap-2 mt-4">
+          <MenuButton
+            icon={UserIcon}
+            label="Perfil"
+            onClick={() => setIsModalOpen(true)}
+          />
+        </div>
       </div>
 
-<UserButton
-            onClick={() => navigate('/profile')}
-          />
       {/* Logo secundario */}
       <div className="flex flex-col items-center mt-6">
         <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
       </div>
 
-      
+      <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
 
-    
+
   );
 };
 

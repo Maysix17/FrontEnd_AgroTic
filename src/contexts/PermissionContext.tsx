@@ -41,7 +41,12 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       await loginUser(payload);
       const profile = await getProfile();
       setUser(profile);
-      setPermissions(profile.rol.permisos as unknown as Permission[]);
+      const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+        modulo: p.recurso.modulo.nombre,
+        recurso: p.recurso.nombre,
+        accion: p.accion,
+      }));
+      setPermissions(mappedPermissions);
 
       console.log('Login successful:', profile);
       setIsAuthenticated(true);
@@ -59,7 +64,12 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       const profile = await getProfile();
       console.log('PermissionContext: getProfile successful', profile);
       setUser(profile);
-      setPermissions(profile.rol.permisos as unknown as Permission[]);
+      const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+        modulo: p.recurso.modulo.nombre,
+        recurso: p.recurso.nombre,
+        accion: p.accion,
+      }));
+      setPermissions(mappedPermissions);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('PermissionContext: Refresh failed:', error);
@@ -85,7 +95,12 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       try {
         const profile = await getProfile();
         setUser(profile);
-        setPermissions(profile.rol.permisos as unknown as Permission[]);
+        const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+          modulo: p.recurso.modulo.nombre,
+          recurso: p.recurso.nombre,
+          accion: p.accion,
+        }));
+        setPermissions(mappedPermissions);
         setIsAuthenticated(true);
       } catch (error) {
         // Not authenticated
