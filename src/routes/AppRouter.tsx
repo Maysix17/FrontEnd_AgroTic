@@ -7,7 +7,12 @@ import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/templates/MainLayout";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UserProfilePage from "../pages/UserProfilePage";
+import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
+import Dashboard from "../pages/Dashboard";
+import InputSearch from "../components/atoms/InputSearch";
+import BotonPage from "../pages/BotonPage";
+import TablePage from "../pages/TablePage";
 const AppRouter = () => {
   return (
     <Routes>
@@ -27,7 +32,15 @@ const AppRouter = () => {
       <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
 
       {/* Aplicación principal */}
-      <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
+      <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="panel-control" element={<PanelControl />} />
+        <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
+        <Route path="iot" element={<MapRegisterPage />} />
+        <Route path="fitosanitario" element={<BotonPage />} />
+        <Route path="inventario" element={<TablePage />} />
+      </Route>
 
       <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>

@@ -27,8 +27,8 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleControlPanel = () => {
-    // TODO: Navigate to control panel
-    console.log('Control panel');
+    navigate('/app/panel-control');
+    onClose();
   };
 
   if (!user) return null;
