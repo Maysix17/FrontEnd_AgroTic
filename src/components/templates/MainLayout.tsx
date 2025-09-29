@@ -1,6 +1,8 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Menu from '../organisms/Menu';
+
+=======
 import Dashboard from '../../pages/Dashboard';
 import MapRegisterPage from '../../pages/MapRegisterPage';
 import BotonPage from '../../pages/BotonPage';
@@ -13,6 +15,8 @@ const MainLayout: React.FC = () => {
     <div className="flex">
       <Menu />
       <main className="ml-56 flex-1 p-6">
+        <Outlet />
+=======
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="cultivos" element={<CultivosPage />} /> {/* Ahora va a CultivosPage */}

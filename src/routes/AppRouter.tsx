@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 // Páginas
 import LoginPage from "../pages/LoginPage";
 import MapRegisterPage from "../pages/MapRegisterPage";
@@ -6,30 +6,50 @@ import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/templates/MainLayout";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import UserProfilePage from "../pages/UserProfilePage";
+import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
+
+import Dashboard from "../pages/Dashboard";
+import InputSearch from "../components/atoms/InputSearch";
+import BotonPage from "../pages/BotonPage";
+import TablePage from "../pages/TablePage";
+=======
 import TipoCultivoPage from "../pages/TipoCultivoPage";
+
 const AppRouter = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Redirigir la raíz al login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+    <Routes>
+      {/* Redirigir la raíz al login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Página de inicio de sesión */}
-        <Route path="/login" element={<LoginPage />} />
+      {/* Página de inicio de sesión */}
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* Página de registro de usuario */}
-        <Route path="/register" element={<RegisterPage />} />
+      {/* Página de registro de usuario */}
+      <Route path="/register" element={<RegisterPage />} />
 
-        {/* Página de recuperación de contraseña */}
-        <Route path="/recover-password" element={<RecoverPasswordPage />} />
+      {/* Página de recuperación de contraseña */}
+      <Route path="/recover-password" element={<RecoverPasswordPage />} />
 
-        {/* Página de registro de mapas */}
-        <Route path="/map-register" element={<ProtectedRoute><MapRegisterPage /></ProtectedRoute>} />
+      {/* Página de perfil de usuario */}
+      <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
 
-        {/* Aplicación principal */}
-        <Route path="/app/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
+      {/* Aplicación principal */}
+      <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="panel-control" element={<PanelControl />} />
+        <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
+        <Route path="iot" element={<MapRegisterPage />} />
+        <Route path="fitosanitario" element={<BotonPage />} />
+        <Route path="inventario" element={<TablePage />} />
+      </Route>
 
+
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+    </Routes>
+=======
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         {/* Ruta del formulario */}
         <Route path="/cultivos/tipo-cultivo" element={<TipoCultivoPage />} />
