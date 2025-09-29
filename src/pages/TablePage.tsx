@@ -1,7 +1,7 @@
 // pages/TablePage.tsx
 import React, { useState } from "react";
 import ResultsTable from "../components/organisms/ResultsTable";
-import InputSearch from "../components/atoms/Buscadores/InputSearch";
+import InputSearch from "../components/atoms/InputSearch";
 import type { ResultItem } from "../types/ResultItem";
 
 const TablePage: React.FC = () => {

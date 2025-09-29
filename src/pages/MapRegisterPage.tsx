@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import MapModal from "../components/organisms/MapModal";
-import PrimaryButton from "../components/atoms/Button/PrimaryButton";
+import PrimaryButton from "../components/atoms/PrimaryButton";
 
 const MapRegisterPage = () => {
   const [isOpen, setIsOpen] = useState(false);

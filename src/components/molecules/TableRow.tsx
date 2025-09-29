@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../atoms/Button/ButtonAccion";
+import Button from "../atoms/ButtonAccion";
 import type { TableRowProps } from "../../types/TableRowProps";
 
 const TableRow: React.FC<TableRowProps> = ({ item, onView }) => {

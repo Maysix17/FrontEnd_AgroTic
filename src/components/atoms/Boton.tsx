@@ -1,5 +1,5 @@
 import { Button } from "@heroui/react";
-import type { ButtonProps } from "../../../types/Boton.type";
+import type { ButtonProps } from "../../types/Boton.type";
 
 const CustomButton: React.FC<ButtonProps> = ({ label, onClick }) => {
     return (

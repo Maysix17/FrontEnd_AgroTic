@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/Button/PrimaryButton";
+import PrimaryButton from "../atoms/PrimaryButton";
 import UserInputs from "../atoms/UserInputs";
 import type { LoginFormProps } from "../../types/login.types";
 
