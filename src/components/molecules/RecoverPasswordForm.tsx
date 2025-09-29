@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/PrimaryButton";
+import PrimaryButton from "../atoms/Button/PrimaryButton";
 import { recoverPassword } from "../../services/RecoverPasswordService"; // 👈 importamos el servicio
 
 const RecoverPasswordForm: React.FC = () => {

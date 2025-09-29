@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Menu from '../organisms/Menu';
 import Dashboard from '../../pages/Dashboard';
-import InputSearch from '../atoms/buscador';
+import InputSearch from '../atoms/Buscadores/InputSearch';
 import MapRegisterPage from '../../pages/MapRegisterPage';
 import BotonPage from '../../pages/BotonPage';
 import TablePage from '../../pages/TablePage';

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "@heroui/react";
-import type { PrimaryButtonProps } from "../../types/primaryButton.types";
+import type { PrimaryButtonProps } from "../../../types/primaryButton.types";
 
 const PrimaryButton: React.FC<PrimaryButtonProps> = ({
   text,

@@ -16,6 +16,14 @@ export interface Role {
 }
 
 /**
+ * Interface for the Ficha type.
+ */
+export interface Ficha {
+  id: string;
+  numero: number;
+}
+
+/**
  * Interface for the User type.
  */
 export interface User {
@@ -26,4 +34,5 @@ export interface User {
   correo: string;
   telefono: string;
   rol: Role;
+  ficha?: Ficha;
 }

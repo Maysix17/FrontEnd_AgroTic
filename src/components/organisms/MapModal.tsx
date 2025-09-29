@@ -7,7 +7,11 @@ import {
 } from "@heroui/react";
 
 import MapForm from "../molecules/MapForm";
-import type{ MapModalProps } from "../../interfaces/MapModal";
+
+interface MapModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const MapModal: React.FC<MapModalProps> = ({ isOpen, onClose }) => {
   return (

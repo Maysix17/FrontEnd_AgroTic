@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/PrimaryButton";
+import PrimaryButton from "../atoms/Button/PrimaryButton";
 import UserInputs from "../atoms/UserInputs";
 import type { RegisterFormProps } from "../../types/Register";
 import type { RegisterFormData } from "../../types/Auth";

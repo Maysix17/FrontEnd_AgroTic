@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextInput from "../atoms/TextInput";
-import PrimaryButton from "../atoms/PrimaryButton";
+import PrimaryButton from "../atoms/Button/PrimaryButton";
 import ImageUpload from "../atoms/ImagenUpload";
 import { registerMap } from "../../services/mapService";
 import type { MapData } from "../../types/map.types";

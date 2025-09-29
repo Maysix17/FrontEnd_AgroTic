@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { ResetPasswordFormValues } from "../../types/ResetPasswordForm.types";
-import PrimaryButton from "../atoms/PrimaryButton";
+import PrimaryButton from "../atoms/Button/PrimaryButton";
 import { resetPassword } from "../../services/ResetPasswordService";
 import { useSearchParams } from "react-router-dom";
 

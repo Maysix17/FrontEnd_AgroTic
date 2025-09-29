@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Boton from "../atoms/Boton";
+import Boton from "../atoms/Button/Boton";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const FitosanitarioButtons: React.FC = () => {
