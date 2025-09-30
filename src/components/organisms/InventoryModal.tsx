@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
 import PrimaryButton from '../atoms/PrimaryButton';
 import ImageUpload from '../atoms/ImagenUpload';
-import apiClient from '../../lib/axios/axios';
 import Swal from 'sweetalert2';
 import { inventoryService } from '../../services/inventoryService';
 import type { Categoria, Bodega } from '../../services/inventoryService';
@@ -11,9 +10,11 @@ interface InventoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onInventoryCreated: () => void;
+  editItem?: InventoryItem | null;
 }
 
-const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInventoryCreated }) => {
+const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInventoryCreated, editItem }) => {
+  const isEdit = !!editItem;
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -35,8 +36,32 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
     if (isOpen) {
       fetchCategorias();
       fetchBodegas();
+      if (editItem) {
+        setFormData({
+          nombre: editItem.nombre,
+          descripcion: editItem.descripcion || '',
+          stock: editItem.stock.toString(),
+          precio: editItem.precio.toString(),
+          capacidadUnidad: editItem.capacidadUnidad?.toString() || '',
+          fechaVencimiento: editItem.fechaVencimiento || '',
+          fkCategoriaId: editItem.fkCategoriaId,
+          fkBodegaId: editItem.fkBodegaId,
+        });
+      } else {
+        setFormData({
+          nombre: '',
+          descripcion: '',
+          stock: '',
+          precio: '',
+          capacidadUnidad: '',
+          fechaVencimiento: '',
+          fkCategoriaId: '',
+          fkBodegaId: '',
+        });
+        setSelectedFile(null);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editItem]);
 
   const fetchCategorias = async () => {
     try {
@@ -83,13 +108,23 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
         imgUrl: selectedFile || undefined,
       };
 
-      await inventoryService.create(data);
-      Swal.fire({
-        icon: 'success',
-        title: 'Inventario creado',
-        text: 'El inventario ha sido registrado exitosamente.',
-        confirmButtonText: 'Aceptar',
-      });
+      if (isEdit && editItem) {
+        await inventoryService.update(editItem.id, data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Inventario actualizado',
+          text: 'El inventario ha sido actualizado exitosamente.',
+          confirmButtonText: 'Aceptar',
+        });
+      } else {
+        await inventoryService.create(data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Inventario creado',
+          text: 'El inventario ha sido registrado exitosamente.',
+          confirmButtonText: 'Aceptar',
+        });
+      }
       onInventoryCreated();
       onClose();
       setFormData({
@@ -129,7 +164,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="2xl">
       <ModalContent className="bg-white p-6">
-        <h2 className="text-2xl font-bold mb-4">Registrar Nuevo Inventario</h2>
+        <h2 className="text-2xl font-bold mb-4">{isEdit ? 'Editar Inventario' : 'Registrar Nuevo Inventario'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -245,7 +280,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
           <div className="flex justify-end space-x-2">
             <Button onClick={onClose} variant="light">Cancelar</Button>
             <PrimaryButton
-              text={isLoading ? 'Creando...' : 'Crear Inventario'}
+              text={isLoading ? (isEdit ? 'Actualizando...' : 'Creando...') : (isEdit ? 'Actualizar Inventario' : 'Crear Inventario')}
               type="submit"
               disabled={isLoading}
             />

@@ -22,6 +22,26 @@ export interface CreateInventoryDto {
   imgUrl?: File;
 }
 
+export interface InventoryItem {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  stock: number;
+  precio: number;
+  capacidadUnidad?: number;
+  fechaVencimiento?: string;
+  imgUrl?: string;
+  fkCategoriaId: string;
+  fkBodegaId: string;
+  categoria?: Categoria;
+  bodega?: Bodega;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+}
+
 export const inventoryService = {
   create: async (data: CreateInventoryDto): Promise<any> => {
     const formData = new FormData();
@@ -40,6 +60,41 @@ export const inventoryService = {
         'Content-Type': 'multipart/form-data',
       },
     });
+    return response.data;
+  },
+
+  update: async (id: string, data: CreateInventoryDto): Promise<any> => {
+    const formData = new FormData();
+    formData.append('nombre', data.nombre);
+    if (data.descripcion) formData.append('descripcion', data.descripcion);
+    formData.append('stock', data.stock.toString());
+    formData.append('precio', data.precio.toString());
+    if (data.capacidadUnidad) formData.append('capacidadUnidad', data.capacidadUnidad.toString());
+    if (data.fechaVencimiento) formData.append('fechaVencimiento', data.fechaVencimiento);
+    formData.append('fkCategoriaId', data.fkCategoriaId);
+    formData.append('fkBodegaId', data.fkBodegaId);
+    if (data.imgUrl) formData.append('imgUrl', data.imgUrl);
+
+    const response = await apiClient.put(`/inventario/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<any> => {
+    const response = await apiClient.delete(`/inventario/${id}`);
+    return response.data;
+  },
+
+  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<InventoryItem>> => {
+    const response = await apiClient.get(`/inventario?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  search: async (query: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<InventoryItem>> => {
+    const response = await apiClient.get(`/inventario/search/${query}?page=${page}&limit=${limit}`);
     return response.data;
   },
 
