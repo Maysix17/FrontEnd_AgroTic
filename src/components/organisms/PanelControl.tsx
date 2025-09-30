@@ -48,9 +48,8 @@ const PanelControl: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Panel de Control</h1>
         <div className="space-x-2">
-          <Button variant="primary" onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</Button>
-          <Button variant="secondary">Exportar</Button>
-          <Button variant="secondary">Importar</Button>
+          <Button onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</Button>
+         
         </div>
       </div>
 
