@@ -9,7 +9,6 @@ import {
   CpuChipIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { Modal, ModalContent, Button } from "@heroui/react";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
 import { usePermission } from '../../contexts/PermissionContext';
@@ -88,7 +87,7 @@ const Menu: React.FC = () => {
   }
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
+    <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
       <div>
         {/* Logo y Botón de Usuario */}
         <div className="flex flex-col items-center mb-8">
