@@ -195,18 +195,12 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
             />
             {errors.correo && <p className="text-red-500 text-sm mt-1">{errors.correo}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700">
+              <strong>Nota:</strong> La contraseña se establecerá automáticamente como el DNI del usuario.
+            </p>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Rol</label>
             <select

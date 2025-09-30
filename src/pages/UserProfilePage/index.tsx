@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProfileTemplate from '../../components/templates/ProfileTemplate/ProfileTemplate';
-import UserCard from '../../components/organisms/UserCard/UserCard';
+import UserModal from '../../components/organisms/UserModal';
 import { getProfile } from '../../services/profileService';
 import type { User } from '../../types/user';
 
@@ -36,7 +36,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ user }) => {
 
   return (
     <ProfileTemplate>
-      <UserCard user={userData} isLoading={loading} error={error} />
+      <UserModal isOpen={true} onClose={() => {}} />
     </ProfileTemplate>
   );
 };
