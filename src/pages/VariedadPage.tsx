@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import type { VariedadData } from "../types/variedad.types";
 import type { TipoCultivoData } from "../types/tipoCultivo.types";
 import {
-  registerTipoCultivo,
-  getTipoCultivos,
-  updateTipoCultivo,
-  deleteTipoCultivo,
-} from "../services/tipoCultivo";
+  registerVariedad,
+  getVariedades,
+  updateVariedad,
+  deleteVariedad,
+} from "../services/variedad";
+import { getTipoCultivos } from "../services/tipoCultivo";
 
-const TipoCultivoPage = () => {
-  const [tipoCultivoData, setTipoCultivoData] = useState<TipoCultivoData>({
+const VariedadPage = () => {
+  const [variedadData, setVariedadData] = useState<VariedadData>({
     nombre: "",
+    fkTipoCultivoId: "",
   });
-  const [cultivos, setCultivos] = useState<TipoCultivoData[]>([]);
+  const [tiposCultivo, setTiposCultivo] = useState<TipoCultivoData[]>([]);
+  const [variedades, setVariedades] = useState<VariedadData[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [message, setMessage] = useState<string>("");
 
@@ -20,15 +24,25 @@ const TipoCultivoPage = () => {
 
   // Cargar lista al iniciar
   useEffect(() => {
-    fetchCultivos();
+    fetchVariedades();
+    fetchTiposCultivo();
   }, []);
 
-  const fetchCultivos = async () => {
+  const fetchVariedades = async () => {
+    try {
+      const data = await getVariedades();
+      setVariedades(data);
+    } catch (err) {
+      console.error("Error al cargar variedades", err);
+    }
+  };
+
+  const fetchTiposCultivo = async () => {
     try {
       const data = await getTipoCultivos();
-      setCultivos(data);
+      setTiposCultivo(data);
     } catch (err) {
-      console.error("Error al cargar cultivos", err);
+      console.error("Error al cargar tipos de cultivo", err);
     }
   };
 
@@ -37,30 +51,30 @@ const TipoCultivoPage = () => {
     e.preventDefault();
     try {
       if (editId) {
-        await updateTipoCultivo(editId, tipoCultivoData);
+        await updateVariedad(editId, variedadData);
         setMessage("Actualizado con éxito");
       } else {
-        await registerTipoCultivo(tipoCultivoData);
+        await registerVariedad(variedadData);
         setMessage("Registro exitoso");
       }
 
-      setTipoCultivoData({ nombre: "" });
+      setVariedadData({ nombre: "", fkTipoCultivoId: "" });
       setEditId(null);
-      fetchCultivos();
+      fetchVariedades();
     } catch (error: any) {
       setMessage(error.response?.data?.message || "Error en la operación");
     }
   };
 
-  const handleEdit = (id: string, nombre: string) => {
-    setEditId(id);
-    setTipoCultivoData({ nombre });
+  const handleEdit = (variedad: VariedadData) => {
+    setEditId(variedad.id!);
+    setVariedadData({ nombre: variedad.nombre, fkTipoCultivoId: variedad.fkTipoCultivoId });
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("¿Seguro que deseas eliminar este tipo de cultivo?")) {
-      await deleteTipoCultivo(id);
-      fetchCultivos();
+    if (confirm("¿Seguro que deseas eliminar esta variedad?")) {
+      await deleteVariedad(id);
+      fetchVariedades();
     }
   };
 
@@ -80,7 +94,7 @@ const TipoCultivoPage = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">
-            {editId ? "Editar Tipo de Cultivo" : "Registrar Tipo de Cultivo"}
+            {editId ? "Editar Variedad" : "Registrar Variedad"}
           </h2>
           <button
             type="button"
@@ -99,13 +113,33 @@ const TipoCultivoPage = () => {
             </label>
             <input
               type="text"
-              value={tipoCultivoData.nombre}
+              value={variedadData.nombre}
               onChange={(e) =>
-                setTipoCultivoData({ ...tipoCultivoData, nombre: e.target.value })
+                setVariedadData({ ...variedadData, nombre: e.target.value })
               }
-              placeholder="Ingrese el nombre del tipo de cultivo"
+              placeholder="Ingrese el nombre de la variedad"
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tipo de Cultivo
+            </label>
+            <select
+              value={variedadData.fkTipoCultivoId}
+              onChange={(e) =>
+                setVariedadData({ ...variedadData, fkTipoCultivoId: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-green-500 focus:outline-none"
+            >
+              <option value="">Seleccione un tipo de cultivo</option>
+              {tiposCultivo.map((tipo) => (
+                <option key={tipo.id} value={tipo.id}>
+                  {tipo.nombre}
+                </option>
+              ))}
+            </select>
           </div>
 
           {message && (
@@ -125,22 +159,24 @@ const TipoCultivoPage = () => {
           <thead className="bg-gray-200">
             <tr>
               <th className="p-2 border">Nombre</th>
+              <th className="p-2 border">Tipo de Cultivo</th>
               <th className="p-2 border text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {cultivos.map((c) => (
-              <tr key={c.id} className="hover:bg-gray-50">
-                <td className="p-2 border">{c.nombre}</td>
+            {variedades.map((v) => (
+              <tr key={v.id} className="hover:bg-gray-50">
+                <td className="p-2 border">{v.nombre}</td>
+                <td className="p-2 border">{v.tipoCultivo?.nombre || "N/A"}</td>
                 <td className="p-2 border flex justify-center gap-2">
                   <button
-                    onClick={() => handleEdit(c.id!, c.nombre)}
+                    onClick={() => handleEdit(v)}
                     className="text-blue-600 hover:underline"
                   >
                     ✏️
                   </button>
                   <button
-                    onClick={() => handleDelete(c.id!)}
+                    onClick={() => handleDelete(v.id!)}
                     className="text-red-600 hover:underline"
                   >
                     🗑️
@@ -148,9 +184,9 @@ const TipoCultivoPage = () => {
                 </td>
               </tr>
             ))}
-            {cultivos.length === 0 && (
+            {variedades.length === 0 && (
               <tr>
-                <td colSpan={2} className="text-center p-2">
+                <td colSpan={3} className="text-center p-2">
                   No hay registros aún
                 </td>
               </tr>
@@ -162,4 +198,4 @@ const TipoCultivoPage = () => {
   );
 };
 
-export default TipoCultivoPage;
+export default VariedadPage;
