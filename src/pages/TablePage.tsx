@@ -1,7 +1,7 @@
 // pages/TablePage.tsx
 import React, { useState } from "react";
 import ResultsTable from "../components/organisms/ResultsTable";
-import InputSearch from "../components/atoms/InputSearch";
+import InputSearch from "../components/atoms/buscador";
 import type { ResultItem } from "../types/ResultItem";
 
 const TablePage: React.FC = () => {
@@ -28,7 +28,7 @@ const TablePage: React.FC = () => {
 
       <InputSearch
         value={searchTerm}
-        onChange={setSearchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Buscar por lote o sensor..."
       />
 

@@ -1,92 +1,131 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import MenuButton from "../molecules/MenuButton.tsx";
+import MenuButton from "../molecules/MenuButton";
+import UserModal from "./UserModal";
 import {
   HomeIcon,
   DocumentTextIcon,
-  SparklesIcon,
   CubeIcon,
   CpuChipIcon,
+  UserIcon,
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
-import type { MenuItem } from "../../types/Menu.types";
 import { usePermission } from '../../contexts/PermissionContext';
+import { getModules } from '../../services/moduleService';
+import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
-  const { hasPermission, isAuthenticated } = usePermission();
+  // 2. Obtener datos y funciones del contexto de permisos/autenticación
+  const { permissions, isAuthenticated, hasPermission, user } = usePermission();
   const navigate = useNavigate();
+  const [modules, setModules] = useState<Modulo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUserCardModalOpen, setIsUserCardModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchModules = async () => {
+      try {
+        const fetchedModules = await getModules();
+        setModules(fetchedModules);
+      } catch (error) {
+        console.error('Error fetching modules:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (isAuthenticated) {
+      fetchModules();
+    }
+  }, [isAuthenticated]);
+
+  const getIcon = (label: string) => {
+    switch (label) {
+      case "Inicio": return HomeIcon;
+      case "IOT": return CpuChipIcon;
+      case "Cultivos": return CubeIcon;
+      case "Inventario": return DocumentTextIcon;
+      case "Usuarios": return UserIcon;
+      default: return HomeIcon;
+    }
+  };
 
   const getRoute = (label: string) => {
     switch (label) {
       case "Inicio": return "/app";
       case "IOT": return "/app/iot";
       case "Cultivos": return "/app/cultivos";
-      case "Fitosanitario": return "/app/fitosanitario";
       case "Inventario": return "/app/inventario";
       default: return "/app";
     }
   };
 
-  const menuItems: MenuItem[] = [
-    { label: "Inicio", icon: HomeIcon },
-    { label: "IOT", icon: CpuChipIcon },
-    { label: "Cultivos", icon: CubeIcon },
-    { label: "Fitosanitario", icon: SparklesIcon },
-    { label: "Inventario", icon: DocumentTextIcon },
-  ];
 
+  const filteredModules = modules.filter(module =>
+    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') ||
+    module.nombre === 'Usuarios'
+  );
 
-  if (!isAuthenticated) return <div className="flex items-center justify-center h-screen">Loading permissions...</div>;
+  const priorityOrder = ['Inicio', 'IOT', 'Cultivos', 'Inventario', 'Usuarios'];
+  const sortedFilteredModules = [...filteredModules].sort((a, b) => {
+    const aIndex = priorityOrder.indexOf(a.nombre);
+    const bIndex = priorityOrder.indexOf(b.nombre);
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return 0;
+  });
+
+  console.log('Filtered modules count:', filteredModules.length);
+  console.log('Filtered modules:', filteredModules.map(m => m.nombre));
+
+  if (!isAuthenticated || loading) {
+    return <div className="flex items-center justify-center h-screen">Cargando permisos...</div>;
+  }
 
   return (
-    <>
-      {/* Sidebar */}
-      <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-6">
-          <img src={logo} alt="Logo tic" className="w-40 h-auto mb-2" />
+    <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
+      <div>
+        {/* Logo y Botón de Usuario */}
+        <div className="flex flex-col items-center mb-8">
+          <img src={logo} alt="Logo tic" className="w-40 h-auto mb-6" />
+          {/* 3. Implementar el UserButton */}
+          
         </div>
 
         {/* Botones del menú */}
         <div className="flex flex-col gap-2">
-                   {menuItems.map((item) => {
-            let hasPerm = false;
-            switch (item.label) {
-              case "Inicio":
-                hasPerm = hasPermission("Inicio", "acceso_inicio", "ver");
-                break;
-              case "IOT":
-                hasPerm = hasPermission("IOT", "acceso_iot", "ver");
-                break;
-              case "Cultivos":
-                hasPerm = hasPermission("Cultivos", "acceso_cultivos", "ver");
-                break;
-              case "Fitosanitario":
-                hasPerm = hasPermission("Fitosanitario", "acceso_fitosanitario", "ver");
-                break;
-              case "Inventario":
-                hasPerm = hasPermission("Inventario", "acceso_inventario", "ver");
-                break;
-            }
-            return hasPerm ? (
+          {sortedFilteredModules.map((module) => {
+            const IconComponent = getIcon(module.nombre);
+            const label = module.nombre === 'Usuarios' ? 'Perfil' : module.nombre;
+            const onClickHandler = module.nombre === 'Usuarios' ? () => setIsUserCardModalOpen(true) : () => navigate(getRoute(module.nombre));
+            return (
               <MenuButton
-                key={item.label}
-                icon={item.icon}
-                label={item.label}
-                onClick={() => navigate(getRoute(item.label))}
+                key={module.id}
+                icon={IconComponent}
+                label={label}
+                onClick={onClickHandler}
               />
-            ) : null;
+            );
           })}
         </div>
 
-        {/* Logo secundario */}
-        <div className="flex flex-col items-center mt-6">
-          <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
-        </div>
       </div>
 
-    </>
+      {/* Logo secundario */}
+      <div className="flex flex-col items-center mt-6">
+        <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
+      </div>
+
+      <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <UserModal isOpen={isUserCardModalOpen} onClose={() => setIsUserCardModalOpen(false)} />
+    </div>
+
+
   );
 };
 

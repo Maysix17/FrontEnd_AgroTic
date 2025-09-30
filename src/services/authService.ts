@@ -1,7 +1,5 @@
 import apiClient from "../lib/axios/axios";
-import type { RegisterPayload, RegisterFormData, LoginPayload, DecodedToken } from "../types/Auth";
-import Cookies from "js-cookie";
-import { jwtDecode } from 'jwt-decode';
+import type { RegisterPayload, RegisterFormData, LoginPayload } from "../types/Auth";
 
 export const registerUser = async (
   formData: RegisterFormData
@@ -38,48 +36,28 @@ export const registerUser = async (
 
 export const logoutUser = async (): Promise<void> => {
   try {
-    // Clear the access_token and refresh_token cookies
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
-
-    // Placeholder for potential backend logout call
-    // await apiClient.post("/auth/logout");
-
+    await apiClient.post("/auth/logout");
   } catch (error) {
     console.error("Error during logout:", error);
     throw error;
   }
 };
 
-export const loginUser = async (payload: LoginPayload): Promise<DecodedToken> => {
+export const loginUser = async (payload: LoginPayload): Promise<void> => {
   try {
-    const response = await apiClient.post("/auth/login", payload);
-    const token = response.data.access_token;
-
-    Cookies.set("access_token", token);
-    return jwtDecode<DecodedToken>(token);
+    await apiClient.post("/auth/login", payload);
   } catch (error) {
     console.error("Login failed:", error);
     throw error;
   }
 };
 
-export const refreshToken = async (): Promise<DecodedToken> => {
+export const refreshToken = async (): Promise<void> => {
   try {
-    const response = await apiClient.post("/auth/refresh");
-    const token = response.data.access_token;
-    Cookies.set("access_token", token);
-    return jwtDecode<DecodedToken>(token);
+    await apiClient.post("/auth/refresh");
   } catch (error) {
     console.error("Refresh failed:", error);
     throw error;
   }
 };
 
-export const getToken = (): string | undefined => {
-  return Cookies.get("access_token");
-};
-
-export const decodeToken = (token: string): DecodedToken => {
-  return jwtDecode<DecodedToken>(token);
-};
