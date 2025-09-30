@@ -12,14 +12,13 @@ import {
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
-import type { MenuItem } from "../../types/Menu.types";
 import { usePermission } from '../../contexts/PermissionContext';
 import { getModules } from '../../services/moduleService';
 import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
   // 2. Obtener datos y funciones del contexto de permisos/autenticación
-  const { user, permissions, hasPermission, isAuthenticated, logout } = usePermission();
+  const { permissions,  isAuthenticated} = usePermission();
   const navigate = useNavigate();
   const [modules, setModules] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,10 +62,6 @@ const Menu: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   const filteredModules = modules.filter(module =>
     permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') &&

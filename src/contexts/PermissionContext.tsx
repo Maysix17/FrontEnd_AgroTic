@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { logoutUser, loginUser, refreshToken } from '../services/authService';
 import type { Permission, LoginPayload } from '../types/Auth';
 import type { User } from '../types/user';
-import type { Permission as UserPermission } from '../types/user';
 import { setupAxiosInterceptors } from '../lib/axios/axios';
 import { getProfile } from '../services/profileService';
 
