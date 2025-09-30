@@ -5,7 +5,6 @@ import UserModal from "./UserModal";
 import {
   HomeIcon,
   DocumentTextIcon,
-  SparklesIcon,
   CubeIcon,
   CpuChipIcon,
   UserIcon,
@@ -18,7 +17,7 @@ import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
   // 2. Obtener datos y funciones del contexto de permisos/autenticación
-  const { permissions,  isAuthenticated} = usePermission();
+  const { permissions, isAuthenticated, hasPermission } = usePermission();
   const navigate = useNavigate();
   const [modules, setModules] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +44,6 @@ const Menu: React.FC = () => {
       case "Inicio": return HomeIcon;
       case "IOT": return CpuChipIcon;
       case "Cultivos": return CubeIcon;
-      case "Fitosanitario": return SparklesIcon;
       case "Inventario": return DocumentTextIcon;
       default: return HomeIcon;
     }
@@ -56,7 +54,6 @@ const Menu: React.FC = () => {
       case "Inicio": return "/app";
       case "IOT": return "/app/iot";
       case "Cultivos": return "/app/cultivos";
-      case "Fitosanitario": return "/app/fitosanitario";
       case "Inventario": return "/app/inventario";
       default: return "/app";
     }
@@ -113,13 +110,15 @@ const Menu: React.FC = () => {
         </div>
 
         {/* Botón de Perfil */}
-        <div className="flex flex-col gap-2 mt-4">
-          <MenuButton
-            icon={UserIcon}
-            label="Perfil"
-            onClick={() => setIsModalOpen(true)}
-          />
-        </div>
+        {hasPermission('Usuarios', 'panel de control', 'ver') && (
+          <div className="flex flex-col gap-2 mt-4">
+            <MenuButton
+              icon={UserIcon}
+              label="Perfil"
+              onClick={() => setIsModalOpen(true)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Logo secundario */}
