@@ -19,6 +19,10 @@ import InputSearch from "../components/atoms/InputSearch";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
 
+import InventoryPage from "../pages/InventoryPage";
+
+
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -44,7 +48,7 @@ const AppRouter = () => {
         <Route path="panel-control" element={<PanelControl />} />
         <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
         <Route path="iot" element={<MapRegisterPage />} />
-        <Route path="inventario" element={<TablePage />} />
+        <Route path="inventario" element={<InventoryPage />} />
       </Route>
 
 
