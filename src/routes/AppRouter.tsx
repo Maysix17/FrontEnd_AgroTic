@@ -38,7 +38,6 @@ const AppRouter = () => {
         <Route path="panel-control" element={<PanelControl />} />
         <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
         <Route path="iot" element={<MapRegisterPage />} />
-        <Route path="fitosanitario" element={<BotonPage />} />
         <Route path="inventario" element={<TablePage />} />
       </Route>
 

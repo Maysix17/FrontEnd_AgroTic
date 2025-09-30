@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import InputSearch from '../atoms/buscador';
 import Button from '../atoms/ButtonAccion';
 import Table from '../atoms/Table';
+import AdminUserForm from './AdminUserForm';
 import apiClient from '../../lib/axios/axios';
 
 const PanelControl: React.FC = () => {
@@ -9,6 +10,7 @@ const PanelControl: React.FC = () => {
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUserFormOpen, setIsUserFormOpen] = useState(false);
 
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
@@ -46,7 +48,7 @@ const PanelControl: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Panel de Control</h1>
         <div className="space-x-2">
-          <Button variant="primary">Nuevo Usuario</Button>
+          <Button variant="primary" onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</Button>
           <Button variant="secondary">Exportar</Button>
           <Button variant="secondary">Importar</Button>
         </div>
@@ -92,6 +94,13 @@ const PanelControl: React.FC = () => {
         </Table>
       )}
 
+      <AdminUserForm
+        isOpen={isUserFormOpen}
+        onClose={() => setIsUserFormOpen(false)}
+        onUserCreated={() => {
+          // Optionally refresh the list or show a message
+        }}
+      />
     </div>
   );
 };

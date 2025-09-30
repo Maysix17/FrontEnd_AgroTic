@@ -13,7 +13,7 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout } = usePermission();
+  const { user, logout, hasPermission } = usePermission();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -67,7 +67,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="bg-gray-50 p-3 rounded-lg min-h-[64px] col-span-1 md:col-span-2">
-                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">N. de documento de identidad</div>
+                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">N. deeeecumento de identidad</div>
                   <div className="text-base font-bold text-gray-900 break-words">{user.dni}</div>
                 </div>
 
@@ -101,12 +101,14 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 >
                   Editar perfil
                 </Button>
-                <Button
-                  onClick={handleControlPanel}
-                  className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold"
-                >
-                  Panel de control
-                </Button>
+                {hasPermission('Usuarios', 'panel de control', 'ver') && (
+                  <Button
+                    onClick={handleControlPanel}
+                    className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold"
+                  >
+                    Panel de control
+                  </Button>
+                )}
               </div>
             </div>
           </div>
