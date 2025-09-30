@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardBody, Skeleton } from '@heroui/react';
 import Avatar from '../../atoms/Avatar/Avatar';
-import SmallPill from '../../molecules/SmallPill';
 import Heading from '../../atoms/Heading/Heading';
 import FieldGrid from '../../molecules/FieldGrid';
 import InfoField from '../../molecules/InfoField';
