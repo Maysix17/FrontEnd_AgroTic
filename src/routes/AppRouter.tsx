@@ -9,11 +9,20 @@ import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
+
+import TipoCultivoPage from "../pages/TipoCultivoPage";
+import VariedadPage from "../pages/VariedadPage";
+
+
 import Dashboard from "../pages/Dashboard";
 import InputSearch from "../components/atoms/InputSearch";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
+
 import InventoryPage from "../pages/InventoryPage";
+
+
+
 const AppRouter = () => {
   return (
     <Routes>
@@ -42,8 +51,14 @@ const AppRouter = () => {
         <Route path="inventario" element={<InventoryPage />} />
       </Route>
 
+
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+      </Routes>
+    </Router>
+
       <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
+
   );
 };
 
