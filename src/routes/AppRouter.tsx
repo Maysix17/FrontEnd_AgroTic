@@ -9,14 +9,10 @@ import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UserProfilePage from "../pages/UserProfilePage";
 import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
-
 import Dashboard from "../pages/Dashboard";
 import InputSearch from "../components/atoms/InputSearch";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
-=======
-import TipoCultivoPage from "../pages/TipoCultivoPage";
-
 const AppRouter = () => {
   return (
     <Routes>
@@ -46,15 +42,8 @@ const AppRouter = () => {
         <Route path="inventario" element={<TablePage />} />
       </Route>
 
-
       <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
-=======
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        {/* Ruta del formulario */}
-        <Route path="/cultivos/tipo-cultivo" element={<TipoCultivoPage />} />
-      </Routes>
-    </Router>
   );
 };
 
