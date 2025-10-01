@@ -5,7 +5,6 @@ import UserModal from "./UserModal";
 import {
   HomeIcon,
   DocumentTextIcon,
-  SparklesIcon,
   CubeIcon,
   CpuChipIcon,
   UserIcon,
@@ -18,11 +17,12 @@ import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
   // 2. Obtener datos y funciones del contexto de permisos/autenticación
-  const { permissions,  isAuthenticated} = usePermission();
+  const { permissions, isAuthenticated, hasPermission, user } = usePermission();
   const navigate = useNavigate();
   const [modules, setModules] = useState<Modulo[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUserCardModalOpen, setIsUserCardModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchModules = async () => {
@@ -45,8 +45,8 @@ const Menu: React.FC = () => {
       case "Inicio": return HomeIcon;
       case "IOT": return CpuChipIcon;
       case "Cultivos": return CubeIcon;
-      case "Fitosanitario": return SparklesIcon;
       case "Inventario": return DocumentTextIcon;
+      case "Usuarios": return UserIcon;
       default: return HomeIcon;
     }
   };
@@ -56,7 +56,6 @@ const Menu: React.FC = () => {
       case "Inicio": return "/app";
       case "IOT": return "/app/iot";
       case "Cultivos": return "/app/cultivos";
-      case "Fitosanitario": return "/app/fitosanitario";
       case "Inventario": return "/app/inventario";
       default: return "/app";
     }
@@ -64,11 +63,11 @@ const Menu: React.FC = () => {
 
 
   const filteredModules = modules.filter(module =>
-    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') &&
-    module.nombre !== 'usuarios'
+    permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') ||
+    module.nombre === 'Usuarios'
   );
 
-  const priorityOrder = ['Inicio', 'IOT', 'Cultivos', 'Inventario'];
+  const priorityOrder = ['Inicio', 'IOT', 'Cultivos', 'Inventario', 'Usuarios'];
   const sortedFilteredModules = [...filteredModules].sort((a, b) => {
     const aIndex = priorityOrder.indexOf(a.nombre);
     const bIndex = priorityOrder.indexOf(b.nombre);
@@ -88,7 +87,7 @@ const Menu: React.FC = () => {
   }
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-64 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
+    <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
       <div>
         {/* Logo y Botón de Usuario */}
         <div className="flex flex-col items-center mb-8">
@@ -101,25 +100,19 @@ const Menu: React.FC = () => {
         <div className="flex flex-col gap-2">
           {sortedFilteredModules.map((module) => {
             const IconComponent = getIcon(module.nombre);
+            const label = module.nombre === 'Usuarios' ? 'Perfil' : module.nombre;
+            const onClickHandler = module.nombre === 'Usuarios' ? () => setIsUserCardModalOpen(true) : () => navigate(getRoute(module.nombre));
             return (
               <MenuButton
                 key={module.id}
                 icon={IconComponent}
-                label={module.nombre}
-                onClick={() => navigate(getRoute(module.nombre))}
+                label={label}
+                onClick={onClickHandler}
               />
             );
           })}
         </div>
 
-        {/* Botón de Perfil */}
-        <div className="flex flex-col gap-2 mt-4">
-          <MenuButton
-            icon={UserIcon}
-            label="Perfil"
-            onClick={() => setIsModalOpen(true)}
-          />
-        </div>
       </div>
 
       {/* Logo secundario */}
@@ -128,6 +121,8 @@ const Menu: React.FC = () => {
       </div>
 
       <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      <UserModal isOpen={isUserCardModalOpen} onClose={() => setIsUserCardModalOpen(false)} />
     </div>
 
 

@@ -2,6 +2,8 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Menu from '../organisms/Menu';
 
+
+
 const MainLayout: React.FC = () => {
   return (
     <div className="flex">

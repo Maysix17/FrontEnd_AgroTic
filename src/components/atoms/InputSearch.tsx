@@ -1,14 +1,15 @@
 import React from "react";
-import type { InputSearchProps } from "../../types/InputSearchProps";
+import type { InputSearchProps } from "../../types/InputSearchProps.ts";
 
-const InputSearch: React.FC<InputSearchProps> = ({ value, onChange, placeholder }) => {
+const InputSearch: React.FC<InputSearchProps> = ({ value, onChange, onKeyDown, placeholder }) => {
   return (
     <input
       type="text"
       placeholder={placeholder || "Buscar..."}
       value={value}
       onChange={onChange}
-      className="border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      onKeyDown={onKeyDown}
+      className="w-[200px] px-3 py-1 text-sm rounded-2xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
     />
   );
 };

@@ -1,3 +1,4 @@
+```tsx
 import React, { useState, useEffect } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
@@ -6,12 +7,16 @@ import Table from "../components/atoms/Table";
 import { useNavigate } from "react-router-dom";
 import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
+import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
+import VariedadModal from "../components/organisms/VariedadModal";
 
 const CultivosPage: React.FC = () => {
   const navigate = useNavigate();
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<SearchCultivoDto>({});
+  const [isTipoCultivoModalOpen, setIsTipoCultivoModalOpen] = useState(false);
+  const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
 
   // Función de búsqueda unificada (utiliza el endpoint POST /cultivos/search)
   const handleSearch = async () => {
@@ -119,7 +124,11 @@ const CultivosPage: React.FC = () => {
           />
           <CustomButton
             label="Registrar Tipo de Cultivo"
-            onClick={() => navigate("/cultivos/tipo-cultivo")}
+            onClick={() => setIsTipoCultivoModalOpen(true)}
+          />
+          <CustomButton
+            label="Registrar Variedad"
+            onClick={() => setIsVariedadModalOpen(true)}
           />
         </div>
       </div>
@@ -250,8 +259,19 @@ const CultivosPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      <TipoCultivoModal
+        isOpen={isTipoCultivoModalOpen}
+        onClose={() => setIsTipoCultivoModalOpen(false)}
+      />
+
+      <VariedadModal
+        isOpen={isVariedadModalOpen}
+        onClose={() => setIsVariedadModalOpen(false)}
+      />
     </div>
   );
 };
 
 export default CultivosPage;
+```

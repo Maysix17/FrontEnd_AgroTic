@@ -13,7 +13,7 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout } = usePermission();
+  const { user, logout, hasPermission } = usePermission();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -42,15 +42,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
       className="max-w-[820px]"
     >
       <ModalContent className="bg-white border border-gray-200 rounded-[18px] shadow-lg p-5 md:p-6 max-h-[calc(100vh-40px)] overflow-auto">
-        <div className="relative">
-          <button
-            onClick={onClose}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl leading-none"
-            aria-label="Cerrar modal"
-          >
-            &times;
-          </button>
-          <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
             <div className="flex-1 flex flex-col gap-4">
               <h1 className="text-2xl font-bold text-center md:text-left">Datos del usuario</h1>
               <p className="text-gray-600 text-sm text-center md:text-left">Información básica</p>
@@ -67,7 +59,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="bg-gray-50 p-3 rounded-lg min-h-[64px] col-span-1 md:col-span-2">
-                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">N. de documento de identidad</div>
+                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">N. deeeecumento de identidad</div>
                   <div className="text-base font-bold text-gray-900 break-words">{user.dni}</div>
                 </div>
 
@@ -101,15 +93,16 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 >
                   Editar perfil
                 </Button>
-                <Button
-                  onClick={handleControlPanel}
-                  className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold"
-                >
-                  Panel de control
-                </Button>
+                {hasPermission('Usuarios', 'panel de control', 'ver') && (
+                  <Button
+                    onClick={handleControlPanel}
+                    className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold"
+                  >
+                    Panel de control
+                  </Button>
+                )}
               </div>
             </div>
-          </div>
         </div>
       </ModalContent>
     </Modal>

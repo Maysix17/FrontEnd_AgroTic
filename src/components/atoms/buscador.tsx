@@ -1,15 +1,19 @@
 import React from "react";
+import { Input } from "@heroui/react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import type { InputSearchProps } from "../../types/InputSearchProps.ts";
 
 const InputSearch: React.FC<InputSearchProps> = ({ placeholder, value, onChange, onKeyDown }) => {
     return (
-        <input
-            type="text"
+        <Input
             placeholder={placeholder || "Buscar..."}
             value={value}
             onChange={onChange}
             onKeyDown={onKeyDown}
-            className="w-[200px] px-3 py-1 text-sm rounded-2xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+            startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
+            size="sm"
+            variant="bordered"
+            className="w-64"
         />
     );
 };
