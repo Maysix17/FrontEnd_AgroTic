@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import TextInput from "../atoms/TextInput";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import ImageUpload from "../atoms/ImagenUpload";
 import { registerMap } from "../../services/mapService";
 import type { MapData } from "../../types/map.types";
@@ -36,7 +36,7 @@ const MapForm = () => {
 
       {message && <p className="text-center text-red-500">{message}</p>}
 
-      <PrimaryButton
+      <CustomButton
         type="submit"
         text="Registrar"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"

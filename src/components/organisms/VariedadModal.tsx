@@ -7,7 +7,7 @@ import {
   deleteVariedad,
 } from '../../services/variedad';
 import Table from '../atoms/Table';
-import ButtonAccion from '../atoms/ButtonAccion';
+import CustomButton from '../atoms/Boton';
 
 interface VariedadModalProps {
   isOpen: boolean;
@@ -70,10 +70,10 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
                   <td className="px-4 py-2 border-b">{variedad.tipoCultivo?.nombre || 'N/A'}</td>
                   <td className="px-4 py-2 border-b">
                     <div className="flex gap-2">
-                      <ButtonAccion onClick={() => handleEdit(variedad)}>Editar</ButtonAccion>
-                      <ButtonAccion onClick={() => handleDelete(variedad.id!)} variant="secondary">
+                      <CustomButton onClick={() => handleEdit(variedad)}>Editar</CustomButton>
+                      <CustomButton onClick={() => handleDelete(variedad.id!)} variant="bordered">
                         Eliminar
-                      </ButtonAccion>
+                      </CustomButton>
                     </div>
                   </td>
                 </tr>

@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../atoms/ButtonAccion";
+import CustomButton from "../atoms/Boton";
 import type { TableRowProps } from "../../types/TableRowProps";
 
 const TableRow: React.FC<TableRowProps> = ({ item, onView }) => {
@@ -9,7 +9,7 @@ const TableRow: React.FC<TableRowProps> = ({ item, onView }) => {
       <td className="px-4 py-2">{item.cultivo}</td>
       <td className="px-4 py-2">{item.sensor}</td>
       <td className="px-4 py-2 text-center">
-        <Button onClick={() => onView(item)}>Ver más</Button>
+        <CustomButton onClick={() => onView(item)}>Ver más</CustomButton>
       </td>
     </tr>
   );

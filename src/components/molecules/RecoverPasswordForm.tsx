@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import { recoverPassword } from "../../services/RecoverPasswordService"; // 👈 importamos el servicio
 
 const RecoverPasswordForm: React.FC = () => {
@@ -48,7 +48,7 @@ const RecoverPasswordForm: React.FC = () => {
       {error && <p className="text-center text-red-500 text-sm">{error}</p>}
       {successMessage && <p className="text-center text-green-500 text-sm">{successMessage}</p>}
 
-      <PrimaryButton
+      <CustomButton
         text="Enviar"
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"

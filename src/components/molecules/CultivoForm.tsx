@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TextInput from "../atoms/TextInput";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import type { TipoCultivoData } from "../../types/tipoCultivo.types";
 import { registerTipoCultivo, updateTipoCultivo, getTipoCultivos } from "../../services/tipoCultivo";
 
@@ -66,7 +66,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
 
       {message && <p className="text-center text-green-600">{message}</p>}
 
-      <PrimaryButton
+      <CustomButton
         type="submit"
         text={editId ? "Actualizar" : "Registrar"}
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"

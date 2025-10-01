@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import InputSearch from '../atoms/buscador';
-import Button from '../atoms/ButtonAccion';
+import CustomButton from '../atoms/Boton';
 import Table from '../atoms/Table';
 import AdminUserForm from './AdminUserForm';
 import apiClient from '../../lib/axios/axios';
@@ -48,8 +48,8 @@ const PanelControl: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Panel de Control</h1>
         <div className="space-x-2">
-          <Button onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</Button>
-         
+          <CustomButton onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</CustomButton>
+
         </div>
       </div>
 
@@ -61,7 +61,7 @@ const PanelControl: React.FC = () => {
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <Button variant="primary" onClick={handleSearch}>Buscar</Button>
+        <CustomButton variant="solid" onClick={handleSearch}>Buscar</CustomButton>
       </div>
 
       {/* Table */}
@@ -85,8 +85,8 @@ const PanelControl: React.FC = () => {
                 </span>
               </td>
               <td className="px-4 py-2 space-x-2">
-                <Button variant="secondary">Editar</Button>
-                <Button variant="secondary">Eliminar</Button>
+                <CustomButton variant="bordered">Editar</CustomButton>
+                <CustomButton variant="bordered">Eliminar</CustomButton>
               </td>
             </tr>
           ))}

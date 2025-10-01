@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, Button } from '@heroui/react';
-import PrimaryButton from '../atoms/PrimaryButton';
+import { Modal, ModalContent } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 import apiClient from '../../lib/axios/axios';
 import Swal from 'sweetalert2';
 
@@ -237,8 +237,8 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
           )}
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
           <div className="flex justify-end space-x-2">
-            <Button onClick={onClose} variant="light">Cancelar</Button>
-            <PrimaryButton
+            <CustomButton onClick={onClose} variant="light">Cancelar</CustomButton>
+            <CustomButton
               text={isLoading ? 'Creando...' : 'Crear Usuario'}
               type="submit"
               disabled={isLoading}

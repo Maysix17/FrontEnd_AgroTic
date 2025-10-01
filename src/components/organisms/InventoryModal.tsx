@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
-import PrimaryButton from '../atoms/PrimaryButton';
+import CustomButton from '../atoms/Boton';
 import ImageUpload from '../atoms/ImagenUpload';
 import Swal from 'sweetalert2';
 import { inventoryService } from '../../services/inventoryService';
-import type { Categoria, Bodega } from '../../services/inventoryService';
+import type { Categoria, Bodega, InventoryItem } from '../../services/inventoryService';
 
 interface InventoryModalProps {
   isOpen: boolean;
@@ -279,7 +279,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
           <div className="flex justify-end space-x-2">
             <Button onClick={onClose} variant="light">Cancelar</Button>
-            <PrimaryButton
+            <CustomButton
               text={isLoading ? (isEdit ? 'Actualizando...' : 'Creando...') : (isEdit ? 'Actualizar Inventario' : 'Crear Inventario')}
               type="submit"
               disabled={isLoading}
