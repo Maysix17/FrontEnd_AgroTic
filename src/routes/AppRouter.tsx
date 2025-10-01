@@ -16,7 +16,7 @@ import CultivosPage from "../pages/CultivosPage";
 
 
 import Dashboard from "../pages/Dashboard";
-import InputSearch from "../components/atoms/InputSearch";
+import CultivosPage from "../pages/CultivosPage";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
 
