@@ -10,7 +10,7 @@ import UserProfilePage from "../pages/UserProfilePage";
 import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
-import InputSearch from "../components/atoms/InputSearch";
+import CultivosPage from "../pages/CultivosPage";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
 const AppRouter = () => {
@@ -36,7 +36,7 @@ const AppRouter = () => {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="panel-control" element={<PanelControl />} />
-        <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
+        <Route path="cultivos" element={<CultivosPage />} />
         <Route path="iot" element={<MapRegisterPage />} />
         <Route path="fitosanitario" element={<BotonPage />} />
         <Route path="inventario" element={<TablePage />} />
