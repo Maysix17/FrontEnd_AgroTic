@@ -1,10 +1,13 @@
 export interface Cultivo {
+  cvzid: string; // CVZ ID - fundamental para cosechas
   id: string;
   ficha: string;
   lote: string; // CORREGIDO: Propiedades en minúsculas para coincidir con el backend (getRawMany)
   nombrecultivo: string;
   fechasiembra: string;
   fechacosecha: string;
+  estado: number; // Estado del cultivo: 1=En curso, 0=Finalizado
+  cosechaid?: string; // ID de la cosecha para ventas
 }
 
 export interface SearchCultivoDto {
