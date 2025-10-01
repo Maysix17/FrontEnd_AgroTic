@@ -12,6 +12,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 
 import TipoCultivoPage from "../pages/TipoCultivoPage";
 import VariedadPage from "../pages/VariedadPage";
+import CultivosPage from "../pages/CultivosPage";
 
 
 import Dashboard from "../pages/Dashboard";
@@ -46,19 +47,12 @@ const AppRouter = () => {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="panel-control" element={<PanelControl />} />
-        <Route path="cultivos" element={<InputSearch placeholder="Buscar cultivooos..." value="" onChange={() => {}} />} />
+        <Route path="cultivos" element={<CultivosPage />} />
         <Route path="iot" element={<MapRegisterPage />} />
         <Route path="inventario" element={<InventoryPage />} />
       </Route>
-
-
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-      </Routes>
-    </Router>
-
       <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
-
   );
 };
 

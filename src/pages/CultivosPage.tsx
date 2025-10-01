@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton"; // tu botón
-import { useNavigate } from "react-router-dom";
+import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
+import VariedadModal from "../components/organisms/VariedadModal";
 
 const CultivosPage: React.FC = () => {
-  const navigate = useNavigate();
+  const [isTipoCultivoModalOpen, setIsTipoCultivoModalOpen] = useState(false);
+  const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -23,14 +25,25 @@ const CultivosPage: React.FC = () => {
         <div className="flex gap-4">
           <CustomButton
             label="Registrar Tipo de Cultivo"
-            onClick={() => navigate("tipo-cultivo")}
+            onClick={() => setIsTipoCultivoModalOpen(true)}
           />
           <CustomButton
             label="Registrar Variedad"
-            onClick={() => navigate("variedad")}
+            onClick={() => setIsVariedadModalOpen(true)}
           />
         </div>
       </div>
+
+      <TipoCultivoModal
+        isOpen={isTipoCultivoModalOpen}
+        onClose={() => setIsTipoCultivoModalOpen(false)}
+      />
+
+      <VariedadModal
+        isOpen={isVariedadModalOpen}
+        onClose={() => setIsVariedadModalOpen(false)}
+        onSuccess={() => setIsVariedadModalOpen(false)}
+      />
     </div>
   );
 };
