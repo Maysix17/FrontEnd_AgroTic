@@ -42,7 +42,6 @@ const CultivosPage: React.FC = () => {
       <VariedadModal
         isOpen={isVariedadModalOpen}
         onClose={() => setIsVariedadModalOpen(false)}
-        onSuccess={() => setIsVariedadModalOpen(false)}
       />
     </div>
   );
