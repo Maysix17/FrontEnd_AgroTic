@@ -27,10 +27,9 @@ const CultivosPage: React.FC = () => {
     }
   };
 
-  // Carga inicial: ahora llama a la función de búsqueda
+  // No cargar datos inicialmente - tabla vacía hasta que el usuario busque
   useEffect(() => {
-    // Llama a handleSearch para cargar los cultivos
-    handleSearch();
+    // Tabla inicia vacía
   }, []);
 
 
@@ -53,15 +52,76 @@ const CultivosPage: React.FC = () => {
     handleSearch();
   };
 
+  const exportToExcel = (cultivo?: Cultivo): void => {
+    const dataToExport = cultivo ? [cultivo] : cultivos;
+
+    if (dataToExport.length === 0) {
+      alert('No hay datos para exportar');
+      return;
+    }
+
+    // Crear contenido HTML para Excel
+    const headers = ['Ficha', 'Lote', 'Nombre del Cultivo', 'Fecha de Siembra', 'Fecha de Cosecha'];
+    const htmlContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <title>Cultivos Export</title>
+        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Cultivos</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+      </head>
+      <body>
+        <table border="1">
+          <thead>
+            <tr>
+              ${headers.map(header => `<th>${header}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${dataToExport.map(cultivo => `
+              <tr>
+                <td>${cultivo.ficha}</td>
+                <td>${cultivo.lote}</td>
+                <td>${cultivo.nombrecultivo}</td>
+                <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : 'Sin fecha'}</td>
+                <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : 'Sin cosecha'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    // Crear blob y descargar
+    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    const fileName = cultivo
+      ? `cultivo_${cultivo.ficha}_${new Date().toISOString().split('T')[0]}.xls`
+      : `cultivos_${new Date().toISOString().split('T')[0]}.xls`;
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-6">
-      {/* Header with title and register button */}
+      {/* Header with title and action buttons */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
-        <CustomButton
-          label="Registrar Tipo de Cultivo"
-          onClick={() => navigate("/cultivos/tipo-cultivo")}
-        />
+        <div className="flex gap-2">
+          <CustomButton
+            label="Exportar Todos"
+            onClick={() => exportToExcel()}
+          />
+          <CustomButton
+            label="Registrar Tipo de Cultivo"
+            onClick={() => navigate("/cultivos/tipo-cultivo")}
+          />
+        </div>
       </div>
 
       {/* Filters Section */}
@@ -154,15 +214,12 @@ const CultivosPage: React.FC = () => {
                   <td className="px-4 py-2">{cultivo.ficha}</td>
                   <td className="px-4 py-2">{cultivo.lote}</td>
 
-                  {/* CORREGIDO: Usar nombrecultivo (todo minúsculas) */}
                   <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
 
                   <td className="px-4 py-2">
-                    {/* CORREGIDO: Usar fechasiembra (todo minúsculas) */}
                     {cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : 'Sin fecha'}
                   </td>
                   <td className="px-4 py-2">
-                    {/* CORREGIDO: Usar fechacosecha (todo minúsculas) */}
                     {cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : 'Sin cosecha'}
                   </td>
                   <td className="px-4 py-2">
@@ -173,7 +230,10 @@ const CultivosPage: React.FC = () => {
                       <button className="text-green-600 hover:text-green-800 text-sm">
                         Financiero
                       </button>
-                      <button className="text-purple-600 hover:text-purple-800 text-sm">
+                      <button
+                        className="text-purple-600 hover:text-purple-800 text-sm"
+                        onClick={() => exportToExcel(cultivo)}
+                      >
                         Exportar
                       </button>
                     </div>
