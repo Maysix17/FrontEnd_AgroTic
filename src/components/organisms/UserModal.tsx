@@ -93,7 +93,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 >
                   Editar perfil
                 </Button>
-                {hasPermission('Usuarios', 'panel de control', 'ver') && (
+                {hasPermission('panel de control', 'ver') && (
                   <Button
                     onClick={handleControlPanel}
                     className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold"
