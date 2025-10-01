@@ -11,7 +11,7 @@ interface PermissionContextType {
   user: User | null;
   permissions: Permission[];
   isAuthenticated: boolean;
-  hasPermission: (recurso: string, accion: string) => boolean;
+  hasPermission: (modulo: string, recurso: string, accion: string) => boolean;
   login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -31,8 +31,8 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  const hasPermission = (recurso: string, accion: string): boolean => {
-    return permissions.some(p => p.recurso === recurso && p.accion === accion);
+  const hasPermission = (modulo: string, recurso: string, accion: string): boolean => {
+    return permissions.some(p => p.modulo === modulo && p.recurso === recurso && p.accion === accion);
   };
 
   const login = async (payload: LoginPayload): Promise<void> => {
@@ -40,7 +40,8 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       await loginUser(payload);
       const profile = await getProfile();
       setUser(profile);
-      const mappedPermissions = (profile.rol?.permisos as any[] || []).map(p => ({
+      const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+        modulo: p.recurso.modulo.nombre,
         recurso: p.recurso.nombre,
         accion: p.accion,
       }));
@@ -62,7 +63,8 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       const profile = await getProfile();
       console.log('PermissionContext: getProfile successful', profile);
       setUser(profile);
-      const mappedPermissions = (profile.rol?.permisos as any[] || []).map(p => ({
+      const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+        modulo: p.recurso.modulo.nombre,
         recurso: p.recurso.nombre,
         accion: p.accion,
       }));
@@ -92,7 +94,8 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       try {
         const profile = await getProfile();
         setUser(profile);
-        const mappedPermissions = (profile.rol?.permisos as any[] || []).map(p => ({
+        const mappedPermissions = (profile.rol.permisos as any[]).map(p => ({
+          modulo: p.recurso.modulo.nombre,
           recurso: p.recurso.nombre,
           accion: p.accion,
         }));

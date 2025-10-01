@@ -16,7 +16,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredPermi
 
   if (requiredPermissions) {
     const hasAllPermissions = requiredPermissions.every(perm =>
-      hasPermission(perm.recurso, perm.accion)
+      hasPermission(perm.modulo, perm.recurso, perm.accion)
     );
     if (!hasAllPermissions) {
       // Optionally, redirect to an unauthorized page or show a message

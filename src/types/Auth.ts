@@ -29,6 +29,7 @@ export interface User {
 }
 
 export interface Permission {
+  modulo: string;
   recurso: string;
   accion: string;
 }
