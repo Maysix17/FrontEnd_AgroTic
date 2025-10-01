@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TextInput from "../atoms/TextInput";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import type { VariedadData } from "../../types/variedad.types";
 import type { TipoCultivoData } from "../../types/tipoCultivo.types";
 import {
@@ -94,7 +94,7 @@ const VariedadForm: React.FC<VariedadFormProps> = ({ editData, onSuccess }) => {
 
       {message && <p className="text-center text-green-600">{message}</p>}
 
-      <PrimaryButton
+      <CustomButton
         type="submit"
         text={editData ? "Actualizar" : "Registrar"}
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"

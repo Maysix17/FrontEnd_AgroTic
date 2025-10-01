@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import UserInputs from "../atoms/UserInputs";
 import type { RegisterFormProps } from "../../types/Register";
 import type { RegisterFormData } from "../../types/Auth";
@@ -109,7 +109,7 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
         <p className="text-red-500 text-sm text-center">{errors.general}</p>
       )}
 
-      <PrimaryButton
+      <CustomButton
         text={isLoading ? "Registrando..." : "Registrarse"}
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"

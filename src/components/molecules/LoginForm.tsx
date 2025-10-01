@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import UserInputs from "../atoms/UserInputs";
 import type { LoginFormProps } from "../../types/login.types";
 
@@ -32,7 +32,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
       {message && <p className="text-center text-red-500">{message}</p>}
 
-      <PrimaryButton
+      <CustomButton
         text="Iniciar sesión"
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"

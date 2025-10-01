@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
-import PrimaryButton from '../atoms/PrimaryButton';
+import CustomButton from '../atoms/Boton';
 import type { InventoryItem } from '../../services/inventoryService';
 
 interface InventoryDetailsModalProps {
@@ -19,7 +19,7 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
       <ModalContent className="bg-white p-6 relative">
         {/* Edit and Delete buttons in top right */}
         <div className="absolute top-4 right-4 flex space-x-2">
-          <PrimaryButton
+          <CustomButton
             text="Editar"
             onClick={() => onEdit(item)}
             className="bg-blue-500 hover:bg-blue-600"

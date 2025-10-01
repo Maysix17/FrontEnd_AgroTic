@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { ResetPasswordFormValues } from "../../types/ResetPasswordForm.types";
-import PrimaryButton from "../atoms/PrimaryButton";
+import CustomButton from "../atoms/Boton";
 import { resetPassword } from "../../services/ResetPasswordService";
 import { useSearchParams } from "react-router-dom";
 
@@ -78,7 +78,7 @@ const ResetPasswordForm: React.FC = () => {
       {successMessage && (
         <p className="text-center text-green-500 text-sm">{successMessage}</p>
       )}
-      <PrimaryButton
+      <CustomButton
         text="Cambiar contraseña"
         type="submit"
         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"

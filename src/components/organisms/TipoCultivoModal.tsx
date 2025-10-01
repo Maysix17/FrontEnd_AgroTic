@@ -8,7 +8,7 @@ import {
   deleteTipoCultivo,
 } from '../../services/tipoCultivo';
 import Table from '../atoms/Table';
-import ButtonAccion from '../atoms/ButtonAccion';
+import CustomButton from '../atoms/Boton';
 
 interface TipoCultivoModalProps {
   isOpen: boolean;
@@ -71,10 +71,10 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
                   <td className="px-4 py-2 border-b">{cultivo.nombre}</td>
                   <td className="px-4 py-2 border-b">
                     <div className="flex gap-2">
-                      <ButtonAccion onClick={() => handleEdit(cultivo)}>Editar</ButtonAccion>
-                      <ButtonAccion onClick={() => handleDelete(cultivo.id!)} variant="secondary">
+                      <CustomButton onClick={() => handleEdit(cultivo)}>Editar</CustomButton>
+                      <CustomButton onClick={() => handleDelete(cultivo.id!)} variant="bordered">
                         Eliminar
-                      </ButtonAccion>
+                      </CustomButton>
                     </div>
                   </td>
                 </tr>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InputSearch from '../components/atoms/buscador';
-import ButtonAccion from '../components/atoms/ButtonAccion';
+import CustomButton from '../components/atoms/Boton';
 import Table from '../components/atoms/Table';
 import InventoryModal from '../components/organisms/InventoryModal';
 import { inventoryService } from '../services/inventoryService';
@@ -106,7 +106,7 @@ const InventoryPage: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Gestión de Inventario</h1>
         <div className="space-x-2">
-          <ButtonAccion onClick={() => setIsInventoryModalOpen(true)}>Registrar Inventario</ButtonAccion>
+          <CustomButton onClick={() => setIsInventoryModalOpen(true)}>Registrar Inventario</CustomButton>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ const InventoryPage: React.FC = () => {
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <ButtonAccion variant="primary" onClick={handleSearch}>Buscar</ButtonAccion>
+        <CustomButton variant="solid" onClick={handleSearch}>Buscar</CustomButton>
       </div>
 
       {/* Table */}
