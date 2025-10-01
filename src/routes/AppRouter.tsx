@@ -12,7 +12,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 
 import TipoCultivoPage from "../pages/TipoCultivoPage";
 import VariedadPage from "../pages/VariedadPage";
-import CultivosPage from "../pages/CultivosPage";
 
 
 import Dashboard from "../pages/Dashboard";

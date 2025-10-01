@@ -1,4 +1,4 @@
-```tsx
+
 import React, { useState, useEffect } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
@@ -274,4 +274,3 @@ const CultivosPage: React.FC = () => {
 };
 
 export default CultivosPage;
-```
