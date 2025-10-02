@@ -19,7 +19,6 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
     fecha: '',
     fkCosechaId: '', // This needs to be set properly
     precioKilo: 0,
-    ventaTotal: 0,
   });
   const [loading, setLoading] = useState(false);
 
@@ -76,12 +75,6 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
                 type="number"
                 value={formData.precioKilo?.toString() || ''}
                 onChange={(e) => handleChange('precioKilo', parseFloat(e.target.value))}
-              />
-              <TextInput
-                label="Venta Total"
-                type="number"
-                value={formData.ventaTotal?.toString() || ''}
-                onChange={(e) => handleChange('ventaTotal', parseFloat(e.target.value))}
               />
             </div>
           </ModalBody>

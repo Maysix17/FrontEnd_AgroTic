@@ -1,16 +1,14 @@
 export interface Venta {
-  id: string;
-  cantidad: number;
-  fecha: string;
-  fkCosechaId: string;
-  precioKilo?: number;
-  ventaTotal?: number;
-}
+   id: string;
+   cantidad: number;
+   fecha: string;
+   fkCosechaId: string;
+   precioKilo?: number;
+ }
 
 export interface CreateVentaDto {
-  cantidad: number;
-  fecha: string;
-  fkCosechaId: string;
-  precioKilo?: number;
-  ventaTotal?: number;
-}
+   cantidad: number;
+   fecha: string;
+   fkCosechaId: string;
+   precioKilo?: number;
+ }
