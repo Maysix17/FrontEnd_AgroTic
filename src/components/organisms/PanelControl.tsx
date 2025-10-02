@@ -3,7 +3,10 @@ import InputSearch from '../atoms/buscador';
 import CustomButton from '../atoms/Boton';
 import Table from '../atoms/Table';
 import AdminUserForm from './AdminUserForm';
+import CreateRoleModal from './CreateRoleModal';
+import ManageRolesModal from './ManageRolesModal';
 import apiClient from '../../lib/axios/axios';
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 
 const PanelControl: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
@@ -11,6 +14,8 @@ const PanelControl: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isManageRolesModalOpen, setIsManageRolesModalOpen] = useState(false);
 
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
@@ -47,9 +52,17 @@ const PanelControl: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Panel de Control</h1>
-        <div className="space-x-2">
+        <div className="space-x-2 flex items-center">
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="bordered">Gestión de roles</Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Gestión de roles">
+              <DropdownItem key="create" onClick={() => setIsRoleModalOpen(true)}>Crear nuevo rol</DropdownItem>
+              <DropdownItem key="manage" onClick={() => setIsManageRolesModalOpen(true)}>Gestionar roles</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
           <CustomButton onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</CustomButton>
-
         </div>
       </div>
 
@@ -99,6 +112,19 @@ const PanelControl: React.FC = () => {
         onUserCreated={() => {
           // Optionally refresh the list or show a message
         }}
+      />
+
+      <CreateRoleModal
+        isOpen={isRoleModalOpen}
+        onClose={() => setIsRoleModalOpen(false)}
+        onRoleCreated={() => {
+          // Optionally refresh roles or show message
+        }}
+      />
+
+      <ManageRolesModal
+        isOpen={isManageRolesModalOpen}
+        onClose={() => setIsManageRolesModalOpen(false)}
       />
     </div>
   );
