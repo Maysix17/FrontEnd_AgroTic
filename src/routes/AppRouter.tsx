@@ -19,6 +19,7 @@ import CultivosPage from "../pages/CultivosPage";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
 
+import ZapatoPage from "../pages/ZapatoPage";
 import InventoryPage from "../pages/InventoryPage";
 
 
@@ -48,6 +49,7 @@ const AppRouter = () => {
         <Route path="panel-control" element={<PanelControl />} />
         <Route path="cultivos" element={<CultivosPage />} />
         <Route path="iot" element={<MapRegisterPage />} />
+        <Route path="zapato" element={<ZapatoPage />} />
         <Route path="inventario" element={<InventoryPage />} />
       </Route>
       <Route path="/reset-password" element={<ResetPasswordPage />} />
