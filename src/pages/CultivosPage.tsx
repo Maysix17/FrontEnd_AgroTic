@@ -9,6 +9,8 @@ import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
+import CosechaModal from "../components/organisms/CosechaModal";
+import VentaModal from "../components/organisms/VentaModal";
 
 const CultivosPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,19 +19,13 @@ const CultivosPage: React.FC = () => {
   const [filters, setFilters] = useState<SearchCultivoDto>({});
   const [isTipoCultivoModalOpen, setIsTipoCultivoModalOpen] = useState(false);
   const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
+  const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
+  const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
+  const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
 
   // Función de búsqueda unificada (utiliza el endpoint POST /cultivos/search)
   const handleSearch = async () => {
-    setLoading(true);
-    try {
-      // Usa los filtros actuales (que son {} en la carga inicial)
-      const data = await searchCultivos(filters);
-      setCultivos(data);
-    } catch (error) {
-      console.error("Error searching cultivos:", error);
-    } finally {
-      setLoading(false);
-    }
+    await handleSearchWithFilters(filters);
   };
 
   // No cargar datos inicialmente - tabla vacía hasta que el usuario busque
@@ -39,7 +35,22 @@ const CultivosPage: React.FC = () => {
 
 
   const handleFilterChange = (key: keyof SearchCultivoDto, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    const newFilters = { ...filters, [key]: value };
+    setFilters(newFilters);
+    // Auto-search when filters change
+    handleSearchWithFilters(newFilters);
+  };
+
+  const handleSearchWithFilters = async (searchFilters: SearchCultivoDto) => {
+    setLoading(true);
+    try {
+      const data = await searchCultivos(searchFilters);
+      setCultivos(data);
+    } catch (error) {
+      console.error("Error searching cultivos:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDateRangeChange = (dates: [Date | null, Date | null]) => {
@@ -53,8 +64,18 @@ const CultivosPage: React.FC = () => {
 
   const clearFilters = () => {
     setFilters({});
-    // Al limpiar filtros, volvemos a llamar a handleSearch (sin filtros)
-    handleSearch();
+    // Al limpiar filtros, tabla queda vacía
+    setCultivos([]);
+  };
+
+  const handleOpenCosechaModal = (cultivo: Cultivo) => {
+    setSelectedCultivo(cultivo);
+    setIsCosechaModalOpen(true);
+  };
+
+  const handleOpenVentaModal = (cultivo: Cultivo) => {
+    setSelectedCultivo(cultivo);
+    setIsVentaModalOpen(true);
   };
 
   const exportToExcel = (cultivo?: Cultivo): void => {
@@ -182,7 +203,7 @@ const CultivosPage: React.FC = () => {
             <label className="block text-sm font-medium mb-1">Estado del Cultivo</label>
             <select
               className="w-full border rounded-lg px-3 py-2"
-              value={filters.estado_cultivo || ""}
+              value={filters.estado_cultivo ?? ""}
               onChange={(e) => handleFilterChange("estado_cultivo", e.target.value ? parseInt(e.target.value) : undefined)}
             >
               <option value="">Todos</option>
@@ -217,9 +238,9 @@ const CultivosPage: React.FC = () => {
           <div className="p-8 text-center">Cargando...</div>
         ) : (
           <div className="overflow-x-auto">
-            <Table headers={["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha", "Acciones"]}>
-              {cultivos.map((cultivo) => (
-                <tr key={cultivo.id} className="border-b hover:bg-gray-50">
+            <Table headers={["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha", "Actividades", "Finanzas", "Cosecha/Venta", "Exportar"]}>
+              {cultivos.map((cultivo, index) => (
+                <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">{cultivo.ficha}</td>
                   <td className="px-4 py-2">{cultivo.lote}</td>
 
@@ -232,20 +253,43 @@ const CultivosPage: React.FC = () => {
                     {cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : 'Sin cosecha'}
                   </td>
                   <td className="px-4 py-2">
-                    <div className="flex gap-2">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm">
-                        Actividades
-                      </button>
-                      <button className="text-green-600 hover:text-green-800 text-sm">
-                        Financiero
-                      </button>
-                      <button
-                        className="text-purple-600 hover:text-purple-800 text-sm"
-                        onClick={() => exportToExcel(cultivo)}
-                      >
-                        Exportar
-                      </button>
-                    </div>
+                    <CustomButton
+                      label="Actividades"
+                      onClick={() => {}}
+                      size="sm"
+                      variant="bordered"
+                    />
+                  </td>
+                  <td className="px-4 py-2">
+                    <CustomButton
+                      label="Financiero"
+                      onClick={() => {}}
+                      size="sm"
+                      variant="bordered"
+                    />
+                  </td>
+                  <td className="px-4 py-2">
+                    {cultivo.estado === 0 ? (
+                      <CustomButton
+                        label="Registrar Venta"
+                        onClick={() => handleOpenVentaModal(cultivo)}
+                        size="sm"
+                      />
+                    ) : (
+                      <CustomButton
+                        label="Registrar Cosecha"
+                        onClick={() => handleOpenCosechaModal(cultivo)}
+                        size="sm"
+                      />
+                    )}
+                  </td>
+                  <td className="px-4 py-2">
+                    <CustomButton
+                      label="Exportar"
+                      onClick={() => exportToExcel(cultivo)}
+                      size="sm"
+                      variant="bordered"
+                    />
                   </td>
                 </tr>
               ))}
@@ -268,6 +312,24 @@ const CultivosPage: React.FC = () => {
       <VariedadModal
         isOpen={isVariedadModalOpen}
         onClose={() => setIsVariedadModalOpen(false)}
+      />
+
+      <CosechaModal
+        isOpen={isCosechaModalOpen}
+        onClose={() => setIsCosechaModalOpen(false)}
+        cvzId={selectedCultivo?.cvzid || ''}
+        onSuccess={() => {
+          handleSearch(); // Refresh the search results
+        }}
+      />
+
+      <VentaModal
+        isOpen={isVentaModalOpen}
+        onClose={() => setIsVentaModalOpen(false)}
+        cultivo={selectedCultivo}
+        onSuccess={() => {
+          handleSearch(); // Refresh the search results
+        }}
       />
     </div>
   );
