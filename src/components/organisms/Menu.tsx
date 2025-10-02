@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "../molecules/MenuButton";
 import UserModal from "./UserModal";
@@ -12,33 +12,22 @@ import {
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
 import { usePermission } from '../../contexts/PermissionContext';
-import { getModules } from '../../services/moduleService';
-import type { Modulo } from '../../types/module';
 
 const Menu: React.FC = () => {
   // 2. Obtener datos y funciones del contexto de permisos/autenticación
   const { permissions, isAuthenticated, hasPermission, user } = usePermission();
   const navigate = useNavigate();
-  const [modules, setModules] = useState<Modulo[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUserCardModalOpen, setIsUserCardModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchModules = async () => {
-      try {
-        const fetchedModules = await getModules();
-        setModules(fetchedModules);
-      } catch (error) {
-        console.error('Error fetching modules:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (isAuthenticated) {
-      fetchModules();
-    }
-  }, [isAuthenticated]);
+  // Módulos principales estáticos
+  const mainModules = [
+    { nombre: 'Inicio' },
+    { nombre: 'IOT' },
+    { nombre: 'Cultivos' },
+    { nombre: 'Inventario' },
+    { nombre: 'Usuarios' },
+  ];
 
   const getIcon = (label: string) => {
     switch (label) {
@@ -57,12 +46,13 @@ const Menu: React.FC = () => {
       case "IOT": return "/app/iot";
       case "Cultivos": return "/app/cultivos";
       case "Inventario": return "/app/inventario";
+      case "Zapato": return "/app/zapato";
       default: return "/app";
     }
   };
 
 
-  const filteredModules = modules.filter(module =>
+  const filteredModules = mainModules.filter(module =>
     permissions.some(perm => perm.modulo === module.nombre && perm.accion === 'ver') ||
     module.nombre === 'Usuarios'
   );
@@ -79,10 +69,7 @@ const Menu: React.FC = () => {
     return 0;
   });
 
-  console.log('Filtered modules count:', filteredModules.length);
-  console.log('Filtered modules:', filteredModules.map(m => m.nombre));
-
-  if (!isAuthenticated || loading) {
+  if (!isAuthenticated) {
     return <div className="flex items-center justify-center h-screen">Cargando permisos...</div>;
   }
 
@@ -104,13 +91,20 @@ const Menu: React.FC = () => {
             const onClickHandler = module.nombre === 'Usuarios' ? () => setIsUserCardModalOpen(true) : () => navigate(getRoute(module.nombre));
             return (
               <MenuButton
-                key={module.id}
+                key={module.nombre}
                 icon={IconComponent}
                 label={label}
                 onClick={onClickHandler}
               />
             );
           })}
+          {/* Botón de Zapato sin permisos */}
+        {/* <MenuButton
+            key="Zapato"
+            icon={DocumentTextIcon}
+            label="Zapato"
+            onClick={() => navigate(getRoute("Zapato"))}
+          />*/}
         </div>
 
       </div>
