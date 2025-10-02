@@ -1,56 +1,81 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-// Páginas
+
+// Páginas públicas
 import LoginPage from "../pages/LoginPage";
-import MapRegisterPage from "../pages/MapRegisterPage";
-import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage";
-import MainLayout from "../components/templates/MainLayout";
+import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+
+// Páginas protegidas
 import UserProfilePage from "../pages/UserProfilePage";
+import Dashboard from "../pages/Dashboard";
+import CultivosPage from "../pages/CultivosPage";
+import TipoCultivoPage from "../pages/TipoCultivoPage";
+import VariedadPage from "../pages/VariedadPage";
+import InventoryPage from "../pages/InventoryPage";
+import MapRegisterPage from "../pages/MapRegisterPage";
+
+// Componentes
+import MainLayout from "../components/templates/MainLayout";
 import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
 
-import TipoCultivoPage from "../pages/TipoCultivoPage";
-import VariedadPage from "../pages/VariedadPage";
-
-
-import Dashboard from "../pages/Dashboard";
-import CultivosPage from "../pages/CultivosPage";
-import BotonPage from "../pages/BotonPage";
-import TablePage from "../pages/TablePage";
-
-import InventoryPage from "../pages/InventoryPage";
-
-
+// 👉 Calendario con modal de actividades
+import CalendarioPage from "../pages/GestionActividadesPage";
 
 const AppRouter = () => {
   return (
     <Routes>
-      {/* Redirigir la raíz al login */}
+      {/* 🔹 Redirección raíz al login */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Página de inicio de sesión */}
+      {/* 🔹 Rutas públicas */}
       <Route path="/login" element={<LoginPage />} />
-
-      {/* Página de registro de usuario */}
       <Route path="/register" element={<RegisterPage />} />
-
-      {/* Página de recuperación de contraseña */}
       <Route path="/recover-password" element={<RecoverPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-      {/* Página de perfil de usuario */}
-      <Route path="/profile" element={<ProtectedRoute><UserProfilePage /></ProtectedRoute>} />
+      {/* 🔹 Rutas protegidas */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <UserProfilePage />
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Aplicación principal */}
-      <Route path="/app" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+      {/* 🔹 Aplicación principal (usa MainLayout) */}
+      <Route
+        path="/app"
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Redirección a dashboard */}
         <Route index element={<Navigate to="dashboard" replace />} />
+
+        {/* Panel principal */}
         <Route path="dashboard" element={<Dashboard />} />
+
+        {/* Panel de control */}
         <Route path="panel-control" element={<PanelControl />} />
+
+        {/* Cultivos */}
         <Route path="cultivos" element={<CultivosPage />} />
+        <Route path="cultivos/tipo" element={<TipoCultivoPage />} />
+        <Route path="cultivos/variedad" element={<VariedadPage />} />
+
+        <Route path="cultivos/gestion-actividades" element={<CalendarioPage />} />
+
+        {/* IoT */}
         <Route path="iot" element={<MapRegisterPage />} />
+
+        {/* Inventario */}
         <Route path="inventario" element={<InventoryPage />} />
       </Route>
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
   );
 };
