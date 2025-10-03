@@ -8,8 +8,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({ label, onChange }) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   return (
-    <div className="flex flex-col gap-2">
-      {label && <label className="text-sm font-medium">{label}</label>}
+    <div className="flex flex-col">
+      {label && <label className="block text-sm font-medium mb-4">{label}</label>}
       <DatePicker
         selectsRange
         startDate={startDate}
@@ -21,7 +21,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({ label, onChange }) => {
         }}
         isClearable
         dateFormat="yyyy-MM-dd"
-        className="border rounded-lg px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="border border-gray-300 rounded-xl px-3 py-3 h-10 text-gray-700 focus:outline-none  w-64 "
       />
     </div>
   );

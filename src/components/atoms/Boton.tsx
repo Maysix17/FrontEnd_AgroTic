@@ -30,7 +30,7 @@ const CustomButton: React.FC<ButtonProps> = ({
         before:absolute before:inset-0 before:bg-white/20 before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300
         disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md
         focus:outline-none focus:ring-4 focus:ring-green-300
-        active:scale-95
+        active:scale-95 
     `;
 
     return (
