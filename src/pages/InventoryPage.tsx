@@ -111,7 +111,7 @@ const InventoryPage: React.FC = () => {
       </div>
 
       {/* Search */}
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 flex gap-2 items-center">
         <InputSearch
           placeholder="Buscar por nombre..."
           value={searchInput}

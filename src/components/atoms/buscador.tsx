@@ -11,9 +11,9 @@ const InputSearch: React.FC<InputSearchProps> = ({ placeholder, value, onChange,
             onChange={onChange}
             onKeyDown={onKeyDown}
             startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
-            size="sm"
+            size="md"
             variant="bordered"
-            className="w-64"
+            className="w-64 py-3"
         />
     );
 };
