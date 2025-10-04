@@ -11,6 +11,7 @@ import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
 import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
+import FichaModal from "../components/organisms/FichaModal";
 
 const CultivosPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const CultivosPage: React.FC = () => {
   const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
   const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
+  const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
+  const [selectedFichas, setSelectedFichas] = useState<string[]>([]);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
 
   // Función de búsqueda unificada (utiliza el endpoint POST /cultivos/search)
@@ -76,6 +79,12 @@ const CultivosPage: React.FC = () => {
   const handleOpenVentaModal = (cultivo: Cultivo) => {
     setSelectedCultivo(cultivo);
     setIsVentaModalOpen(true);
+  };
+
+  const handleOpenFichaModal = (fichaString: string) => {
+    const fichas = fichaString.split(',').map(f => f.trim()).filter(f => f);
+    setSelectedFichas(fichas);
+    setIsFichaModalOpen(true);
   };
 
   const exportToExcel = (cultivo?: Cultivo): void => {
@@ -241,7 +250,14 @@ const CultivosPage: React.FC = () => {
             <Table headers={["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha", "Actividades", "Finanzas", "Cosecha/Venta", "Exportar"]}>
               {cultivos.map((cultivo, index) => (
                 <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">{cultivo.ficha}</td>
+                  <td className="px-4 py-2">
+                    <CustomButton
+                      label="Ver Fichas"
+                      onClick={() => handleOpenFichaModal(cultivo.ficha)}
+                      size="sm"
+                      variant="bordered"
+                    />
+                  </td>
                   <td className="px-4 py-2">{cultivo.lote}</td>
 
                   <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
@@ -330,6 +346,12 @@ const CultivosPage: React.FC = () => {
         onSuccess={() => {
           handleSearch(); // Refresh the search results
         }}
+      />
+
+      <FichaModal
+        isOpen={isFichaModalOpen}
+        onClose={() => setIsFichaModalOpen(false)}
+        fichas={selectedFichas}
       />
     </div>
   );
