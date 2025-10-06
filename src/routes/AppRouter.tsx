@@ -16,6 +16,7 @@ import VariedadPage from "../pages/VariedadPage";
 
 import Dashboard from "../pages/Dashboard";
 import CultivosPage from "../pages/CultivosPage";
+import ActividadesPage from "../pages/ActividadesPage";
 import BotonPage from "../pages/BotonPage";
 import TablePage from "../pages/TablePage";
 
@@ -48,6 +49,7 @@ const AppRouter = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="panel-control" element={<PanelControl />} />
         <Route path="cultivos" element={<CultivosPage />} />
+        <Route path="actividades" element={<ActividadesPage />} />
         <Route path="iot" element={<MapRegisterPage />} />
         <Route path="zapato" element={<ZapatoPage />} />
         <Route path="inventario" element={<InventoryPage />} />
