@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MenuButton from "../molecules/MenuButton";
 import UserModal from "./UserModal";
@@ -8,6 +8,7 @@ import {
   CubeIcon,
   CpuChipIcon,
   UserIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
 import logo2 from "../../assets/logoSena.png";
@@ -19,6 +20,24 @@ const Menu: React.FC = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUserCardModalOpen, setIsUserCardModalOpen] = useState(false);
+  const [isCultivosSubmenuOpen, setIsCultivosSubmenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsCultivosSubmenuOpen(false);
+      }
+    };
+
+    if (isCultivosSubmenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCultivosSubmenuOpen]);
 
   // Módulos principales estáticos
   const mainModules = [
@@ -74,7 +93,7 @@ const Menu: React.FC = () => {
   }
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
+    <div ref={menuRef} className="fixed left-0 top-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl">
       <div>
         {/* Logo y Botón de Usuario */}
         <div className="flex flex-col items-center mb-8">
@@ -88,7 +107,38 @@ const Menu: React.FC = () => {
           {sortedFilteredModules.map((module) => {
             const IconComponent = getIcon(module.nombre);
             const label = module.nombre === 'Usuarios' ? 'Perfil' : module.nombre;
-            const onClickHandler = module.nombre === 'Usuarios' ? () => setIsUserCardModalOpen(true) : () => navigate(getRoute(module.nombre));
+            const onClickHandler = module.nombre === 'Usuarios' ? () => { setIsUserCardModalOpen(true); setIsCultivosSubmenuOpen(false); } : module.nombre === 'Cultivos' ? () => setIsCultivosSubmenuOpen(!isCultivosSubmenuOpen) : () => { navigate(getRoute(module.nombre)); setIsCultivosSubmenuOpen(false); };
+            if (module.nombre === 'Cultivos') {
+              return (
+                <React.Fragment key={module.nombre}>
+                  <MenuButton
+                    icon={IconComponent}
+                    label={label}
+                    onClick={onClickHandler}
+                  />
+                  <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                      isCultivosSubmenuOpen ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-2">
+                      <button
+                        className="ml-2 py-1 px-2 w-full rounded-lg bg-white text-gray-600 shadow-sm hover:bg-gray-50 transition-all duration-150 ease-in-out select-none focus:outline-none text-sm"
+                        onClick={() => { navigate(getRoute("Cultivos")); setIsCultivosSubmenuOpen(false); }}
+                      >
+                        Gestionar Cultivos
+                      </button>
+                      <button
+                        className="ml-2 py-1 px-2 w-full rounded-lg bg-white text-gray-600 shadow-sm hover:bg-gray-50 transition-all duration-150 ease-in-out select-none focus:outline-none text-sm"
+                        onClick={() => { navigate("/app/actividades"); setIsCultivosSubmenuOpen(false); }}
+                      >
+                        Gestionar Actividades
+                      </button>
+                    </div>
+                  </div>
+                </React.Fragment>
+              );
+            }
             return (
               <MenuButton
                 key={module.nombre}
