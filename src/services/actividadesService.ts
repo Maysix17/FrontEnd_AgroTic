@@ -25,6 +25,7 @@ export interface CreateActividadData {
 export interface UsuarioXActividad {
   fkUsuarioId: string;
   fkActividadId: string;
+  fechaAsignacion: Date;
 }
 
 export interface InventarioXActividad {
@@ -38,6 +39,7 @@ export interface Movimiento {
   stockReservado?: number;
   stockDevuelto?: number;
   stockDevueltoSobrante?: number;
+  stockReservadoSobrante?: number;
 }
 
 export const getActividadesByDateRange = async (start: string, end: string): Promise<Actividad[]> => {

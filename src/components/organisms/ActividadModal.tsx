@@ -354,6 +354,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                     const hasSurplus = (mat.material.stock_sobrante || 0) > 0;
                     const availableStock = mat.material.stock_disponible || mat.material.stock;
                     const isOverLimit = mat.qty > availableStock;
+                    const showSurplusButton = hasSurplus && !mat.isSurplus;
                     return (
                       <div key={mat.material.id} className="flex items-center gap-2 p-2 border rounded">
                         <div className="flex-1">
@@ -378,7 +379,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                         {isOverLimit && (
                           <span className="text-red-500 text-sm">Excede stock disponible</span>
                         )}
-                        {hasSurplus && (
+                        {showSurplusButton && (
                           <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(mat.material.id)}>
                             Usar Sobrante
                           </Button>

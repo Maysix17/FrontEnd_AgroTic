@@ -200,28 +200,35 @@ const ActividadesPage: React.FC = () => {
               horasDedicadas: 8, // default
               observacion: data.descripcion,
               estado: true,
-              fkCultivoVariedadZonaId: cvzs[0].id,
+              fkCultivoVariedadZonaId: cvzs[0].cvzId,
               fkCategoriaActividadId: data.categoria,
             };
 
             const actividad = await createActividad(actividadData);
 
             // Save users
-            for (const userId of data.usuarios) {
-              await createUsuarioXActividad({ fkUsuarioId: userId, fkActividadId: actividad.id });
-            }
+             for (const userId of data.usuarios) {
+               await createUsuarioXActividad({ fkUsuarioId: userId, fkActividadId: actividad.id, fechaAsignacion: data.fecha });
+             }
 
             // Save materials and movements
+            console.log('Processing materials:', data.materiales);
             for (const mat of data.materiales) {
-              await createInventarioXActividad({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty });
+               console.log('Processing material:', mat);
+               await createInventarioXActividad({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty });
+               console.log('InventarioXActividad created for:', mat.id);
 
-              // Create movement for reservation or surplus usage
-              if (mat.isSurplus) {
-                await createMovimiento({ fkInventarioId: mat.id, stockDevueltoSobrante: -mat.qty });
-              } else {
-                await createMovimiento({ fkInventarioId: mat.id, stockReservado: mat.qty });
-              }
-            }
+               // Create movement for reservation or surplus usage
+               if (mat.isSurplus) {
+                 console.log('Creating surplus movement for:', mat.id, 'quantity:', mat.qty);
+                 await createMovimiento({ fkInventarioId: mat.id, stockReservadoSobrante: mat.qty });
+                 console.log('Surplus movement created');
+               } else {
+                 console.log('Creating regular movement for:', mat.id, 'quantity:', mat.qty);
+                 await createMovimiento({ fkInventarioId: mat.id, stockReservado: mat.qty });
+                 console.log('Regular movement created');
+               }
+             }
 
             alert('Actividad guardada exitosamente');
           } catch (error) {
@@ -293,18 +300,29 @@ const ActividadesPage: React.FC = () => {
             // Update actividad with imgUrl and finalize
             await updateActividad(data.activityId, { imgUrl, estado: false }); // finalized
 
-            // Create movements for returns
-            for (const [invId, qty] of Object.entries(data.returns)) {
-              if ((qty as number) > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevuelto: qty as number });
-              }
-            }
+            // Release reservations and create returns/surplus movements
+            for (const ixa of selectedActivity.inventario_x_actividades || []) {
+              const invId = ixa.inventario.id;
+              const usedQty = ixa.cantidadUsada;
+              const returnedQty = data.returns[invId] || 0;
+              const surplusQty = data.surplus[invId] || 0;
 
-            // Create movements for surplus stock
-            for (const [invId, qty] of Object.entries(data.surplus)) {
-              if ((qty as number) > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevueltoSobrante: qty as number });
+              // Release reservation (negative stockReservado)
+              await createMovimiento({ fkInventarioId: invId, stockReservado: -usedQty });
+
+              // Create return movement if any
+              if (returnedQty > 0) {
+                await createMovimiento({ fkInventarioId: invId, stockDevuelto: returnedQty });
               }
+
+              // Create surplus movement if any
+              if (surplusQty > 0) {
+                await createMovimiento({ fkInventarioId: invId, stockDevueltoSobrante: surplusQty });
+              }
+
+              // Release surplus reservation (negative stockReservadoSobrante)
+              // Since surplus is considered used when activity is finalized, release the reservation
+              await createMovimiento({ fkInventarioId: invId, stockReservadoSobrante: -usedQty });
             }
 
             alert('Actividad finalizada');

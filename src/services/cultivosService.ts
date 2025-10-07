@@ -18,9 +18,9 @@ export const getCultivosVariedadXZonaByCultivo = async (cultivoId: string): Prom
   return response.data;
 };
 
-export const getZonaCultivosVariedadXZona = async (zonaId: string): Promise<any> => {
+export const getZonaCultivosVariedadXZona = async (zonaId: string): Promise<any[]> => {
   const response = await apiClient.get(`/zonas/${zonaId}/cultivos-variedad-zona`);
-  return response.data;
+  return response.data.cultivos || [];
 };
 
 export const getZonaByNombre = async (nombre: string): Promise<any> => {
