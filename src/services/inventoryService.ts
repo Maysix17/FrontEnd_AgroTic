@@ -35,6 +35,9 @@ export interface InventoryItem {
   fkBodegaId: string;
   categoria?: Categoria;
   bodega?: Bodega;
+  stock_disponible?: number;
+  stock_devuelto?: number;
+  stock_sobrante?: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -105,6 +108,16 @@ export const inventoryService = {
 
   getBodegas: async (): Promise<Bodega[]> => {
     const response = await apiClient.get('/bodega');
+    return response.data;
+  },
+
+  getAvailableStock: async (id: string): Promise<number> => {
+    const response = await apiClient.get(`/inventario/${id}/stock-disponible`);
+    return response.data;
+  },
+
+  validateStockAvailability: async (id: string, quantity: number): Promise<boolean> => {
+    const response = await apiClient.get(`/inventario/${id}/validar-stock/${quantity}`);
     return response.data;
   },
 };

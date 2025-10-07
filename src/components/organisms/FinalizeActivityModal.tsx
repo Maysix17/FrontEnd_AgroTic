@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input, Textarea } from '@heroui/react';
 
-interface Material {
-  id: string;
-  nombre: string;
-  cantidadUsada: number;
-}
-
 interface Activity {
   id: string;
   descripcion: string;
@@ -22,6 +16,7 @@ interface FinalizeActivityModalProps {
 
 const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, onClose, activity, onSave }) => {
   const [returns, setReturns] = useState<{ [key: string]: number }>({});
+  const [surplus, setSurplus] = useState<{ [key: string]: number }>({});
   const [horas, setHoras] = useState(0);
   const [precioHora, setPrecioHora] = useState('');
   const [observacion, setObservacion] = useState('');
@@ -31,6 +26,7 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
     const data = {
       activityId: activity?.id,
       returns,
+      surplus,
       horas,
       precioHora,
       observacion,
@@ -57,12 +53,33 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
               <div className="grid grid-cols-2 gap-4">
                 {activity.inventario_x_actividades?.map((ixa) => (
                   <div key={ixa.inventario.id} className="space-y-2">
-                    <label className="block text-sm">{ixa.inventario.nombre} ({ixa.cantidadUsada})</label>
+                    <label className="block text-sm">{ixa.inventario.nombre} (usado: {ixa.cantidadUsada})</label>
                     <Input
                       type="number"
                       placeholder="Cantidad devuelta"
                       value={returns[ixa.inventario.id]?.toString() || ''}
                       onChange={(e) => setReturns({ ...returns, [ixa.inventario.id]: Number(e.target.value) })}
+                      min="0"
+                      max={ixa.cantidadUsada}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Dynamic surplus fields */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Stock sobrante encontrado:</label>
+              <div className="grid grid-cols-2 gap-4">
+                {activity.inventario_x_actividades?.map((ixa) => (
+                  <div key={ixa.inventario.id} className="space-y-2">
+                    <label className="block text-sm">{ixa.inventario.nombre}</label>
+                    <Input
+                      type="number"
+                      placeholder="Stock sobrante"
+                      value={surplus[ixa.inventario.id]?.toString() || ''}
+                      onChange={(e) => setSurplus({ ...surplus, [ixa.inventario.id]: Number(e.target.value) })}
+                      min="0"
                     />
                   </div>
                 ))}
