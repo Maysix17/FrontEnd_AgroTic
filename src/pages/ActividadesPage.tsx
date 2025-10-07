@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import DatePicker from 'react-datepicker';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -29,6 +29,69 @@ const ActividadesPage: React.FC = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
+  const [events, setEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchEvents(selectedDate);
+  }, [selectedDate]);
+
+  const CustomEvent = ({ event }: any) => {
+    return (
+      <div className="flex items-center justify-between p-1 bg-blue-100 rounded text-xs">
+        <span className="truncate">{event.title}</span>
+        <div className="flex gap-1">
+          <button
+            className="bg-green-500 text-white px-1 rounded text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedActivity(event.resource);
+              setIsDetailModalOpen(true);
+            }}
+          >
+            Ver
+          </button>
+          <button
+            className="bg-red-500 text-white px-1 rounded text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedActivity(event.resource);
+              setIsFinalizeModalOpen(true);
+            }}
+          >
+            Finalizar
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const fetchEvents = async (date: Date) => {
+    const start = startOfMonth(date);
+    const end = endOfMonth(date);
+    const startStr = start.toISOString().split('T')[0];
+    const endStr = end.toISOString().split('T')[0];
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+    try {
+      const response = await fetch(`http://localhost:3000/actividades/by-date-range?start=${startStr}&end=${endStr}`, { headers });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const activities = await response.json();
+      const formattedEvents = activities.map((activity: any) => ({
+        id: activity.id,
+        title: activity.descripcion || 'Actividad',
+        start: new Date(activity.fechaAsignacion),
+        end: new Date(activity.fechaAsignacion),
+        resource: activity,
+      }));
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      setEvents([]);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 h-full overflow-hidden">
@@ -56,6 +119,8 @@ const ActividadesPage: React.FC = () => {
           defaultView="month"
           date={selectedDate}
           onNavigate={(date) => setSelectedDate(date)}
+          events={events}
+          components={{ event: CustomEvent }}
           onSelectSlot={async (slotInfo) => {
             const dateStr = slotInfo.start.toISOString().split('T')[0];
             const token = localStorage.getItem('token');
@@ -63,11 +128,17 @@ const ActividadesPage: React.FC = () => {
 
             try {
               const countResponse = await fetch(`http://localhost:3000/actividades/count-by-date/${dateStr}`, { headers });
+              if (!countResponse.ok) {
+                throw new Error(`HTTP error! status: ${countResponse.status}`);
+              }
               const count = await countResponse.json();
 
               if (count > 0) {
                 // Fetch activities and open list modal
                 const activitiesResponse = await fetch(`http://localhost:3000/actividades/by-date/${dateStr}`, { headers });
+                if (!activitiesResponse.ok) {
+                  throw new Error(`HTTP error! status: ${activitiesResponse.status}`);
+                }
                 const activitiesData = await activitiesResponse.json();
                 setActivities(activitiesData);
                 setIsListModalOpen(true);
@@ -161,12 +232,20 @@ const ActividadesPage: React.FC = () => {
                 body: JSON.stringify({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty }),
               });
 
-              // Create movement for reservation
-              await fetch('http://localhost:3000/movimientos', {
-                method: 'POST',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ fkInventarioId: mat.id, stockReservado: mat.qty }),
-              });
+              // Create movement for reservation or surplus usage
+              if (mat.isSurplus) {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify({ fkInventarioId: mat.id, stockDevueltoSobrante: -mat.qty }),
+                });
+              } else {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify({ fkInventarioId: mat.id, stockReservado: mat.qty }),
+                });
+              }
             }
 
             alert('Actividad guardada exitosamente');
@@ -271,6 +350,17 @@ const ActividadesPage: React.FC = () => {
                   method: 'POST',
                   headers,
                   body: JSON.stringify({ fkInventarioId: invId, stockDevuelto: qty }),
+                });
+              }
+            }
+
+            // Create movements for surplus stock
+            for (const [invId, qty] of Object.entries(data.surplus)) {
+              if ((qty as number) > 0) {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({ fkInventarioId: invId, stockDevueltoSobrante: qty }),
                 });
               }
             }

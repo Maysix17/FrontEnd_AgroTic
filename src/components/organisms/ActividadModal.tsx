@@ -19,6 +19,7 @@ interface Material {
   nombre: string;
   categoria: string;
   stock: number;
+  stock_disponible?: number;
   stock_devuelto?: number;
   stock_sobrante?: number;
 }
@@ -52,7 +53,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   const [debouncedLoteSearch, setDebouncedLoteSearch] = useState('');
 
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
-  const [selectedMateriales, setSelectedMateriales] = useState<{ [key: string]: { material: Material; qty: number; custom: boolean } }>({});
+  const [selectedMateriales, setSelectedMateriales] = useState<{ [key: string]: { material: Material; qty: number; custom: boolean; isSurplus?: boolean } }>({});
   const [selectedLote, setSelectedLote] = useState<Zona | null>(null);
 
   const [categoria, setCategoria] = useState('');
@@ -133,6 +134,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
             nombre: item.nombre,
             categoria: item.categoria?.nombre || '',
             stock: item.stock,
+            stock_disponible: item.stock_disponible || item.stock,
             stock_devuelto: item.stock_devuelto || 0,
             stock_sobrante: item.stock_sobrante || 0,
           }));
@@ -187,7 +189,8 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
         [material.id]: {
           material,
           qty: 0,
-          custom: false
+          custom: false,
+          isSurplus: false
         }
       });
     }
@@ -215,24 +218,60 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     setLote('');
   };
 
-  const handleSuggestion = (id: string) => {
+  const handleUseSurplus = (id: string) => {
     const material = selectedMateriales[id].material;
-    const sum = (material.stock_devuelto || 0) + (material.stock_sobrante || 0);
-    setSelectedMateriales({
-      ...selectedMateriales,
-      [id]: {
-        ...selectedMateriales[id],
-        qty: sum,
-        custom: false
-      }
-    });
+    const surplus = material.stock_sobrante || 0;
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      `¿Desea usar el sobrante de ${surplus} unidades de ${material.nombre}? ` +
+      `(Stock disponible: ${material.stock_disponible || material.stock})`
+    );
+    if (confirmed) {
+      setSelectedMateriales({
+        ...selectedMateriales,
+        [id]: {
+          ...selectedMateriales[id],
+          qty: surplus,
+          custom: false,
+          isSurplus: true
+        }
+      });
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Validate stock availability
+    const validationPromises = Object.values(selectedMateriales).map(async (mat) => {
+      if (mat.isSurplus) {
+        const surplusStock = mat.material.stock_sobrante || 0;
+        if (mat.qty > surplusStock) {
+          return { valid: false, material: mat.material.nombre, requested: mat.qty, available: surplusStock, type: 'sobrante' };
+        }
+      } else {
+        const availableStock = mat.material.stock_disponible || mat.material.stock;
+        if (mat.qty > availableStock) {
+          return { valid: false, material: mat.material.nombre, requested: mat.qty, available: availableStock, type: 'disponible' };
+        }
+      }
+      return { valid: true };
+    });
+
+    const validationResults = await Promise.all(validationPromises);
+    const invalidResults = validationResults.filter(result => !result.valid);
+
+    if (invalidResults.length > 0) {
+      const messages = invalidResults.map(result => {
+        const stockType = result.type === 'sobrante' ? 'sobrante' : 'disponible';
+        return `${result.material}: solicitado ${result.requested}, ${stockType} ${result.available}`;
+      });
+      alert(`No hay suficiente stock para:\n${messages.join('\n')}`);
+      return;
+    }
+
     const data = {
       fecha: selectedDate,
       usuarios: selectedUsuarios.map(u => u.id),
-      materiales: Object.values(selectedMateriales).map(mat => ({ id: mat.material.id, nombre: mat.material.nombre, qty: mat.qty })),
+      materiales: Object.values(selectedMateriales).map(mat => ({ id: mat.material.id, nombre: mat.material.nombre, qty: mat.qty, isSurplus: mat.isSurplus })),
       categoria,
       descripcion,
       lote
@@ -312,11 +351,19 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                 <label className="block text-sm font-medium mb-2">Seleccionados</label>
                 <div className="space-y-2">
                   {Object.values(selectedMateriales).map((mat) => {
-                    const hasSuggestion = mat.material.stock_devuelto! > 0 || mat.material.stock_sobrante! > 0;
+                    const hasSurplus = (mat.material.stock_sobrante || 0) > 0;
+                    const availableStock = mat.material.stock_disponible || mat.material.stock;
+                    const isOverLimit = mat.qty > availableStock;
                     return (
                       <div key={mat.material.id} className="flex items-center gap-2 p-2 border rounded">
+                        <div className="flex-1">
+                          <div className="font-medium">{mat.material.nombre}</div>
+                          <div className="text-sm text-gray-600">
+                            Disponible: {availableStock} | Sobrante: {mat.material.stock_sobrante || 0}
+                          </div>
+                        </div>
                         <Button size="sm" onClick={() => handleSelectMaterial(mat.material)}>
-                          {mat.material.nombre}
+                          Remover
                         </Button>
                         <Input
                           type="number"
@@ -324,11 +371,16 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                           value={mat.qty.toString()}
                           onChange={(e) => handleQtyChange(mat.material.id, Number(e.target.value))}
                           size="sm"
-                          className="w-32"
+                          className={`w-32 ${isOverLimit ? 'border-red-500' : ''}`}
+                          min="0"
+                          max={availableStock}
                         />
-                        {hasSuggestion && (
-                          <Button size="sm" variant="ghost" onClick={() => handleSuggestion(mat.material.id)}>
-                            Sugerencia
+                        {isOverLimit && (
+                          <span className="text-red-500 text-sm">Excede stock disponible</span>
+                        )}
+                        {hasSurplus && (
+                          <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(mat.material.id)}>
+                            Usar Sobrante
                           </Button>
                         )}
                       </div>
