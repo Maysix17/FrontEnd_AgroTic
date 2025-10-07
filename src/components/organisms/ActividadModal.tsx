@@ -257,7 +257,9 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                 ))}
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Seleccionados</label>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Seleccionados</label>
+                </div>
                 <div className="space-y-2">
                   {Object.values(selectedMateriales).map((mat) => {
                     const hasSurplus = (mat.material.stock_sobrante || 0) > 0;
@@ -294,20 +296,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                           </Button>
                         )}
                       </div>
-                      <Button size="sm" onClick={() => handleSelectMaterial(mat.material)}>Remover</Button>
-                      <Input
-                        type="number"
-                        value={mat.qty.toString()}
-                        onChange={(e) => handleQtyChange(mat.material.id, Number(e.target.value))}
-                        size="sm"
-                        className={`w-32 ${overLimit ? "border-red-500" : ""}`}
-                        min={0}
-                        max={available}
-                      />
-                      {overLimit && <span className="text-red-500 text-sm">Excede stock</span>}
-                      {hasSurplus && <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(mat.material.id)}>Usar Sobrante</Button>}
-                    </div>
-                  );
+                    );
                 })}
               </div>
             </div>
