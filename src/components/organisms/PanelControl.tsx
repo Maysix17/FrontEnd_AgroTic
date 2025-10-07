@@ -5,7 +5,7 @@ import Table from '../atoms/Table';
 import AdminUserForm from './AdminUserForm';
 import CreateRoleModal from './CreateRoleModal';
 import ManageRolesModal from './ManageRolesModal';
-import apiClient from '../../lib/axios/axios';
+import userSearchService from '../../services/userSearchService';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 
 const PanelControl: React.FC = () => {
@@ -22,8 +22,7 @@ const PanelControl: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get(`/usuarios/search/dni/${searchInput}`);
-      const data = response.data;
+      const data = await userSearchService.searchByDni(searchInput);
       setResults(Array.isArray(data) ? data.slice(0, 8) : [data]);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al buscar usuario');

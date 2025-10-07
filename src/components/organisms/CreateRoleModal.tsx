@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Switch, Card, CardHeader, CardBody } from '@heroui/react';
-import apiClient from '../../lib/axios/axios';
+import { getModulos, createRole, updateRole, assignPermissionsToRole } from '../../services/rolesService';
 
 interface Modulo {
   id: string;
@@ -41,7 +41,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
       if (editingRole) {
         setRoleName(editingRole.nombre);
         // Pre-select permissions
-        const selectedPerms = new Set(editingRole.permisos.map((p: any) => p.id as string));
+        const selectedPerms = new Set<string>(editingRole.permisos.map((p: any) => p.id as string));
         setSelectedPermissions(selectedPerms);
         // Pre-select modules and resources based on permissions
         const selectedMods = new Set<string>();
@@ -63,8 +63,8 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
   const fetchModulos = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/modulos');
-      setModulos(response.data);
+      const data = await getModulos();
+      setModulos(data);
     } catch (error) {
       console.error('Error fetching modulos:', error);
     } finally {
@@ -127,17 +127,17 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
     try {
       if (editingRole) {
         // Update role
-        await apiClient.patch(`/roles/${editingRole.id}`, {
+        await updateRole(editingRole.id, {
           nombre: roleName,
           permisoIds: Array.from(selectedPermissions),
         });
       } else {
         // Create role
-        const roleResponse = await apiClient.post('/roles', { nombre: roleName });
-        const roleId = roleResponse.data.id;
+        const roleResponse = await createRole({ nombre: roleName });
+        const roleId = roleResponse.id;
 
         // Assign permissions
-        await apiClient.post(`/roles/${roleId}/permisos/multiple`, {
+        await assignPermissionsToRole(roleId, {
           permisoIds: Array.from(selectedPermissions),
         });
       }
