@@ -21,13 +21,3 @@ export interface UserInputsProps {
   telefono?: string;
   setTelefono?: (value: string) => void;
 }
-// Tipo para los errores de cada campo
-export type ErrorState = {
-  nombres?: string;
-  apellidos?: string;
-  dni?: string;
-  telefono?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-};

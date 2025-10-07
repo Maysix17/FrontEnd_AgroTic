@@ -1,5 +1,8 @@
-import React from "react";
-import type { FieldGridProps } from "../../types/FieldGridProps";
+import React from 'react';
+
+interface FieldGridProps {
+  children: React.ReactNode;
+}
 
 const FieldGrid: React.FC<FieldGridProps> = ({ children }) => {
   return (
