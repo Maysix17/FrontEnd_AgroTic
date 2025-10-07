@@ -1,5 +1,10 @@
-import React from "react";
-import type { InfoFieldProps } from "../../types/InfoFieldProps";
+import React from 'react';
+
+interface InfoFieldProps {
+  label: string;
+  value?: string | React.ReactNode;
+  full?: boolean;
+}
 
 const InfoField: React.FC<InfoFieldProps> = ({ label, value, full = false }) => {
   return (

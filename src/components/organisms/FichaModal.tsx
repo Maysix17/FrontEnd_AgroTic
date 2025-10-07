@@ -1,6 +1,11 @@
 import React from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
-import type { FichaModalProps } from '../../types/fichaModal.types';
+
+interface FichaModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  fichas: string[];
+}
 
 const FichaModal: React.FC<FichaModalProps> = ({ isOpen, onClose, fichas }) => {
   return (

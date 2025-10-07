@@ -1,6 +1,5 @@
 /**
- * Interface para el tipo Permiso.
- * Representa una acción o permiso específico que puede tener un rol.
+ * Interface for the Permission type.
  */
 export interface Permission {
   id: string;
@@ -8,18 +7,16 @@ export interface Permission {
 }
 
 /**
- * Interface para el tipo Rol.
- * Representa un rol de usuario (ej: Administrador, Aprendiz) e incluye sus permisos.
+ * Interface for the Role type.
  */
 export interface Role {
   id: string;
   nombre: string;
-  permisos?: Permission[]; // Opcional, lista de permisos asociados al rol
+  permisos: Permission[];
 }
 
 /**
- * Interface para el tipo Ficha.
- * Representa una ficha disponible para un aprendiz.
+ * Interface for the Ficha type.
  */
 export interface Ficha {
   id: string;
@@ -27,8 +24,7 @@ export interface Ficha {
 }
 
 /**
- * Interface para el tipo Usuario.
- * Representa un usuario completo en la aplicación.
+ * Interface for the User type.
  */
 export interface User {
   id: string;
@@ -37,35 +33,6 @@ export interface User {
   dni: string;
   correo: string;
   telefono: string;
-  rol: Role;      // Rol asociado al usuario
-  ficha?: Ficha;  // Ficha asignada (solo para aprendices)
+  rol: Role;
+  ficha?: Ficha;
 }
-
-/**
- * Interface para los datos del formulario de creación de usuario.
- */
-export interface AdminUserFormData {
-  nombres: string;
-  apellidos: string;
-  dni: string;
-  telefono: string;
-  correo: string;
-  password: string;
-  rolId: string;   // ID del rol seleccionado
-  fichaId: string; // ID de la ficha seleccionada (si aplica)
-}
-
-/**
- * Props para el componente AdminUserForm (modal/formulario).
- */
-export interface AdminUserFormProps {
-  isOpen: boolean;          // Indica si el modal está abierto
-  onClose: () => void;      // Función para cerrar el modal
-  onUserCreated: () => void; // Función que se ejecuta después de crear un usuario
-}
-
-/**
- * Tipo para los errores del formulario.
- * Clave: nombre del campo, Valor: mensaje de error correspondiente.
- */
-export type FormErrors = Record<string, string>;
