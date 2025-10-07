@@ -97,8 +97,10 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
 
 
   const fetchCategorias = async () => {
+    console.log('Fetching categorias');
     try {
       const data = await categoriaService.getAll();
+      console.log('Categorias fetched:', data);
       setCategorias(data);
     } catch (error) {
       console.error('Error fetching categorias:', error);
@@ -109,8 +111,10 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   useEffect(() => {
     const fetchFilteredUsuarios = async () => {
       if (debouncedUsuarioSearch.trim()) {
+        console.log('Searching usuarios:', debouncedUsuarioSearch);
         try {
           const data = await userSearchService.search(debouncedUsuarioSearch);
+          console.log('Usuarios found:', data.items);
           setFilteredUsuarios(data.items);
         } catch (error) {
           console.error('Error searching usuarios:', error);
@@ -127,8 +131,10 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   useEffect(() => {
     const fetchFilteredMateriales = async () => {
       if (debouncedMaterialSearch.trim()) {
+        console.log('Searching materiales:', debouncedMaterialSearch);
         try {
           const data = await inventoryService.search(debouncedMaterialSearch);
+          console.log('Materiales data:', data);
           const mapped = data.items.map((item: any) => ({
             id: item.id,
             nombre: item.nombre,
@@ -138,6 +144,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
             stock_devuelto: item.stock_devuelto || 0,
             stock_sobrante: item.stock_sobrante || 0,
           }));
+          console.log('Materiales mapped:', mapped);
           setFilteredMateriales(mapped);
         } catch (error) {
           console.error('Error searching materiales:', error);
@@ -154,8 +161,10 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   useEffect(() => {
     const fetchFilteredZonas = async () => {
       if (debouncedLoteSearch.trim()) {
+        console.log('Searching zonas:', debouncedLoteSearch);
         try {
           const data = await zoneSearchService.search(debouncedLoteSearch);
+          console.log('Zonas found:', data.items);
           setFilteredZonas(data.items);
         } catch (error) {
           console.error('Error searching zonas:', error);
@@ -240,6 +249,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   };
 
   const handleSave = async () => {
+    console.log('Starting save process');
     // Validate stock availability
     const validationPromises = Object.values(selectedMateriales).map(async (mat) => {
       if (mat.isSurplus) {
@@ -257,6 +267,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     });
 
     const validationResults = await Promise.all(validationPromises);
+    console.log('Validation results:', validationResults);
     const invalidResults = validationResults.filter(result => !result.valid);
 
     if (invalidResults.length > 0) {
@@ -276,6 +287,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       descripcion,
       lote
     };
+    console.log('Saving data:', data);
     onSave(data);
     onClose();
   };
@@ -361,12 +373,25 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                           Disponible: {available} | Sobrante: {mat.material.stock_sobrante ?? 0}
                         </div>
                       </div>
-                    );
+                      <Input
+                        type="number"
+                        placeholder="Qty"
+                        value={mat.qty.toString()}
+                        onChange={(e) => handleQtyChange(mat.material.id, parseInt(e.target.value) || 0)}
+                        className="w-20"
+                        min="0"
+                      />
+                      {hasSurplus && (
+                        <Button size="sm" onClick={() => handleUseSurplus(mat.material.id)}>
+                          Usar Sobrante
+                        </Button>
+                      )}
+                    </div>
+                  );
                   })}
                 </div>
               </div>
             </div>
-          </div>
 
           {/* Bottom Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
