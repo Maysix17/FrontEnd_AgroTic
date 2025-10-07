@@ -1,34 +1,37 @@
 import React, { useState } from "react";
 import CustomButton from "../atoms/Boton";
-import { recoverPassword } from "../../services/RecoverPasswordService"; // 👈 importamos el servicio
+import UserInputs from "../atoms/UserInputs"; 
+import { recoverPassword } from "../../services/RecoverPasswordService";
 
 const RecoverPasswordForm: React.FC = () => {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string>("");
+  const [errors, setErrors] = useState<{ email?: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({});
     setSuccessMessage("");
 
-    if (!email) {
-      setError("Por favor, ingresa tu correo electrónico.");
+    if (!email.trim()) {
+      setErrors({ email: "Por favor, ingresa tu correo electrónico." });
       return;
     }
 
     setIsLoading(true);
     try {
-      const data = await recoverPassword(email); //  usamos el servicio
+      const data = await recoverPassword(email);
       setSuccessMessage(
         data.message || "Se ha enviado un enlace de recuperación a tu correo."
       );
       setEmail("");
     } catch (error: any) {
-      setError(
-        error.response?.data?.message || "Error al intentar recuperar contraseña."
-      );
+      setErrors({
+        email:
+          error.response?.data?.message ||
+          "Error al intentar recuperar contraseña.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -36,18 +39,15 @@ const RecoverPasswordForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <input
-        type="email"
-        placeholder="Correo electrónico"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border rounded px-3 py-2 w-full"
-        disabled={isLoading}
-      />
+      {/* Usamos UserInputs solo con email */}
+      <UserInputs email={email} setEmail={setEmail} errors={errors} />
 
-      {error && <p className="text-center text-red-500 text-sm">{error}</p>}
-      {successMessage && <p className="text-center text-green-500 text-sm">{successMessage}</p>}
+      {/* Mensaje de éxito */}
+      {successMessage && (
+        <p className="text-center text-green-500 text-sm">{successMessage}</p>
+      )}
 
+      {/*Botón */}
       <CustomButton
         text="Enviar"
         type="submit"
@@ -59,3 +59,4 @@ const RecoverPasswordForm: React.FC = () => {
 };
 
 export default RecoverPasswordForm;
+

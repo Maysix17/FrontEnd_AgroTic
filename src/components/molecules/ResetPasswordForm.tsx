@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { ResetPasswordFormValues } from "../../types/ResetPasswordForm.types";
+import UserInputs from "../atoms/UserInputs"; 
 import CustomButton from "../atoms/Boton";
 import { resetPassword } from "../../services/ResetPasswordService";
 import { useSearchParams } from "react-router-dom";
@@ -9,37 +10,49 @@ const ResetPasswordForm: React.FC = () => {
     password: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  // Manejo de errores específicos por campo (para UserInputs)
+  const [errors, setErrors] = useState<{
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrors({});
     setSuccessMessage("");
-    if (!form.password || !form.confirmPassword) {
-      setError("Completa todos los campos.");
+
+    const newErrors: typeof errors = {};
+
+    if (!form.password) newErrors.password = "La contraseña es obligatoria.";
+    if (!form.confirmPassword)
+      newErrors.confirmPassword = "Debes confirmar la contraseña.";
+
+    if (form.password && form.confirmPassword && form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Las contraseñas no coinciden.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    if (form.password !== form.confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
+
     if (!token) {
       setError(
         "Token inválido o expirado. Por favor, solicita un nuevo enlace de recuperación."
       );
       return;
     }
+
     setIsLoading(true);
     try {
-      // Cambia aquí para enviar los nombres correctos al backend
       await resetPassword(token, form.password, form.confirmPassword);
       setSuccessMessage(
         "¡Contraseña actualizada correctamente! Ya puedes iniciar sesión."
@@ -56,28 +69,22 @@ const ResetPasswordForm: React.FC = () => {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <input
-        type="password"
-        name="password"
-        placeholder="Nueva contraseña"
-        value={form.password}
-        onChange={handleChange}
-        className="border rounded px-3 py-2 w-full"
-        disabled={isLoading}
+      {/* 🔹 Usa tu componente UserInputs para los campos */}
+      <UserInputs
+        password={form.password}
+        setPassword={(val) => setForm({ ...form, password: val })}
+        confirmPassword={form.confirmPassword}
+        setConfirmPassword={(val) => setForm({ ...form, confirmPassword: val })}
+        errors={errors}
       />
-      <input
-        type="password"
-        name="confirmPassword"
-        placeholder="Confirma contraseña"
-        value={form.confirmPassword}
-        onChange={handleChange}
-        className="border rounded px-3 py-2 w-full"
-        disabled={isLoading}
-      />
+
+      {/* Mensajes de error o éxito */}
       {error && <p className="text-center text-red-500 text-sm">{error}</p>}
       {successMessage && (
         <p className="text-center text-green-500 text-sm">{successMessage}</p>
       )}
+
+      {/* Botón */}
       <CustomButton
         text="Cambiar contraseña"
         type="submit"

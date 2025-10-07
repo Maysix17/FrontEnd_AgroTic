@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
@@ -26,21 +25,15 @@ const CultivosPage: React.FC = () => {
   const [selectedFichas, setSelectedFichas] = useState<string[]>([]);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
 
-  // Función de búsqueda unificada (utiliza el endpoint POST /cultivos/search)
   const handleSearch = async () => {
     await handleSearchWithFilters(filters);
   };
 
-  // No cargar datos inicialmente - tabla vacía hasta que el usuario busque
-  useEffect(() => {
-    // Tabla inicia vacía
-  }, []);
-
+  useEffect(() => {}, []);
 
   const handleFilterChange = (key: keyof SearchCultivoDto, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-    // Auto-search when filters change
     handleSearchWithFilters(newFilters);
   };
 
@@ -58,16 +51,15 @@ const CultivosPage: React.FC = () => {
 
   const handleDateRangeChange = (dates: [Date | null, Date | null]) => {
     const [startDate, endDate] = dates;
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      fecha_inicio: startDate ? startDate.toISOString().split('T')[0] : undefined,
-      fecha_fin: endDate ? endDate.toISOString().split('T')[0] : undefined,
+      fecha_inicio: startDate ? startDate.toISOString().split("T")[0] : undefined,
+      fecha_fin: endDate ? endDate.toISOString().split("T")[0] : undefined,
     }));
   };
 
   const clearFilters = () => {
     setFilters({});
-    // Al limpiar filtros, tabla queda vacía
     setCultivos([]);
   };
 
@@ -82,7 +74,7 @@ const CultivosPage: React.FC = () => {
   };
 
   const handleOpenFichaModal = (fichaString: string) => {
-    const fichas = fichaString.split(',').map(f => f.trim()).filter(f => f);
+    const fichas = fichaString.split(",").map((f) => f.trim()).filter((f) => f);
     setSelectedFichas(fichas);
     setIsFichaModalOpen(true);
   };
@@ -91,263 +83,233 @@ const CultivosPage: React.FC = () => {
     const dataToExport = cultivo ? [cultivo] : cultivos;
 
     if (dataToExport.length === 0) {
-      alert('No hay datos para exportar');
+      alert("No hay datos para exportar");
       return;
     }
 
-    // Crear contenido HTML para Excel
-    const headers = ['Ficha', 'Lote', 'Nombre del Cultivo', 'Fecha de Siembra', 'Fecha de Cosecha'];
+    const headers = ["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha"];
     const htmlContent = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta charset="utf-8">
-        <title>Cultivos Export</title>
-        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Cultivos</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-      </head>
+      <head><meta charset="utf-8"><title>Cultivos Export</title></head>
       <body>
         <table border="1">
-          <thead>
-            <tr>
-              ${headers.map(header => `<th>${header}</th>`).join('')}
-            </tr>
-          </thead>
+          <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
           <tbody>
-            ${dataToExport.map(cultivo => `
+            ${dataToExport
+              .map(
+                (cultivo) => `
               <tr>
                 <td>${cultivo.ficha}</td>
                 <td>${cultivo.lote}</td>
                 <td>${cultivo.nombrecultivo}</td>
-                <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : 'Sin fecha'}</td>
-                <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : 'Sin cosecha'}</td>
+                <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha"}</td>
+                <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha"}</td>
               </tr>
-            `).join('')}
+            `
+              )
+              .join("")}
           </tbody>
         </table>
       </body>
       </html>
     `;
 
-    // Crear blob y descargar
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
-    const link = document.createElement('a');
+    const blob = new Blob([htmlContent], { type: "application/vnd.ms-excel" });
+    const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
+    link.setAttribute("href", url);
     const fileName = cultivo
-      ? `cultivo_${cultivo.ficha}_${new Date().toISOString().split('T')[0]}.xls`
-      : `cultivos_${new Date().toISOString().split('T')[0]}.xls`;
-    link.setAttribute('download', fileName);
-    link.style.visibility = 'hidden';
+      ? `cultivo_${cultivo.ficha}_${new Date().toISOString().split("T")[0]}.xls`
+      : `cultivos_${new Date().toISOString().split("T")[0]}.xls`;
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Header with title and action buttons */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
-        <div className="flex gap-2">
-          <CustomButton
-            label="Exportar Todos"
-            onClick={() => exportToExcel()}
-          />
-          <CustomButton
-            label="Registrar Tipo de Cultivo"
-            onClick={() => setIsTipoCultivoModalOpen(true)}
-          />
-          <CustomButton
-            label="Registrar Variedad"
-            onClick={() => setIsVariedadModalOpen(true)}
-          />
-        </div>
-      </div>
-
-      {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Filtros de Búsqueda</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Zone Search */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Buscar por Zona</label>
-            <InputSearch
-              placeholder="Nombre de zona..."
-              value={filters.buscar || ""}
-              onChange={(e) => handleFilterChange("buscar", e.target.value)}
-            />
-          </div>
-
-          {/* Crop Search */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Buscar por Cultivo</label>
-            <InputSearch
-              placeholder="Nombre de variedad o tipo..."
-              value={filters.buscar_cultivo || ""}
-              onChange={(e) => handleFilterChange("buscar_cultivo", e.target.value)}
-            />
-          </div>
-
-          {/* Date Range */}
-          <div>
-            <DateRangeInput
-              label="Rango de Fechas"
-              onChange={handleDateRangeChange}
-            />
-          </div>
-
-          {/* Titled User */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Buscar por Ficha</label>
-            <InputSearch
-              placeholder="Número de ficha..."
-              // Asegúrate de manejar la entrada del input correctamente (e.target.value)
-              value={filters.id_titulado || ""}
-              onChange={(e) => handleFilterChange("id_titulado", e.target.value)}
-            />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className="block text-sm font-medium mb-4 ">Estado del Cultivo</label>
-            <select
-              className="w-64 border border-gray-300 rounded-xl  h-10"
-              value={filters.estado_cultivo ?? ""}
-              onChange={(e) => handleFilterChange("estado_cultivo", e.target.value ? parseInt(e.target.value) : undefined)}
-            >
-              <option value="">Todos</option>
-              <option value="1">En Curso</option>
-              <option value="0">Finalizado</option>
-            </select>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 items-center mt-6">
-            <CustomButton
-              label="Buscar"
-              onClick={handleSearch}
-            />
-            <button
-              onClick={clearFilters}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-            >
-              Limpiar
-            </button>
+    <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 p-0 m-0 overflow-y-auto">
+      {/* Contenido interno */}
+      <div className="flex flex-col flex-grow gap-6 p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
+          <div className="flex gap-2 flex-wrap">
+            <CustomButton label="Exportar Todos" onClick={() => exportToExcel()} />
+            <CustomButton label="Registrar Tipo de Cultivo" onClick={() => setIsTipoCultivoModalOpen(true)} />
+            <CustomButton label="Registrar Variedad" onClick={() => setIsVariedadModalOpen(true)} />
           </div>
         </div>
-      </div>
 
-      {/* Results Table */}
-      <div className="bg-white rounded-lg shadow-md">
-        <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Resultados ({cultivos.length})</h2>
+        {/* Filtros */}
+        <div className="bg-white p-4 rounded-lg shadow-md">
+          <h2 className="text-lg font-semibold mb-4">Filtros de Búsqueda</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Buscar por Zona</label>
+              <InputSearch
+                placeholder="Nombre de zona..."
+                value={filters.buscar || ""}
+                onChange={(e) => handleFilterChange("buscar", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Buscar por Cultivo</label>
+              <InputSearch
+                placeholder="Nombre de variedad o tipo..."
+                value={filters.buscar_cultivo || ""}
+                onChange={(e) => handleFilterChange("buscar_cultivo", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <DateRangeInput label="Rango de Fechas" onChange={handleDateRangeChange} />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Buscar por Ficha</label>
+              <InputSearch
+                placeholder="Número de ficha..."
+                value={filters.id_titulado || ""}
+                onChange={(e) => handleFilterChange("id_titulado", e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-4">Estado del Cultivo</label>
+              <select
+                className="w-full border border-gray-300 rounded-xl h-10"
+                value={filters.estado_cultivo ?? ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "estado_cultivo",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              >
+                <option value="">Todos</option>
+                <option value="1">En Curso</option>
+                <option value="0">Finalizado</option>
+              </select>
+            </div>
+
+            <div className="flex gap-2 items-center mt-6">
+              <CustomButton label="Buscar" onClick={handleSearch} />
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              >
+                Limpiar
+              </button>
+            </div>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="p-8 text-center">Cargando...</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <Table headers={["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha", "Actividades", "Finanzas", "Cosecha/Venta", "Exportar"]}>
-              {cultivos.map((cultivo, index) => (
-                <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-2">
-                    <CustomButton
-                      label="Ver Fichas"
-                      onClick={() => handleOpenFichaModal(cultivo.ficha)}
-                      size="sm"
-                      variant="bordered"
-                    />
-                  </td>
-                  <td className="px-4 py-2">{cultivo.lote}</td>
+        {/* Tabla */}
+        <div className="bg-white rounded-lg shadow-md flex-grow overflow-hidden">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-semibold">Resultados ({cultivos.length})</h2>
+          </div>
 
-                  <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
-
-                  <td className="px-4 py-2">
-                    {cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : 'Sin fecha'}
-                  </td>
-                  <td className="px-4 py-2">
-                    {cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : 'Sin cosecha'}
-                  </td>
-                  <td className="px-4 py-2">
-                    <CustomButton
-                      label="Actividades"
-                      onClick={() => {}}
-                      size="sm"
-                      variant="bordered"
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    <CustomButton
-                      label="Financiero"
-                      onClick={() => {}}
-                      size="sm"
-                      variant="bordered"
-                    />
-                  </td>
-                  <td className="px-4 py-2">
-                    {cultivo.estado === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center">Cargando...</div>
+          ) : (
+            <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-350px)]">
+              <Table
+                headers={[
+                  "Ficha",
+                  "Lote",
+                  "Nombre del Cultivo",
+                  "Fecha de Siembra",
+                  "Fecha de Cosecha",
+                  "Actividades",
+                  "Finanzas",
+                  "Cosecha/Venta",
+                  "Exportar",
+                ]}
+              >
+                {cultivos.map((cultivo, index) => (
+                  <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2">
                       <CustomButton
-                        label="Registrar Venta"
-                        onClick={() => handleOpenVentaModal(cultivo)}
+                        label="Ver Fichas"
+                        onClick={() => handleOpenFichaModal(cultivo.ficha)}
                         size="sm"
+                        variant="bordered"
                       />
-                    ) : (
+                    </td>
+                    <td className="px-4 py-2">{cultivo.lote}</td>
+                    <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
+                    <td className="px-4 py-2">
+                      {cultivo.fechasiembra
+                        ? new Date(cultivo.fechasiembra).toLocaleDateString()
+                        : "Sin fecha"}
+                    </td>
+                    <td className="px-4 py-2">
+                      {cultivo.fechacosecha
+                        ? new Date(cultivo.fechacosecha).toLocaleDateString()
+                        : "Sin cosecha"}
+                    </td>
+                    <td className="px-4 py-2">
+                      <CustomButton label="Actividades" onClick={() => {}} size="sm" variant="bordered" />
+                    </td>
+                    <td className="px-4 py-2">
+                      <CustomButton label="Financiero" onClick={() => {}} size="sm" variant="bordered" />
+                    </td>
+                    <td className="px-4 py-2">
+                      {cultivo.estado === 0 ? (
+                        <CustomButton
+                          label="Registrar Venta"
+                          onClick={() => handleOpenVentaModal(cultivo)}
+                          size="sm"
+                        />
+                      ) : (
+                        <CustomButton
+                          label="Registrar Cosecha"
+                          onClick={() => handleOpenCosechaModal(cultivo)}
+                          size="sm"
+                        />
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
                       <CustomButton
-                        label="Registrar Cosecha"
-                        onClick={() => handleOpenCosechaModal(cultivo)}
+                        label="Exportar"
+                        onClick={() => exportToExcel(cultivo)}
                         size="sm"
+                        variant="bordered"
                       />
-                    )}
-                  </td>
-                  <td className="px-4 py-2">
-                    <CustomButton
-                      label="Exportar"
-                      onClick={() => exportToExcel(cultivo)}
-                      size="sm"
-                      variant="bordered"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </Table>
-          </div>
-        )}
+                    </td>
+                  </tr>
+                ))}
+              </Table>
+            </div>
+          )}
 
-        {cultivos.length === 0 && !loading && (
-          <div className="p-8 text-center text-gray-500">
-            No se encontraron cultivos con los filtros aplicados.
-          </div>
-        )}
+          {cultivos.length === 0 && !loading && (
+            <div className="p-8 text-center text-gray-500">
+              No se encontraron cultivos con los filtros aplicados.
+            </div>
+          )}
+        </div>
       </div>
 
-      <TipoCultivoModal
-        isOpen={isTipoCultivoModalOpen}
-        onClose={() => setIsTipoCultivoModalOpen(false)}
-      />
-
-      <VariedadModal
-        isOpen={isVariedadModalOpen}
-        onClose={() => setIsVariedadModalOpen(false)}
-      />
-
+      {/* Modales */}
+      <TipoCultivoModal isOpen={isTipoCultivoModalOpen} onClose={() => setIsTipoCultivoModalOpen(false)} />
+      <VariedadModal isOpen={isVariedadModalOpen} onClose={() => setIsVariedadModalOpen(false)} />
       <CosechaModal
         isOpen={isCosechaModalOpen}
         onClose={() => setIsCosechaModalOpen(false)}
-        cvzId={selectedCultivo?.cvzid || ''}
-        onSuccess={() => {
-          handleSearch(); // Refresh the search results
-        }}
+        cvzId={selectedCultivo?.cvzid || ""}
+        onSuccess={handleSearch}
       />
-
       <VentaModal
         isOpen={isVentaModalOpen}
         onClose={() => setIsVentaModalOpen(false)}
         cultivo={selectedCultivo}
-        onSuccess={() => {
-          handleSearch(); // Refresh the search results
-        }}
+        onSuccess={handleSearch}
       />
-
       <FichaModal
         isOpen={isFichaModalOpen}
         onClose={() => setIsFichaModalOpen(false)}
