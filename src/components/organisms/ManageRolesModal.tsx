@@ -2,8 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/react';
 import { getRoles, deleteRole } from '../../services/rolesService';
 import CreateRoleModal from './CreateRoleModal';
-import type { Role } from '../../types/roles.types';
-import type { ManageRolesModalProps } from '../../types/ManageRolesModalProps.types';
+
+interface Role {
+  id: string;
+  nombre: string;
+  permisos: any[];
+}
+
+interface ManageRolesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -46,7 +55,7 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
   };
 
   const handleRoleCreated = () => {
-    fetchRoles();
+    fetchRoles(); // Refresh list
     setEditingRole(null);
     setIsCreateModalOpen(false);
   };
@@ -98,7 +107,7 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
         isOpen={isCreateModalOpen}
         onClose={handleCreateModalClose}
         onRoleCreated={handleRoleCreated}
-        editingRole={editingRole} 
+        editingRole={editingRole}
       />
     </>
   );

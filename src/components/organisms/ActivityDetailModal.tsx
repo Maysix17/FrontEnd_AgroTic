@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Select, SelectItem, Input, Textarea } from '@heroui/react';
-import type { Activity, ActivityDetailModalProps } from '../../types/activity';
+
+interface Activity {
+  id: string;
+  descripcion: string;
+  categoriaActividad: { nombre: string };
+  cultivoVariedadZona: {
+    zona: { nombre: string };
+    cultivoXVariedad: { cultivo: { nombre: string } };
+  };
+  usuarios_x_actividades?: { usuario: { numero_documento: number; nombres: string; apellidos: string } }[];
+  inventario_x_actividades?: { inventario: { nombre: string }; cantidadUsada: number }[];
+}
+
+interface ActivityDetailModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activity: Activity | null;
+  onUpdate: (id: string, data: any) => void;
+  onDelete: (id: string) => void;
+  onFinalize: (activity: Activity) => void;
+}
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
   isOpen,
@@ -54,7 +74,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               <div className="space-y-2 max-h-40 overflow-auto">
                 {activity.usuarios_x_actividades?.map((uxa, idx) => (
                   <div key={idx} className="p-2 border rounded">
-                    {uxa.usuario.numero_documento} - {uxa.usuario.nombres} {uxa.usuario.apellidos}
+                    {uxa.usuario.numero_documento}
                   </div>
                 )) || <p className="text-gray-500">No hay aprendices</p>}
               </div>
@@ -73,7 +93,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Fichas */}
+            {/* Fichas - Placeholder */}
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Fichas</h3>
               <div className="space-y-2 max-h-40 overflow-auto">
@@ -87,11 +107,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Categoria de la actividad</label>
-                <Select
-                  selectedKeys={[categoria]}
-                  onSelectionChange={(keys) => setCategoria(Array.from(keys)[0] as string)}
-                  disabled={!isEditing}
-                >
+                <Select selectedKeys={[categoria]} onSelectionChange={(keys) => setCategoria(Array.from(keys)[0] as string)} disabled={!isEditing}>
                   <SelectItem key="Siembra">Siembra</SelectItem>
                   <SelectItem key="Cosecha">Cosecha</SelectItem>
                   <SelectItem key="Fertilización">Fertilización</SelectItem>
@@ -102,7 +118,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                 <Input value={ubicacion} disabled />
               </div>
             </div>
-
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Descripción</label>

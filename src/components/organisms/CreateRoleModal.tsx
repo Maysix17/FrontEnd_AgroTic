@@ -43,10 +43,10 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
         // Pre-select permissions
         const selectedPerms = new Set<string>(editingRole.permisos.map((p: any) => p.id as string));
         setSelectedPermissions(selectedPerms);
-
+        // Pre-select modules and resources based on permissions
         const selectedMods = new Set<string>();
         const selectedRes = new Set<string>();
-        editingRole.permisos.forEach((perm) => {
+        editingRole.permisos.forEach((perm: any) => {
           if (perm.recurso && perm.recurso.modulo) {
             selectedMods.add(perm.recurso.modulo.id);
             selectedRes.add(perm.recurso.id);
@@ -78,11 +78,16 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
       newSelected.add(moduleId);
     } else {
       newSelected.delete(moduleId);
+      // Remove associated resources and permissions
       const module = modulos.find(m => m.id === moduleId);
-      module?.recursos.forEach(recurso => {
-        selectedResources.delete(recurso.id);
-        recurso.permisos.forEach(permiso => selectedPermissions.delete(permiso.id));
-      });
+      if (module) {
+        module.recursos.forEach(recurso => {
+          selectedResources.delete(recurso.id);
+          recurso.permisos.forEach(permiso => {
+            selectedPermissions.delete(permiso.id);
+          });
+        });
+      }
     }
     setSelectedModules(newSelected);
   };
@@ -93,8 +98,13 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
       newSelected.add(resourceId);
     } else {
       newSelected.delete(resourceId);
+      // Remove associated permissions
       const recurso = modulos.flatMap(m => m.recursos).find(r => r.id === resourceId);
-      recurso?.permisos.forEach(permiso => selectedPermissions.delete(permiso.id));
+      if (recurso) {
+        recurso.permisos.forEach(permiso => {
+          selectedPermissions.delete(permiso.id);
+        });
+      }
     }
     setSelectedResources(newSelected);
   };
@@ -110,7 +120,8 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
   };
 
   const handleCreateRole = async () => {
-    if (!roleName.trim() || selectedPermissions.size === 0) return;
+    if (!roleName.trim()) return;
+    if (selectedPermissions.size === 0) return;
 
     setCreating(true);
     try {

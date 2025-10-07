@@ -1,14 +1,21 @@
 import React from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
-import type { Activity, ActivityListModalProps } from '../../types/activity';
 
-const ActivityListModal: React.FC<ActivityListModalProps> = ({
-  isOpen,
-  onClose,
-  activities,
-  onSelectActivity,
-  onRegisterNew,
-}) => {
+interface Activity {
+  id: string;
+  descripcion: string;
+  categoriaActividad: { nombre: string };
+}
+
+interface ActivityListModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activities: Activity[];
+  onSelectActivity: (activity: Activity) => void;
+  onRegisterNew: () => void;
+}
+
+const ActivityListModal: React.FC<ActivityListModalProps> = ({ isOpen, onClose, activities, onSelectActivity, onRegisterNew }) => {
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="md">
       <ModalContent>
