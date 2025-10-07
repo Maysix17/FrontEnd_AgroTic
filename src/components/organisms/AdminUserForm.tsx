@@ -3,25 +3,10 @@ import { Modal, ModalContent } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import apiClient from '../../lib/axios/axios';
 import Swal from 'sweetalert2';
-
-interface Role {
-  id: string;
-  nombre: string;
-}
-
-interface Ficha {
-  id: string;
-  numero: number;
-}
-
-interface AdminUserFormProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onUserCreated: () => void;
-}
+import type { Role, Ficha, AdminUserFormData, AdminUserFormProps, FormErrors } from '../../types/user';
 
 const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCreated }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AdminUserFormData>({
     nombres: '',
     apellidos: '',
     dni: '',
@@ -35,7 +20,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
   const [roles, setRoles] = useState<Role[]>([]);
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -66,10 +51,10 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
-    // Clear ficha if role changes and is not Aprendiz
+    // Limpiar ficha si cambia el rol y no es Aprendiz
     if (name === 'rolId') {
       const selectedRole = roles.find(r => r.id === value);
-      if (selectedRole?.nombre !== 'Aprendiz') {
+      if (selectedRole?.nombre.toLowerCase() !== 'aprendiz') {
         setFormData(prev => ({ ...prev, fichaId: '' }));
       }
     }
@@ -79,7 +64,6 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
-
 
     try {
       await apiClient.post('/usuarios/register', formData);
@@ -106,7 +90,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
         const messages = Array.isArray(error.response.data.message)
           ? error.response.data.message
           : [error.response.data.message];
-        const newErrors: Record<string, string> = {};
+        const newErrors: FormErrors = {};
         messages.forEach((msg: string) => {
           if (msg.toLowerCase().includes('correo')) newErrors.correo = msg;
           else if (msg.toLowerCase().includes('dni')) newErrors.dni = msg;
@@ -157,6 +141,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.apellidos && <p className="text-red-500 text-sm mt-1">{errors.apellidos}</p>}
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
@@ -183,6 +168,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
             <input
@@ -195,6 +181,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
             />
             {errors.correo && <p className="text-red-500 text-sm mt-1">{errors.correo}</p>}
           </div>
+
           <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-700">
               <strong>Nota:</strong> La contraseña se establecerá automáticamente como el DNI del usuario.
@@ -217,6 +204,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
             </select>
             {errors.rolId && <p className="text-red-500 text-sm mt-1">{errors.rolId}</p>}
           </div>
+
           {showFichaField && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ficha</label>
@@ -235,7 +223,9 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.fichaId && <p className="text-red-500 text-sm mt-1">{errors.fichaId}</p>}
             </div>
           )}
+
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
+
           <div className="flex justify-end space-x-2">
             <CustomButton onClick={onClose} variant="light">Cancelar</CustomButton>
             <CustomButton

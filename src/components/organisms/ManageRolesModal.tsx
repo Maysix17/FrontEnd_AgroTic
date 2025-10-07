@@ -2,17 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/react';
 import apiClient from '../../lib/axios/axios';
 import CreateRoleModal from './CreateRoleModal';
-
-interface Role {
-  id: string;
-  nombre: string;
-  permisos: any[];
-}
-
-interface ManageRolesModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { Role } from '../../types/roles.types';
+import type { ManageRolesModalProps } from '../../types/ManageRolesModalProps.types';
 
 const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -48,14 +39,14 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
 
     try {
       await apiClient.delete(`/roles/${roleId}`);
-      fetchRoles(); // Refresh list
+      fetchRoles();
     } catch (error) {
       console.error('Error deleting role:', error);
     }
   };
 
   const handleRoleCreated = () => {
-    fetchRoles(); // Refresh list
+    fetchRoles();
     setEditingRole(null);
     setIsCreateModalOpen(false);
   };
@@ -107,7 +98,7 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
         isOpen={isCreateModalOpen}
         onClose={handleCreateModalClose}
         onRoleCreated={handleRoleCreated}
-        editingRole={editingRole}
+        editingRole={editingRole} 
       />
     </>
   );

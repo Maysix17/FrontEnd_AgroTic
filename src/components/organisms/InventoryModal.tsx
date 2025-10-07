@@ -4,17 +4,11 @@ import CustomButton from '../atoms/Boton';
 import ImageUpload from '../atoms/ImagenUpload';
 import Swal from 'sweetalert2';
 import { inventoryService } from '../../services/inventoryService';
-import type { Categoria, Bodega, InventoryItem } from '../../services/inventoryService';
-
-interface InventoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onInventoryCreated: () => void;
-  editItem?: InventoryItem | null;
-}
+import type { InventoryModalProps, Categoria, Bodega } from '../../types/inventoryModal.types';
 
 const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInventoryCreated, editItem }) => {
   const isEdit = !!editItem;
+
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
@@ -36,6 +30,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
     if (isOpen) {
       fetchCategorias();
       fetchBodegas();
+
       if (editItem) {
         setFormData({
           nombre: editItem.nombre,
@@ -44,9 +39,10 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
           precio: editItem.precio.toString(),
           capacidadUnidad: editItem.capacidadUnidad?.toString() || '',
           fechaVencimiento: editItem.fechaVencimiento || '',
-          fkCategoriaId: editItem.fkCategoriaId,
-          fkBodegaId: editItem.fkBodegaId,
+          fkCategoriaId: editItem.categoria?.id || '',
+          fkBodegaId: editItem.bodega?.id || '',
         });
+        setSelectedFile(null);
       } else {
         setFormData({
           nombre: '',
@@ -86,9 +82,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
-  };
+  const handleFileSelect = (file: File) => setSelectedFile(file);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +90,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
     setErrors({});
 
     try {
-      const data = {
+      const data: any = {
         nombre: formData.nombre,
         descripcion: formData.descripcion || undefined,
         stock: parseInt(formData.stock),
@@ -125,6 +119,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
           confirmButtonText: 'Aceptar',
         });
       }
+
       onInventoryCreated();
       onClose();
       setFormData({
@@ -139,11 +134,9 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
       });
       setSelectedFile(null);
     } catch (error: any) {
+      const newErrors: Record<string, string> = {};
       if (error.response?.data?.message) {
-        const messages = Array.isArray(error.response.data.message)
-          ? error.response.data.message
-          : [error.response.data.message];
-        const newErrors: Record<string, string> = {};
+        const messages = Array.isArray(error.response.data.message) ? error.response.data.message : [error.response.data.message];
         messages.forEach((msg: string) => {
           if (msg.toLowerCase().includes('nombre')) newErrors.nombre = msg;
           else if (msg.toLowerCase().includes('stock')) newErrors.stock = msg;
@@ -152,10 +145,10 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
           else if (msg.toLowerCase().includes('bodega')) newErrors.fkBodegaId = msg;
           else newErrors.general = msg;
         });
-        setErrors(newErrors);
       } else {
-        setErrors({ general: 'Error al crear el inventario.' });
+        newErrors.general = 'Error al crear el inventario.';
       }
+      setErrors(newErrors);
     } finally {
       setIsLoading(false);
     }
@@ -192,6 +185,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
               {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
@@ -218,6 +212,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
               />
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Descripción (opcional)</label>
             <input
@@ -228,6 +223,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Vencimiento (opcional)</label>
             <input
@@ -238,6 +234,7 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
@@ -249,8 +246,8 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
                 required
               >
                 <option value="">Seleccionar categoría</option>
-                {categorias.map(categoria => (
-                  <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
+                {categorias.map(c => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
                 ))}
               </select>
               {errors.fkCategoriaId && <p className="text-red-500 text-sm mt-1">{errors.fkCategoriaId}</p>}
@@ -265,18 +262,21 @@ const InventoryModal: React.FC<InventoryModalProps> = ({ isOpen, onClose, onInve
                 required
               >
                 <option value="">Seleccionar bodega</option>
-                {bodegas.map(bodega => (
-                  <option key={bodega.id} value={bodega.id}>{bodega.nombre}</option>
+                {bodegas.map(b => (
+                  <option key={b.id} value={b.id}>{b.nombre}</option>
                 ))}
               </select>
               {errors.fkBodegaId && <p className="text-red-500 text-sm mt-1">{errors.fkBodegaId}</p>}
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Imagen (opcional)</label>
             <ImageUpload onFileSelect={handleFileSelect} />
           </div>
+
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
+
           <div className="flex justify-end space-x-2">
             <Button onClick={onClose} variant="light">Cancelar</Button>
             <CustomButton

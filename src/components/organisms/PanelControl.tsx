@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import InputSearch from '../atoms/buscador';
 import CustomButton from '../atoms/Boton';
 import Table from '../atoms/Table';
+import MobileCard from '../atoms/MobileCard';
+import type { CardField, CardAction } from '../../types/MobileCard.types';
 import AdminUserForm from './AdminUserForm';
 import CreateRoleModal from './CreateRoleModal';
 import ManageRolesModal from './ManageRolesModal';
@@ -45,26 +47,29 @@ const PanelControl: React.FC = () => {
     }
   };
 
-  const headers = ['N. de documento', 'Nombres', 'Apellidos', 'Correo Electrónico', 'Teléfono', 'ID Ficha', 'Rol', 'Acciones'];
-
   return (
     <div className="bg-white shadow-lg rounded-lg p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Panel de Control</h1>
-        <div className="space-x-2 flex items-center">
+       {/* Header */}
+       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2 md:gap-0">
+        <h1 className="text-xl md:text-2xl font-bold mb-2 md:mb-0">Panel de Control</h1>
+        <div className="flex flex-col md:flex-row gap-2 md:gap-2 w-full md:w-auto items-start md:items-center flex-wrap md:flex-nowrap ml-auto">
           <Dropdown>
             <DropdownTrigger>
-              <Button variant="bordered">Gestión de roles</Button>
+              <Button variant="bordered" className="px-2 py-1 md:px-4 md:py-2">Gestión de roles</Button>
             </DropdownTrigger>
             <DropdownMenu aria-label="Gestión de roles">
               <DropdownItem key="create" onClick={() => setIsRoleModalOpen(true)}>Crear nuevo rol</DropdownItem>
               <DropdownItem key="manage" onClick={() => setIsManageRolesModalOpen(true)}>Gestionar roles</DropdownItem>
             </DropdownMenu>
           </Dropdown>
-          <CustomButton onClick={() => setIsUserFormOpen(true)}>Nuevo Usuario</CustomButton>
+          <CustomButton
+          label="Nuevo Usuario"
+          onClick={() => setIsUserFormOpen(true)}
+          size="sm"
+          className="px-2 py-1 md:px-4 md:py-2"/>
         </div>
-      </div>
+    </div>
+
 
       {/* Search */}
       <div className="mb-4 flex gap-2 items-center">
@@ -77,49 +82,86 @@ const PanelControl: React.FC = () => {
         <CustomButton variant="solid" onClick={handleSearch}>Buscar</CustomButton>
       </div>
 
-      {/* Table */}
-      {loading ? (
-        <div className="text-center py-4">Cargando...</div>
-      ) : error ? (
-        <div className="text-center py-4 text-red-500">{error}</div>
-      ) : (
-        <Table headers={headers}>
-          {results.map((user, index) => (
-            <tr key={index} className="border-b">
-              <td className="px-4 py-2">{user.numero_documento}</td>
-              <td className="px-4 py-2">{user.nombres}</td>
-              <td className="px-4 py-2">{user.apellidos}</td>
-              <td className="px-4 py-2">{user.correo_electronico}</td>
-              <td className="px-4 py-2">{user.telefono}</td>
-              <td className="px-4 py-2">{user.id_ficha}</td>
-              <td className="px-4 py-2">
-                <span className={`px-2 py-1 rounded text-sm ${getBadgeClass(user.rol)}`}>
-                  {user.rol}
-                </span>
-              </td>
-              <td className="px-4 py-2 space-x-2">
-                <CustomButton variant="bordered">Editar</CustomButton>
-                <CustomButton variant="bordered">Eliminar</CustomButton>
-              </td>
-            </tr>
-          ))}
-        </Table>
-      )}
+      {/* Desktop Table */}
+      <div className="hidden md:block">
+        {loading ? (
+          <div className="text-center py-4">Cargando...</div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">{error}</div>
+        ) : (
+          <Table headers={['N. de documento','Nombres','Apellidos','Correo Electrónico','Teléfono','ID Ficha','Rol','Acciones']}>
+            {results.map((user, index) => (
+              <tr key={index} className="border-b">
+                <td className="px-4 py-2">{user.numero_documento}</td>
+                <td className="px-4 py-2">{user.nombres}</td>
+                <td className="px-4 py-2">{user.apellidos}</td>
+                <td className="px-4 py-2">{user.correo_electronico}</td>
+                <td className="px-4 py-2">{user.telefono}</td>
+                <td className="px-4 py-2">{user.id_ficha}</td>
+                <td className="px-4 py-2">
+                  <span className={`px-2 py-1 rounded text-sm ${getBadgeClass(user.rol)}`}>
+                    {user.rol}
+                  </span>
+                </td>
+                <td className="px-4 py-2 space-x-2">
+                  <CustomButton variant="bordered">Editar</CustomButton>
+                  <CustomButton variant="bordered">Eliminar</CustomButton>
+                </td>
+              </tr>
+            ))}
+          </Table>
+        )}
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden">
+        {loading ? (
+          <div className="text-center py-4">Cargando...</div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">{error}</div>
+        ) : results.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">No se encontraron resultados.</div>
+        ) : (
+          results.map((user, index) => {
+            const fields: CardField[] = [
+              { label: 'DNI', value: user.numero_documento },
+              { label: 'Nombres', value: user.nombres },
+              { label: 'Apellidos', value: user.apellidos },
+              { label: 'Correo', value: user.correo_electronico },
+              { label: 'Teléfono', value: user.telefono },
+              { label: 'ID Ficha', value: user.id_ficha },
+              { label: 'Rol', value: <span className={`px-2 py-1 rounded text-sm ${getBadgeClass(user.rol)}`}>{user.rol}</span> },
+            ];
+
+            const actions: CardAction[] = [
+              {
+                label: 'Editar',
+                onClick: () => {}, // Aquí puedes abrir formulario de edición
+                size: 'sm',
+              },
+              {
+                label: 'Eliminar',
+                onClick: () => {}, // Aquí abrir confirmación
+                variant: 'bordered',
+                size: 'sm',
+              },
+            ];
+
+            return <MobileCard key={user.numero_documento || index} fields={fields} actions={actions} />;
+          })
+        )}
+      </div>
 
       <AdminUserForm
         isOpen={isUserFormOpen}
         onClose={() => setIsUserFormOpen(false)}
-        onUserCreated={() => {
-          // Optionally refresh the list or show a message
-        }}
+        onUserCreated={() => {}}
       />
 
       <CreateRoleModal
         isOpen={isRoleModalOpen}
         onClose={() => setIsRoleModalOpen(false)}
-        onRoleCreated={() => {
-          // Optionally refresh roles or show message
-        }}
+        onRoleCreated={() => {}}
       />
 
       <ManageRolesModal

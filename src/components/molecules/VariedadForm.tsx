@@ -3,16 +3,9 @@ import TextInput from "../atoms/TextInput";
 import CustomButton from "../atoms/Boton";
 import type { VariedadData } from "../../types/variedad.types";
 import type { TipoCultivoData } from "../../types/tipoCultivo.types";
-import {
-  registerVariedad,
-  updateVariedad,
-} from "../../services/variedad";
+import type { VariedadFormProps } from "../../types/VariedadFormProps";
+import { registerVariedad, updateVariedad } from "../../services/variedad";
 import { getTipoCultivos } from "../../services/tipoCultivo";
-
-interface VariedadFormProps {
-  editData?: VariedadData | null;
-  onSuccess?: () => void;
-}
 
 const VariedadForm: React.FC<VariedadFormProps> = ({ editData, onSuccess }) => {
   const [variedadData, setVariedadData] = useState<VariedadData>({

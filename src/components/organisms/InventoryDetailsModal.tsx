@@ -1,15 +1,7 @@
 import React from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
-import type { InventoryItem } from '../../services/inventoryService';
-
-interface InventoryDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item: InventoryItem | null;
-  onEdit: (item: InventoryItem) => void;
-  onDelete: (id: string) => void;
-}
+import type { InventoryDetailsModalProps } from '../../types/inventoryModal.types';
 
 const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, onClose, item, onEdit, onDelete }) => {
   if (!item) return null;
@@ -17,7 +9,7 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="2xl">
       <ModalContent className="bg-white p-6 relative">
-        {/* Edit and Delete buttons in top right */}
+        {/* Botones Editar y Eliminar */}
         <div className="absolute top-4 right-4 flex space-x-2">
           <CustomButton
             text="Editar"
@@ -45,6 +37,7 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
               <p className="mt-1 text-gray-900">{item.stock}</p>
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Precio</label>
@@ -55,14 +48,17 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
               <p className="mt-1 text-gray-900">{item.capacidadUnidad || '-'}</p>
             </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Descripción</label>
             <p className="mt-1 text-gray-900">{item.descripcion || '-'}</p>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
             <p className="mt-1 text-gray-900">{item.fechaVencimiento || '-'}</p>
           </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Categoría</label>
@@ -73,6 +69,7 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
               <p className="mt-1 text-gray-900">{item.bodega?.nombre || '-'}</p>
             </div>
           </div>
+
           {item.imgUrl && (
             <div>
               <label className="block text-sm font-medium text-gray-700">Imagen</label>
@@ -84,6 +81,7 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
             </div>
           )}
         </div>
+
         <div className="flex justify-end mt-6">
           <Button onClick={onClose} variant="light">Cerrar</Button>
         </div>

@@ -1,20 +1,12 @@
+// File: src/components/organisms/RegisterForm.tsx
 import React, { useState } from "react";
 import CustomButton from "../atoms/Boton";
 import UserInputs from "../atoms/UserInputs";
 import type { RegisterFormProps } from "../../types/Register";
 import type { RegisterFormData } from "../../types/Auth";
+import type { RegisterErrors } from "../../types/RegisterErrors";
 import { registerUser } from "../../services/authService";
-import Swal from "sweetalert2"; 
-type ErrorState = {
-  nombres?: string;
-  apellidos?: string;
-  dni?: string;
-  telefono?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  general?: string;
-};
+import Swal from "sweetalert2";
 
 const RegisterForm: React.FC<RegisterFormProps> = () => {
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -26,7 +18,7 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
     password: "",
   });
 
-  const [errors, setErrors] = useState<ErrorState>({});
+  const [errors, setErrors] = useState<RegisterErrors>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,15 +29,25 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
     try {
       const data = await registerUser(formData);
 
+      // Detectar si es móvil
+      const isMobile = window.innerWidth < 640;
+
       Swal.fire({
         icon: "success",
         title: "¡Registro exitoso!",
-        text: data.message || "Usuario registrado correctamente",
+        text: data?.message || "Usuario registrado correctamente",
         confirmButtonText: "Iniciar sesión",
-        confirmButtonColor: "#16a34a", 
+        width: isMobile ? "80%" : "450px",
+        padding: isMobile ? "0.8rem" : "1.5rem",
+        customClass: {
+          title: isMobile ? "text-base" : "text-xl",
+          confirmButton: isMobile
+            ? "px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700"
+            : "px-5 py-2 text-base bg-green-600 hover:bg-green-700",
+        },
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = "/login"; 
+          window.location.href = "/login";
         }
       });
 
@@ -59,7 +61,7 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
         password: "",
       });
     } catch (err: any) {
-      let newErrors: ErrorState = {};
+      let newErrors: RegisterErrors = {};
 
       if (err.response?.data) {
         const data = err.response.data;
@@ -110,7 +112,7 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
       <CustomButton
         text={isLoading ? "Registrando..." : "Registrarse"}
         type="submit"
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"
+        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400 text-sm sm:text-base"
         disabled={isLoading}
       />
     </form>
@@ -118,7 +120,3 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
 };
 
 export default RegisterForm;
-
-
-
-

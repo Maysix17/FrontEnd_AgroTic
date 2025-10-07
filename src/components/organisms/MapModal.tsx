@@ -1,17 +1,7 @@
 import React from "react";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-} from "@heroui/react";
-
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/react";
 import MapForm from "../molecules/MapForm";
-
-interface MapModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { MapModalProps } from "../../types/MapModal";
 
 const MapModal: React.FC<MapModalProps> = ({ isOpen, onClose }) => {
   return (
@@ -22,7 +12,6 @@ const MapModal: React.FC<MapModalProps> = ({ isOpen, onClose }) => {
             <ModalHeader>
               <h2 className="text-lg font-bold">Registrar Mapa</h2>
             </ModalHeader>
-
             <ModalBody>
               <MapForm />
             </ModalBody>
@@ -34,3 +23,4 @@ const MapModal: React.FC<MapModalProps> = ({ isOpen, onClose }) => {
 };
 
 export default MapModal;
+
