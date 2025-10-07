@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import InputSearch from '../components/atoms/buscador';
 import CustomButton from '../components/atoms/Boton';
 import Table from '../components/atoms/Table';
+import MobileCard from '../components/atoms/MobileCard';
+import type { CardField, CardAction } from '../types/MobileCard.types';
 import InventoryModal from '../components/organisms/InventoryModal';
 import { inventoryService } from '../services/inventoryService';
 import type { InventoryItem } from '../services/inventoryService';
@@ -121,58 +123,117 @@ const InventoryPage: React.FC = () => {
         <CustomButton variant="solid" onClick={handleSearch}>Buscar</CustomButton>
       </div>
 
-      {/* Table */}
-      {loading ? (
-        <div className="text-center py-4">Cargando...</div>
-      ) : error ? (
-        <div className="text-center py-4 text-red-500">{error}</div>
-      ) : (
-        <>
-          <Table headers={headers}>
-            {results.map((item, index) => (
-              <tr key={item.id || index} className="border-b">
-                <td className="px-4 py-2">{item.nombre}</td>
-                <td className="px-4 py-2">{item.stock}</td>
-                <td className="px-4 py-2">${item.precio}</td>
-                <td className="px-4 py-2">{item.categoria?.nombre || '-'}</td>
-                <td className="px-4 py-2">{item.bodega?.nombre || '-'}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => {
-                      setSelectedItem(item);
-                      setIsDetailsModalOpen(true);
-                    }}
-                    className="text-blue-500 hover:text-blue-700"
-                  >
-                    <EyeIcon className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </Table>
+      {/* Desktop Table */}
+      <div className="hidden md:block">
+        {loading ? (
+          <div className="text-center py-4">Cargando...</div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">{error}</div>
+        ) : (
+          <>
+            <Table headers={headers}>
+              {results.map((item, index) => (
+                <tr key={item.id || index} className="border-b">
+                  <td className="px-4 py-2">{item.nombre}</td>
+                  <td className="px-4 py-2">{item.stock}</td>
+                  <td className="px-4 py-2">${item.precio}</td>
+                  <td className="px-4 py-2">{item.categoria?.nombre || '-'}</td>
+                  <td className="px-4 py-2">{item.bodega?.nombre || '-'}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsDetailsModalOpen(true);
+                      }}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <EyeIcon className="w-5 h-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </Table>
 
-          {/* Pagination */}
-          {total > limit && (
-            <div className="flex justify-between items-center mt-4">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-              >
-                Anterior
-              </button>
-              <span>Página {currentPage} de {totalPages}</span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-              >
-                Siguiente
-              </button>
-            </div>
-          )}
-        </>
-      )}
+            {/* Pagination */}
+            {total > limit && (
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+                <span>Página {currentPage} de {totalPages}</span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden">
+        {loading ? (
+          <div className="text-center py-4">Cargando...</div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">{error}</div>
+        ) : results.length === 0 ? (
+          <div className="text-center py-4 text-gray-500">No se encontraron resultados.</div>
+        ) : (
+          <>
+            {results.map((item, index) => {
+              const fields: CardField[] = [
+                { label: 'Nombre', value: item.nombre },
+                { label: 'Stock', value: item.stock.toString() },
+                { label: 'Precio', value: `$${item.precio}` },
+                { label: 'Categoría', value: item.categoria?.nombre || '-' },
+                { label: 'Bodega', value: item.bodega?.nombre || '-' },
+              ];
+
+              const actions: CardAction[] = [
+                {
+                  label: 'Ver más',
+                  onClick: () => {
+                    setSelectedItem(item);
+                    setIsDetailsModalOpen(true);
+                  },
+                  size: 'sm',
+                },
+              ];
+
+              return <MobileCard key={item.id || index} fields={fields} actions={actions} />;
+            })}
+
+            {/* Pagination */}
+            {total > limit && (
+              <div className="flex justify-between items-center mt-4">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+                <span>Página {currentPage} de {totalPages}</span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
 
       <InventoryModal
         isOpen={isInventoryModalOpen}

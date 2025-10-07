@@ -3,6 +3,8 @@ import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
 import DateRangeInput from "../components/atoms/DateRangeInput";
 import Table from "../components/atoms/Table";
+import MobileCard from "../components/atoms/MobileCard";
+import type { CardField, CardAction } from "../types/MobileCard.types";
 import { useNavigate } from "react-router-dom";
 import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
@@ -207,8 +209,8 @@ const CultivosPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabla */}
-        <div className="bg-white rounded-lg shadow-md flex-grow overflow-hidden">
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-white rounded-lg shadow-md flex-grow overflow-hidden">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold">Resultados ({cultivos.length})</h2>
           </div>
@@ -290,6 +292,66 @@ const CultivosPage: React.FC = () => {
           {cultivos.length === 0 && !loading && (
             <div className="p-8 text-center text-gray-500">
               No se encontraron cultivos con los filtros aplicados.
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden bg-white rounded-lg shadow-md flex-grow overflow-hidden">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-semibold">Resultados ({cultivos.length})</h2>
+          </div>
+
+          {loading ? (
+            <div className="p-8 text-center">Cargando...</div>
+          ) : cultivos.length === 0 ? (
+            <div className="p-8 text-center text-gray-500">
+              No se encontraron cultivos con los filtros aplicados.
+            </div>
+          ) : (
+            <div className="p-4 space-y-4">
+              {cultivos.map((cultivo, index) => {
+                const fields: CardField[] = [
+                  { label: 'Lote', value: cultivo.lote },
+                  { label: 'Nombre del Cultivo', value: cultivo.nombrecultivo },
+                  { label: 'Fecha de Siembra', value: cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha" },
+                  { label: 'Fecha de Cosecha', value: cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha" },
+                ];
+
+                const actions: CardAction[] = [
+                  {
+                    label: 'Ver Fichas',
+                    onClick: () => handleOpenFichaModal(cultivo.ficha),
+                    size: 'sm',
+                    variant: 'bordered',
+                  },
+                  {
+                    label: 'Actividades',
+                    onClick: () => {},
+                    size: 'sm',
+                    variant: 'bordered',
+                  },
+                  {
+                    label: 'Financiero',
+                    onClick: () => {},
+                    size: 'sm',
+                    variant: 'bordered',
+                  },
+                  {
+                    label: cultivo.estado === 0 ? 'Registrar Venta' : 'Registrar Cosecha',
+                    onClick: () => cultivo.estado === 0 ? handleOpenVentaModal(cultivo) : handleOpenCosechaModal(cultivo),
+                    size: 'sm',
+                  },
+                  {
+                    label: 'Exportar',
+                    onClick: () => exportToExcel(cultivo),
+                    size: 'sm',
+                    variant: 'bordered',
+                  },
+                ];
+
+                return <MobileCard key={`${cultivo.cvzid}-${index}`} fields={fields} actions={actions} />;
+              })}
             </div>
           )}
         </div>
