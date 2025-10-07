@@ -12,7 +12,6 @@ const InputSearch: React.FC<InputSearchProps> = ({ placeholder, value, onChange,
             onKeyDown={onKeyDown}
             startContent={<MagnifyingGlassIcon className="w-4 h-4 text-gray-400" />}
             size="md"
-            variant="bordered"
             className="w-64 py-3"
         />
     );
