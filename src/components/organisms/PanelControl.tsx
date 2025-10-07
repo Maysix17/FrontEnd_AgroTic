@@ -51,9 +51,9 @@ const PanelControl: React.FC = () => {
   return (
     <div className="bg-white shadow-lg rounded-lg p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Panel de Control</h1>
-        <div className="space-x-2 flex items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
+        <h1 className="text-2xl font-bold text-left whitespace-nowrap">Panel de Control</h1>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
           <Dropdown>
             <DropdownTrigger>
               <Button variant="bordered">Gestión de roles</Button>
