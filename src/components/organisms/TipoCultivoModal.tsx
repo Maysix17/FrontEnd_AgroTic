@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
 import TipoCultivoForm from '../molecules/CultivoForm';
-import type { TipoCultivoData } from '../../types/tipoCultivo.types';
-import {
-  getTipoCultivos,
-  updateTipoCultivo,
-  deleteTipoCultivo,
-} from '../../services/tipoCultivo';
 import Table from '../atoms/Table';
 import CustomButton from '../atoms/Boton';
-
-interface TipoCultivoModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import type { TipoCultivoData } from '../../types/tipoCultivo.types';
+import type { TipoCultivoModalProps } from '../../types/tipoCultivo.types';
+import { getTipoCultivos, deleteTipoCultivo } from '../../services/tipoCultivo';
 
 const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) => {
   const [cultivos, setCultivos] = useState<TipoCultivoData[]>([]);
@@ -21,9 +13,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
   const [message, setMessage] = useState<string>('');
 
   useEffect(() => {
-    if (isOpen) {
-      fetchCultivos();
-    }
+    if (isOpen) fetchCultivos();
   }, [isOpen]);
 
   const fetchCultivos = async () => {
@@ -35,10 +25,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  const handleEdit = (cultivo: TipoCultivoData) => {
-    setEditId(cultivo.id!);
-    // Note: The form will handle the edit logic
-  };
+  const handleEdit = (cultivo: TipoCultivoData) => setEditId(cultivo.id!);
 
   const handleDelete = async (id: string) => {
     if (confirm('¿Seguro que deseas eliminar este tipo de cultivo?')) {
@@ -46,7 +33,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
         await deleteTipoCultivo(id);
         fetchCultivos();
         setMessage('Eliminado con éxito');
-      } catch (err) {
+      } catch {
         setMessage('Error al eliminar');
       }
     }

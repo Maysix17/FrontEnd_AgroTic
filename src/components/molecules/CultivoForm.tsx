@@ -2,12 +2,8 @@ import React, { useState, useEffect } from "react";
 import TextInput from "../atoms/TextInput";
 import CustomButton from "../atoms/Boton";
 import type { TipoCultivoData } from "../../types/tipoCultivo.types";
+import type { TipoCultivoFormProps } from "../../types/TipoCultivoFormProps";
 import { registerTipoCultivo, updateTipoCultivo, getTipoCultivos } from "../../services/tipoCultivo";
-
-interface TipoCultivoFormProps {
-  editId?: string | null;
-  onSuccess?: () => void;
-}
 
 const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) => {
   const [tipoCultivoData, setTipoCultivoData] = useState<TipoCultivoData>({
@@ -17,7 +13,6 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
 
   useEffect(() => {
     if (editId) {
-      // Fetch the item to edit
       const fetchItem = async () => {
         try {
           const data = await getTipoCultivos();
@@ -26,7 +21,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
             setTipoCultivoData({ nombre: item.nombre });
           }
         } catch (err) {
-          console.error('Error fetching item:', err);
+          console.error("Error fetching item:", err);
         }
       };
       fetchItem();
@@ -37,7 +32,6 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (editId) {
         await updateTipoCultivo(editId, tipoCultivoData);

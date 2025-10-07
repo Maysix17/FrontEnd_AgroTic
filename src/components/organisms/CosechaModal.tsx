@@ -2,15 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import TextInput from '../atoms/TextInput';
-import type { CreateCosechaDto } from '../../types/cosechas.types';
+import type { CosechaModalProps, CreateCosechaDto } from '../../types/CosechaModal.types';
 import { createCosecha } from '../../services/cosechasService';
-
-interface CosechaModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  cvzId: string;
-  onSuccess: () => void;
-}
 
 const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onSuccess }) => {
   const [formData, setFormData] = useState<CreateCosechaDto>({
@@ -19,6 +12,7 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     fecha: '',
     fkCultivosVariedadXZonaId: cvzId,
   });
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -82,7 +76,7 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
               />
             </div>
           </ModalBody>
-          <ModalFooter>
+          <ModalFooter className="flex justify-end gap-2">
             <CustomButton type="button" onClick={onClose} variant="bordered">
               Cancelar
             </CustomButton>

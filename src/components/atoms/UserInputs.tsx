@@ -1,16 +1,6 @@
 import React from "react";
 import TextInput from "../atoms/TextInput";
-import type { UserInputsProps } from "../../types/UserInputsProps";
-
-type ErrorState = {
-  nombres?: string;
-  apellidos?: string;
-  dni?: string;
-  telefono?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-};
+import type { UserInputsProps, ErrorState } from "../../types/UserInputsProps";
 
 const UserInputs: React.FC<UserInputsProps & { errors?: ErrorState }> = ({
   dni, setDni,
