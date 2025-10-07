@@ -1,30 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Switch, Card, CardHeader, CardBody } from '@heroui/react';
-import { getModulos, createRole, updateRole, assignPermissionsToRole } from '../../services/rolesService';
-
-interface Modulo {
-  id: string;
-  nombre: string;
-  recursos: Recurso[];
-}
-
-interface Recurso {
-  id: string;
-  nombre: string;
-  permisos: Permiso[];
-}
-
-interface Permiso {
-  id: string;
-  accion: string;
-}
-
-interface CreateRoleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onRoleCreated: () => void;
-  editingRole?: any;
-}
+import { 
+  Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, 
+  Button, Input, Switch, Card, CardHeader, CardBody 
+} from '@heroui/react';
+import apiClient from '../../lib/axios/axios';
+import type { 
+  CreateRoleModalProps, Modulo, Recurso, Permiso, Role, PermisoWithRecurso 
+} from '../../types/roles.types';
 
 const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRoleCreated, editingRole }) => {
   const [roleName, setRoleName] = useState('');
@@ -40,8 +22,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
       fetchModulos();
       if (editingRole) {
         setRoleName(editingRole.nombre);
-        // Pre-select permissions
-        const selectedPerms = new Set<string>(editingRole.permisos.map((p: any) => p.id as string));
+        const selectedPerms = new Set(editingRole.permisos.map((p) => p.id));
         setSelectedPermissions(selectedPerms);
 
         const selectedMods = new Set<string>();
@@ -63,8 +44,8 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
   const fetchModulos = async () => {
     setLoading(true);
     try {
-      const data = await getModulos();
-      setModulos(data);
+      const response = await apiClient.get<Modulo[]>('/modulos');
+      setModulos(response.data);
     } catch (error) {
       console.error('Error fetching modulos:', error);
     } finally {
@@ -115,18 +96,15 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
     setCreating(true);
     try {
       if (editingRole) {
-        // Update role
-        await updateRole(editingRole.id, {
+        await apiClient.patch(`/roles/${editingRole.id}`, {
           nombre: roleName,
           permisoIds: Array.from(selectedPermissions),
         });
       } else {
-        // Create role
-        const roleResponse = await createRole({ nombre: roleName });
-        const roleId = roleResponse.id;
+        const roleResponse = await apiClient.post('/roles', { nombre: roleName });
+        const roleId = roleResponse.data.id;
 
-        // Assign permissions
-        await assignPermissionsToRole(roleId, {
+        await apiClient.post(`/roles/${roleId}/permisos/multiple`, {
           permisoIds: Array.from(selectedPermissions),
         });
       }

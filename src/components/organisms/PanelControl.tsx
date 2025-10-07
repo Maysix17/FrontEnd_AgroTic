@@ -7,7 +7,7 @@ import type { CardField, CardAction } from '../../types/MobileCard.types';
 import AdminUserForm from './AdminUserForm';
 import CreateRoleModal from './CreateRoleModal';
 import ManageRolesModal from './ManageRolesModal';
-import userSearchService from '../../services/userSearchService';
+import apiClient from '../../lib/axios/axios';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button } from '@heroui/react';
 
 const PanelControl: React.FC = () => {
@@ -24,7 +24,8 @@ const PanelControl: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await userSearchService.searchByDni(searchInput);
+      const response = await apiClient.get(`/usuarios/search/dni/${searchInput}`);
+      const data = response.data;
       setResults(Array.isArray(data) ? data.slice(0, 8) : [data]);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Error al buscar usuario');

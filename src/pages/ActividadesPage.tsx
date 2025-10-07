@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
+import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import DatePicker from 'react-datepicker';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -9,19 +9,6 @@ import ActividadModal from '../components/organisms/ActividadModal';
 import ActivityListModal from '../components/organisms/ActivityListModal';
 import ActivityDetailModal from '../components/organisms/ActivityDetailModal';
 import FinalizeActivityModal from '../components/organisms/FinalizeActivityModal';
-import {
-  getActividadesByDateRange,
-  getActividadesCountByDate,
-  getActividadesByDate,
-  createActividad,
-  updateActividad,
-  deleteActividad,
-  uploadActividadEvidence,
-  createUsuarioXActividad,
-  createInventarioXActividad,
-  createMovimiento
-} from '../services/actividadesService';
-import { getZonaByNombre, getZonaCultivosVariedadXZona } from '../services/cultivosService';
 
 const localizer = dateFnsLocalizer({
   format,
@@ -38,26 +25,60 @@ const ActividadesPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDate, setModalDate] = useState(new Date());
   const [isListModalOpen, setIsListModalOpen] = useState(false);
-  const [activities, setActivities] = useState<any[]>([]);
+  const [activities, setActivities] = useState([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
   const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
-  const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
 
   useEffect(() => {
     fetchEvents(selectedDate);
   }, [selectedDate]);
 
+  const CustomEvent = ({ event }: any) => {
+    return (
+      <div className="flex items-center justify-between p-1 bg-blue-100 rounded text-xs">
+        <span className="truncate">{event.title}</span>
+        <div className="flex gap-1">
+          <button
+            className="bg-green-500 text-white px-1 rounded text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedActivity(event.resource);
+              setIsDetailModalOpen(true);
+            }}
+          >
+            Ver
+          </button>
+          <button
+            className="bg-red-500 text-white px-1 rounded text-xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedActivity(event.resource);
+              setIsFinalizeModalOpen(true);
+            }}
+          >
+            Finalizar
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const fetchEvents = async (date: Date) => {
     const start = startOfMonth(date);
     const end = endOfMonth(date);
     const startStr = start.toISOString().split('T')[0];
     const endStr = end.toISOString().split('T')[0];
+    const token = localStorage.getItem('token');
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
     try {
-      const activities = await getActividadesByDateRange(startStr, endStr);
+      const response = await fetch(`http://localhost:3000/actividades/by-date-range?start=${startStr}&end=${endStr}`, { headers });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const activities = await response.json();
       const formattedEvents = activities.map((activity: any) => ({
         id: activity.id,
         title: activity.descripcion || 'Actividad',
@@ -66,25 +87,9 @@ const ActividadesPage: React.FC = () => {
         resource: activity,
       }));
       setEvents(formattedEvents);
-
-      // Fetch activity counts for the month
-      const daysInMonth = eachDayOfInterval({ start, end });
-      const countsPromises = daysInMonth.map(async (day) => {
-        const dateStr = format(day, 'yyyy-MM-dd');
-        try {
-          const count = await getActividadesCountByDate(dateStr);
-          return { dateStr, count };
-        } catch {
-          return { dateStr, count: 0 };
-        }
-      });
-      const countsArray = await Promise.all(countsPromises);
-      const countsObj = countsArray.reduce((acc, curr) => ({ ...acc, [curr.dateStr]: curr.count }), {});
-      setActivityCounts(countsObj);
     } catch (error) {
       console.error('Error fetching events:', error);
       setEvents([]);
-      setActivityCounts({});
     }
   };
 
@@ -114,40 +119,27 @@ const ActividadesPage: React.FC = () => {
           defaultView="month"
           date={selectedDate}
           onNavigate={(date) => setSelectedDate(date)}
-          events={[]}
-          components={{
-            event: () => null,
-            showMore: () => null,
-            dateCellWrapper: ({ children, value }) => {
-              const dateStr = format(value, 'yyyy-MM-dd');
-              const count = activityCounts[dateStr] || 0;
-              const today = new Date();
-              const isToday = format(value, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-              const isOffRange = value.getMonth() !== selectedDate.getMonth();
-              return (
-                <div
-                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-green-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''}`}
-                  style={{ minHeight: '80px' }}
-                >
-                  {children}
-                  {count > 0 && (
-                    <div className="absolute top-1 left-3 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {count}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-          }}
+          events={events}
+          components={{ event: CustomEvent }}
           onSelectSlot={async (slotInfo) => {
             const dateStr = slotInfo.start.toISOString().split('T')[0];
+            const token = localStorage.getItem('token');
+            const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
 
             try {
-              const count = await getActividadesCountByDate(dateStr);
+              const countResponse = await fetch(`http://localhost:3000/actividades/count-by-date/${dateStr}`, { headers });
+              if (!countResponse.ok) {
+                throw new Error(`HTTP error! status: ${countResponse.status}`);
+              }
+              const count = await countResponse.json();
 
               if (count > 0) {
                 // Fetch activities and open list modal
-                const activitiesData = await getActividadesByDate(dateStr);
+                const activitiesResponse = await fetch(`http://localhost:3000/actividades/by-date/${dateStr}`, { headers });
+                if (!activitiesResponse.ok) {
+                  throw new Error(`HTTP error! status: ${activitiesResponse.status}`);
+                }
+                const activitiesData = await activitiesResponse.json();
                 setActivities(activitiesData);
                 setIsListModalOpen(true);
               } else {
@@ -186,12 +178,24 @@ const ActividadesPage: React.FC = () => {
         selectedDate={modalDate}
         onSave={async (data) => {
           try {
+            const getAuthHeaders = (): Record<string, string> => {
+              const token = localStorage.getItem('token');
+              return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+            };
+
             // Find CVZ for the selected lote (zone)
-            const zone = await getZonaByNombre(data.lote);
-            if (!zone) throw new Error('Zona no encontrada');
+            const zonesResponse = await fetch(`http://localhost:3000/zonas?nombre=${data.lote}`, {
+              headers: getAuthHeaders(),
+            });
+            const zones = await zonesResponse.json();
+            if (zones.length === 0) throw new Error('Zona no encontrada');
+            const zoneId = zones[0].id;
 
             // Find CVZ for the zone
-            const cvzs = await getZonaCultivosVariedadXZona(zone.id);
+            const cvzResponse = await fetch(`http://localhost:3000/zonas/${zoneId}/cultivos-variedad-zona`, {
+              headers: getAuthHeaders(),
+            });
+            const cvzs = await cvzResponse.json();
             if (cvzs.length === 0) throw new Error('No hay cultivos en esta zona');
 
             const actividadData = {
@@ -200,35 +204,49 @@ const ActividadesPage: React.FC = () => {
               horasDedicadas: 8, // default
               observacion: data.descripcion,
               estado: true,
-              fkCultivoVariedadZonaId: cvzs[0].cvzId,
+              fkCultivoVariedadZonaId: cvzs[0].id,
               fkCategoriaActividadId: data.categoria,
             };
 
-            const actividad = await createActividad(actividadData);
+            const response = await fetch('http://localhost:3000/actividades', {
+              method: 'POST',
+              headers: getAuthHeaders(),
+              body: JSON.stringify(actividadData),
+            });
+            const actividad = await response.json();
 
             // Save users
-             for (const userId of data.usuarios) {
-               await createUsuarioXActividad({ fkUsuarioId: userId, fkActividadId: actividad.id, fechaAsignacion: data.fecha });
-             }
+            for (const userId of data.usuarios) {
+              await fetch('http://localhost:3000/usuarios-x-actividades', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ fkUsuarioId: userId, fkActividadId: actividad.id }),
+              });
+            }
 
             // Save materials and movements
-            console.log('Processing materials:', data.materiales);
             for (const mat of data.materiales) {
-               console.log('Processing material:', mat);
-               await createInventarioXActividad({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty });
-               console.log('InventarioXActividad created for:', mat.id);
+              await fetch('http://localhost:3000/inventario-x-actividades', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty }),
+              });
 
-               // Create movement for reservation or surplus usage
-               if (mat.isSurplus) {
-                 console.log('Creating surplus movement for:', mat.id, 'quantity:', mat.qty);
-                 await createMovimiento({ fkInventarioId: mat.id, stockReservadoSobrante: mat.qty });
-                 console.log('Surplus movement created');
-               } else {
-                 console.log('Creating regular movement for:', mat.id, 'quantity:', mat.qty);
-                 await createMovimiento({ fkInventarioId: mat.id, stockReservado: mat.qty });
-                 console.log('Regular movement created');
-               }
-             }
+              // Create movement for reservation or surplus usage
+              if (mat.isSurplus) {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify({ fkInventarioId: mat.id, stockDevueltoSobrante: -mat.qty }),
+                });
+              } else {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify({ fkInventarioId: mat.id, stockReservado: mat.qty }),
+                });
+              }
+            }
 
             alert('Actividad guardada exitosamente');
           } catch (error) {
@@ -259,8 +277,14 @@ const ActividadesPage: React.FC = () => {
         onClose={() => setIsDetailModalOpen(false)}
         activity={selectedActivity}
         onUpdate={async (id, data) => {
+          const token = localStorage.getItem('token');
+          const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
           try {
-            await updateActividad(id, data);
+            await fetch(`http://localhost:3000/actividades/${id}`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify(data),
+            });
             alert('Actividad actualizada');
             setIsDetailModalOpen(false);
           } catch (error) {
@@ -269,8 +293,13 @@ const ActividadesPage: React.FC = () => {
           }
         }}
         onDelete={async (id) => {
+          const token = localStorage.getItem('token');
+          const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
           try {
-            await deleteActividad(id);
+            await fetch(`http://localhost:3000/actividades/${id}`, {
+              method: 'DELETE',
+              headers,
+            });
             alert('Actividad eliminada');
             setIsDetailModalOpen(false);
           } catch (error) {
@@ -290,39 +319,50 @@ const ActividadesPage: React.FC = () => {
         onClose={() => setIsFinalizeModalOpen(false)}
         activity={selectedActivity}
         onSave={async (data) => {
+          const token = localStorage.getItem('token');
+          const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+
           try {
             let imgUrl = '';
             if (data.evidence) {
-              const uploadData = await uploadActividadEvidence(data.evidence);
+              const formData = new FormData();
+              formData.append('file', data.evidence);
+              const uploadResponse = await fetch('http://localhost:3000/actividades/upload', {
+                method: 'POST',
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                body: formData,
+              });
+              const uploadData = await uploadResponse.json();
               imgUrl = uploadData.url;
             }
 
             // Update actividad with imgUrl and finalize
-            await updateActividad(data.activityId, { imgUrl, estado: false }); // finalized
+            await fetch(`http://localhost:3000/actividades/${data.activityId}`, {
+              method: 'PATCH',
+              headers,
+              body: JSON.stringify({ imgUrl, estado: false }), // finalized
+            });
 
-            // Release reservations and create returns/surplus movements
-            for (const ixa of selectedActivity.inventario_x_actividades || []) {
-              const invId = ixa.inventario.id;
-              const usedQty = ixa.cantidadUsada;
-              const returnedQty = data.returns[invId] || 0;
-              const surplusQty = data.surplus[invId] || 0;
-
-              // Release reservation (negative stockReservado)
-              await createMovimiento({ fkInventarioId: invId, stockReservado: -usedQty });
-
-              // Create return movement if any
-              if (returnedQty > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevuelto: returnedQty });
+            // Create movements for returns
+            for (const [invId, qty] of Object.entries(data.returns)) {
+              if ((qty as number) > 0) {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({ fkInventarioId: invId, stockDevuelto: qty }),
+                });
               }
+            }
 
-              // Create surplus movement if any
-              if (surplusQty > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevueltoSobrante: surplusQty });
+            // Create movements for surplus stock
+            for (const [invId, qty] of Object.entries(data.surplus)) {
+              if ((qty as number) > 0) {
+                await fetch('http://localhost:3000/movimientos', {
+                  method: 'POST',
+                  headers,
+                  body: JSON.stringify({ fkInventarioId: invId, stockDevueltoSobrante: qty }),
+                });
               }
-
-              // Release surplus reservation (negative stockReservadoSobrante)
-              // Since surplus is considered used when activity is finalized, release the reservation
-              await createMovimiento({ fkInventarioId: invId, stockReservadoSobrante: -usedQty });
             }
 
             alert('Actividad finalizada');
@@ -333,7 +373,6 @@ const ActividadesPage: React.FC = () => {
           }
         }}
       />
-
     </div>
   );
 };

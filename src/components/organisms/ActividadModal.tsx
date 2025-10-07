@@ -256,43 +256,19 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                   </button>
                 ))}
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Seleccionados</label>
-                <div className="space-y-2">
-                  {Object.values(selectedMateriales).map((mat) => {
-                    const hasSurplus = (mat.material.stock_sobrante || 0) > 0;
-                    const availableStock = mat.material.stock_disponible || mat.material.stock;
-                    const isOverLimit = mat.qty > availableStock;
-                    const showSurplusButton = hasSurplus && !mat.isSurplus;
-                    return (
-                      <div key={mat.material.id} className="flex items-center gap-2 p-2 border rounded">
-                        <div className="flex-1">
-                          <div className="font-medium">{mat.material.nombre}</div>
-                          <div className="text-sm text-gray-600">
-                            Disponible: {availableStock} | Sobrante: {mat.material.stock_sobrante || 0}
-                          </div>
+              <label className="block text-sm font-medium">Seleccionados</label>
+              <div className="space-y-2">
+                {Object.values(selectedMateriales).map(mat => {
+                  const available = mat.material.stock_disponible ?? mat.material.stock;
+                  const overLimit = mat.qty > available;
+                  const hasSurplus = (mat.material.stock_sobrante ?? 0) > 0;
+                  return (
+                    <div key={mat.material.id} className="flex items-center gap-2 p-2 border rounded">
+                      <div className="flex-1">
+                        <div className="font-medium">{mat.material.nombre}</div>
+                        <div className="text-sm text-gray-600">
+                          Disponible: {available} | Sobrante: {mat.material.stock_sobrante ?? 0}
                         </div>
-                        <Button size="sm" onClick={() => handleSelectMaterial(mat.material)}>
-                          Remover
-                        </Button>
-                        <Input
-                          type="number"
-                          placeholder="Stock a apartar..."
-                          value={mat.qty.toString()}
-                          onChange={(e) => handleQtyChange(mat.material.id, Number(e.target.value))}
-                          size="sm"
-                          className={`w-32 ${isOverLimit ? 'border-red-500' : ''}`}
-                          min="0"
-                          max={availableStock}
-                        />
-                        {isOverLimit && (
-                          <span className="text-red-500 text-sm">Excede stock disponible</span>
-                        )}
-                        {showSurplusButton && (
-                          <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(mat.material.id)}>
-                            Usar Sobrante
-                          </Button>
-                        )}
                       </div>
                       <Button size="sm" onClick={() => handleSelectMaterial(mat.material)}>Remover</Button>
                       <Input

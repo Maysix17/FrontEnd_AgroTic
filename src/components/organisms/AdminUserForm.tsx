@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
-import { getRoles } from '../../services/rolesService';
-import { getFichas } from '../../services/fichasService';
-import { registerAdminUser } from '../../services/authService';
+import apiClient from '../../lib/axios/axios';
 import Swal from 'sweetalert2';
 import type { Role, Ficha, AdminUserFormData, AdminUserFormProps, FormErrors } from '../../types/user';
 
@@ -33,8 +31,8 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
 
   const fetchRoles = async () => {
     try {
-      const data = await getRoles();
-      setRoles(data);
+      const response = await apiClient.get('/roles');
+      setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
@@ -42,8 +40,8 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
 
   const fetchFichas = async () => {
     try {
-      const data = await getFichas();
-      setFichas(data);
+      const response = await apiClient.get('/fichas');
+      setFichas(response.data);
     } catch (error) {
       console.error('Error fetching fichas:', error);
     }
@@ -68,7 +66,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
     setErrors({});
 
     try {
-      await registerAdminUser(formData);
+      await apiClient.post('/usuarios/register', formData);
       Swal.fire({
         icon: 'success',
         title: 'Usuario creado',

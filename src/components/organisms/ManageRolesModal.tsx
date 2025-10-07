@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from '@heroui/react';
-import { getRoles, deleteRole } from '../../services/rolesService';
+import apiClient from '../../lib/axios/axios';
 import CreateRoleModal from './CreateRoleModal';
 import type { Role } from '../../types/roles.types';
 import type { ManageRolesModalProps } from '../../types/ManageRolesModalProps.types';
@@ -20,8 +20,8 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
   const fetchRoles = async () => {
     setLoading(true);
     try {
-      const data = await getRoles();
-      setRoles(data);
+      const response = await apiClient.get('/roles');
+      setRoles(response.data);
     } catch (error) {
       console.error('Error fetching roles:', error);
     } finally {
@@ -38,8 +38,8 @@ const ManageRolesModal: React.FC<ManageRolesModalProps> = ({ isOpen, onClose }) 
     if (!confirm('¿Estás seguro de que quieres eliminar este rol?')) return;
 
     try {
-      await deleteRole(roleId);
-      fetchRoles(); // Refresh list
+      await apiClient.delete(`/roles/${roleId}`);
+      fetchRoles();
     } catch (error) {
       console.error('Error deleting role:', error);
     }
