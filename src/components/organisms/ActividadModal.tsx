@@ -13,7 +13,7 @@ interface Usuario {
   nombres: string;
   apellidos: string;
 }
-
+/*no hay grandes cambios*/ 
 interface Material {
   id: string;
   nombre: string;
