@@ -20,10 +20,6 @@ const userSearchService = {
     const response = await apiClient.get(`/usuarios/search/${query}?page=${page}&limit=${limit}`);
     return response.data;
   },
-  searchByDni: async (dni: string): Promise<User[]> => {
-    const response = await apiClient.get(`/usuarios/search/dni/${dni}`);
-    return response.data;
-  },
 };
 
 export default userSearchService;
