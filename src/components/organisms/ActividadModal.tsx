@@ -64,6 +64,8 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   const [filteredMateriales, setFilteredMateriales] = useState<Material[]>([]);
   const [filteredZonas, setFilteredZonas] = useState<Zona[]>([]);
 
+  /*cambios importantes */
+  // Fetch categorias
   // Fetch data on open
   useEffect(() => {
     if (isOpen) {
