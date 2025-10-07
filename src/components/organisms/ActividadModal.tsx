@@ -40,7 +40,7 @@ interface ActividadModalProps {
   selectedDate: Date;
   onSave: (data: any) => void;
 }
-
+/*cambios importantes */
 const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave }) => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
