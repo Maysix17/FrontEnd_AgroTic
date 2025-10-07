@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
 import VariedadForm from '../molecules/VariedadForm';
+import type { VariedadData } from '../../types/variedad.types';
+import {
+  getVariedades,
+  deleteVariedad,
+} from '../../services/variedad';
 import Table from '../atoms/Table';
 import CustomButton from '../atoms/Boton';
 
-import type { VariedadData } from '../../types/variedad.types';
-import type { VariedadModalProps } from '../../types/variedadModal.types';
-import { getVariedades, deleteVariedad } from '../../services/variedad';
+interface VariedadModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
 const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
   const [variedades, setVariedades] = useState<VariedadData[]>([]);
@@ -14,7 +20,9 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
   const [message, setMessage] = useState<string>('');
 
   useEffect(() => {
-    if (isOpen) fetchVariedades();
+    if (isOpen) {
+      fetchVariedades();
+    }
   }, [isOpen]);
 
   const fetchVariedades = async () => {
@@ -31,13 +39,14 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Seguro que deseas eliminar esta variedad?')) return;
-    try {
-      await deleteVariedad(id);
-      fetchVariedades();
-      setMessage('Eliminado con éxito');
-    } catch {
-      setMessage('Error al eliminar');
+    if (confirm('¿Seguro que deseas eliminar esta variedad?')) {
+      try {
+        await deleteVariedad(id);
+        fetchVariedades();
+        setMessage('Eliminado con éxito');
+      } catch (err) {
+        setMessage('Error al eliminar');
+      }
     }
   };
 
@@ -50,16 +59,8 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
           <h2 className="text-xl font-semibold">Gestionar Variedades</h2>
         </ModalHeader>
         <ModalBody>
-          <VariedadForm
-            editData={editData}
-            onSuccess={() => {
-              fetchVariedades();
-              setEditData(null);
-            }}
-          />
-
+          <VariedadForm editData={editData} onSuccess={() => { fetchVariedades(); setEditData(null); }} />
           {message && <p className="text-center text-green-600 mt-4">{message}</p>}
-
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-4">Lista de Variedades</h3>
             <Table headers={headers}>

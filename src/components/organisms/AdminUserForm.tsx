@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
-import apiClient from '../../lib/axios/axios';
+import { getRoles } from '../../services/rolesService';
+import { getFichas } from '../../services/fichasService';
+import { registerAdminUser } from '../../services/authService';
 import Swal from 'sweetalert2';
-import type { Role, Ficha, AdminUserFormData, AdminUserFormProps, FormErrors } from '../../types/user';
+
+interface Role {
+  id: string;
+  nombre: string;
+}
+
+interface Ficha {
+  id: string;
+  numero: number;
+}
+
+interface AdminUserFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUserCreated: () => void;
+}
 
 const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCreated }) => {
-  const [formData, setFormData] = useState<AdminUserFormData>({
+  const [formData, setFormData] = useState({
     nombres: '',
     apellidos: '',
     dni: '',
@@ -20,7 +37,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
   const [roles, setRoles] = useState<Role[]>([]);
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (isOpen) {
@@ -31,8 +48,8 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
 
   const fetchRoles = async () => {
     try {
-      const response = await apiClient.get('/roles');
-      setRoles(response.data);
+      const data = await getRoles();
+      setRoles(data);
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
@@ -40,8 +57,8 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
 
   const fetchFichas = async () => {
     try {
-      const response = await apiClient.get('/fichas');
-      setFichas(response.data);
+      const data = await getFichas();
+      setFichas(data);
     } catch (error) {
       console.error('Error fetching fichas:', error);
     }
@@ -51,10 +68,10 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
-    // Limpiar ficha si cambia el rol y no es Aprendiz
+    // Clear ficha if role changes and is not Aprendiz
     if (name === 'rolId') {
       const selectedRole = roles.find(r => r.id === value);
-      if (selectedRole?.nombre.toLowerCase() !== 'aprendiz') {
+      if (selectedRole?.nombre !== 'Aprendiz') {
         setFormData(prev => ({ ...prev, fichaId: '' }));
       }
     }
@@ -65,8 +82,9 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
     setIsLoading(true);
     setErrors({});
 
+
     try {
-      await apiClient.post('/usuarios/register', formData);
+      await registerAdminUser(formData);
       Swal.fire({
         icon: 'success',
         title: 'Usuario creado',
@@ -90,7 +108,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
         const messages = Array.isArray(error.response.data.message)
           ? error.response.data.message
           : [error.response.data.message];
-        const newErrors: FormErrors = {};
+        const newErrors: Record<string, string> = {};
         messages.forEach((msg: string) => {
           if (msg.toLowerCase().includes('correo')) newErrors.correo = msg;
           else if (msg.toLowerCase().includes('dni')) newErrors.dni = msg;
@@ -141,7 +159,6 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.apellidos && <p className="text-red-500 text-sm mt-1">{errors.apellidos}</p>}
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
@@ -168,7 +185,6 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono}</p>}
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
             <input
@@ -181,7 +197,6 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
             />
             {errors.correo && <p className="text-red-500 text-sm mt-1">{errors.correo}</p>}
           </div>
-
           <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-700">
               <strong>Nota:</strong> La contraseña se establecerá automáticamente como el DNI del usuario.
@@ -204,7 +219,6 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
             </select>
             {errors.rolId && <p className="text-red-500 text-sm mt-1">{errors.rolId}</p>}
           </div>
-
           {showFichaField && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ficha</label>
@@ -223,9 +237,7 @@ const AdminUserForm: React.FC<AdminUserFormProps> = ({ isOpen, onClose, onUserCr
               {errors.fichaId && <p className="text-red-500 text-sm mt-1">{errors.fichaId}</p>}
             </div>
           )}
-
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
-
           <div className="flex justify-end space-x-2">
             <CustomButton onClick={onClose} variant="light">Cancelar</CustomButton>
             <CustomButton

@@ -2,17 +2,24 @@ import React, { useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import TextInput from '../atoms/TextInput';
-import type { VentaModalProps, VentaFormData } from '../../types/ventaModal.types';
+import type { CreateVentaDto } from '../../types/venta.types';
 import { createVenta } from '../../services/ventaService';
+import type { Cultivo } from '../../types/cultivos.types';
+
+interface VentaModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  cultivo: Cultivo | null;
+  onSuccess: () => void;
+}
 
 const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuccess }) => {
-  const [formData, setFormData] = useState<VentaFormData>({
+  const [formData, setFormData] = useState<CreateVentaDto>({
     cantidad: 0,
     fecha: '',
-    fkCosechaId: '', // se llenará al enviar
+    fkCosechaId: '', // This needs to be set properly
     precioKilo: 0,
   });
-
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +45,7 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
     }
   };
 
-  const handleChange = (field: keyof VentaFormData, value: any) => {
+  const handleChange = (field: keyof CreateVentaDto, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 

@@ -61,3 +61,8 @@ export const refreshToken = async (): Promise<void> => {
   }
 };
 
+export const registerAdminUser = async (formData: any): Promise<any> => {
+  const response = await apiClient.post("/usuarios/register", formData);
+  return response.data;
+};
+
