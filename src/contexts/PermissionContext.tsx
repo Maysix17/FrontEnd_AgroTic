@@ -84,13 +84,11 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Logout failed:', error);
-      // Optionally handle logout failure
     }
   };
 
   useEffect(() => {
     const init = async () => {
-      // First check auth without interceptor
       try {
         const profile = await getProfile();
         setUser(profile);
@@ -102,10 +100,8 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
         setPermissions(mappedPermissions);
         setIsAuthenticated(true);
       } catch (error) {
-        // Not authenticated
         setIsAuthenticated(false);
       }
-      // Then setup interceptor
       setupAxiosInterceptors(refresh, navigate);
     };
     init();

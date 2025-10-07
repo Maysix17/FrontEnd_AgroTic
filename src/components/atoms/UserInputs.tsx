@@ -1,4 +1,3 @@
-// src/components/molecules/UserInputs.tsx
 import React from "react";
 import TextInput from "../atoms/TextInput";
 import type { UserInputsProps } from "../../types/UserInputsProps";
@@ -24,45 +23,46 @@ const UserInputs: React.FC<UserInputsProps & { errors?: ErrorState }> = ({
   errors = {}
 }) => {
   return (
-    <>
-      <div>
-        {nombres !== undefined && setNombres && (
+    <div className="flex flex-col gap-3"> 
+
+      {nombres !== undefined && setNombres && (
+        <div>
           <TextInput
             label="Nombres"
             placeholder="Ingrese un nombre"
             value={nombres}
             onChange={(e) => setNombres(e.target.value)}
           />
-        )}
-        {errors.nombres && <p className="text-red-500 text-xs">{errors.nombres}</p>}
-      </div>
+          {errors.nombres && <p className="text-red-500 text-xs mt-1">{errors.nombres}</p>}
+        </div>
+      )}
 
-      <div>
-        {apellidos !== undefined && setApellidos && (
+      {apellidos !== undefined && setApellidos && (
+        <div>
           <TextInput
             label="Apellidos"
             placeholder="Ingrese un apellido"
             value={apellidos}
             onChange={(e) => setApellidos(e.target.value)}
           />
-        )}
-        {errors.apellidos && <p className="text-red-500 text-xs">{errors.apellidos}</p>}
-      </div>
+          {errors.apellidos && <p className="text-red-500 text-xs mt-1">{errors.apellidos}</p>}
+        </div>
+      )}
 
-      <div>
-        {dni !== undefined && setDni && (
+      {dni !== undefined && setDni && (
+        <div>
           <TextInput
             label="DNI"
             placeholder="Ingrese DNI"
             value={dni}
             onChange={(e) => setDni(e.target.value)}
           />
-        )}
-        {errors.dni && <p className="text-red-500 text-xs">{errors.dni}</p>}
-      </div>
+          {errors.dni && <p className="text-red-500 text-xs mt-1">{errors.dni}</p>}
+        </div>
+      )}
 
-      <div>
-        {email !== undefined && setEmail && (
+      {email !== undefined && setEmail && (
+        <div>
           <TextInput
             label="Correo electrónico"
             type="email"
@@ -70,24 +70,24 @@ const UserInputs: React.FC<UserInputsProps & { errors?: ErrorState }> = ({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-        )}
-        {errors.email && <p className="text-red-500 text-xs">{errors.email}</p>}
-      </div>
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+        </div>
+      )}
 
-      <div>
-        {telefono !== undefined && setTelefono && (
+      {telefono !== undefined && setTelefono && (
+        <div>
           <TextInput
             label="Teléfono"
             placeholder="Ingrese un teléfono"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
           />
-        )}
-        {errors.telefono && <p className="text-red-500 text-xs">{errors.telefono}</p>}
-      </div>
+          {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
+        </div>
+      )}
 
-      <div>
-        {password !== undefined && setPassword && (
+      {password !== undefined && setPassword && (
+        <div>
           <TextInput
             label="Contraseña"
             type="password"
@@ -95,12 +95,12 @@ const UserInputs: React.FC<UserInputsProps & { errors?: ErrorState }> = ({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        )}
-        {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
-      </div>
+          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+        </div>
+      )}
 
-      <div>
-        {confirmPassword !== undefined && setConfirmPassword && (
+      {confirmPassword !== undefined && setConfirmPassword && (
+        <div>
           <TextInput
             label="Confirmar Contraseña"
             type="password"
@@ -108,11 +108,14 @@ const UserInputs: React.FC<UserInputsProps & { errors?: ErrorState }> = ({
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
-        )}
-        {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword}</p>}
-      </div>
-    </>
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 };
 
 export default UserInputs;
+

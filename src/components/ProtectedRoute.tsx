@@ -19,8 +19,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredPermi
       hasPermission(perm.modulo, perm.recurso, perm.accion)
     );
     if (!hasAllPermissions) {
-      // Optionally, redirect to an unauthorized page or show a message
-      return <Navigate to="/login" replace />; // For now, redirect to login
+      return <Navigate to="/login" replace />; 
     }
   }
 
