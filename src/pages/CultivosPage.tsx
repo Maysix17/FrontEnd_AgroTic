@@ -31,8 +31,6 @@ const CultivosPage: React.FC = () => {
     await handleSearchWithFilters(filters);
   };
 
-  useEffect(() => {}, []);
-
   const handleFilterChange = (key: keyof SearchCultivoDto, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
@@ -83,7 +81,6 @@ const CultivosPage: React.FC = () => {
 
   const exportToExcel = (cultivo?: Cultivo): void => {
     const dataToExport = cultivo ? [cultivo] : cultivos;
-
     if (dataToExport.length === 0) {
       alert("No hay datos para exportar");
       return;
@@ -130,22 +127,43 @@ const CultivosPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 p-0 m-0 overflow-y-auto">
-      {/* Contenido interno */}
+    <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 overflow-y-auto">
       <div className="flex flex-col flex-grow gap-6 p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
-          <div className="flex gap-2 flex-wrap">
-            <CustomButton label="Exportar Todos" onClick={() => exportToExcel()} />
-            <CustomButton label="Registrar Tipo de Cultivo" onClick={() => setIsTipoCultivoModalOpen(true)} />
-            <CustomButton label="Registrar Variedad" onClick={() => setIsVariedadModalOpen(true)} />
+
+        {/* Header adaptable */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <h1 className="text-2xl font-bold text-left whitespace-nowrap">
+            Gestión de Cultivos
+          </h1>
+
+          {/* 🔹 Botones: apilados en móvil, alineados en web */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
+            <CustomButton
+              label="Exportar Todos"
+              onClick={() => exportToExcel()}
+              size="md"
+              className="sm:w-[240px]"
+            />
+            <CustomButton
+              label="Registrar Tipo de Cultivo"
+              onClick={() => setIsTipoCultivoModalOpen(true)}
+              size="md"
+              className="sm:w-[240px]"
+            />
+            <CustomButton
+              label="Registrar Variedad"
+              onClick={() => setIsVariedadModalOpen(true)}
+              size="md"
+              className="sm:w-[240px]"
+            />
           </div>
         </div>
 
         {/* Filtros */}
         <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold mb-4">Filtros de Búsqueda</h2>
+          <h2 className="text-lg font-semibold mb-4 text-center sm:text-left">
+            Filtros de Búsqueda
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
@@ -198,18 +216,19 @@ const CultivosPage: React.FC = () => {
             </div>
 
             <div className="flex gap-2 items-center mt-6">
-              <CustomButton label="Buscar" onClick={handleSearch} />
-              <button
+              <CustomButton label="Buscar" onClick={handleSearch} size="sm" />
+              <CustomButton
+                label="Limpiar"
                 onClick={clearFilters}
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-              >
-                Limpiar
-              </button>
+                size="sm"
+                color="danger"
+                variant="solid"
+              />
             </div>
           </div>
         </div>
 
-        {/* Desktop Table */}
+        {/* Tabla escritorio */}
         <div className="hidden md:block bg-white rounded-lg shadow-md flex-grow overflow-hidden">
           <div className="p-4 border-b">
             <h2 className="text-lg font-semibold">Resultados ({cultivos.length})</h2>
@@ -312,45 +331,54 @@ const CultivosPage: React.FC = () => {
             <div className="p-4 space-y-4">
               {cultivos.map((cultivo, index) => {
                 const fields: CardField[] = [
-                  { label: 'Lote', value: cultivo.lote },
-                  { label: 'Nombre del Cultivo', value: cultivo.nombrecultivo },
-                  { label: 'Fecha de Siembra', value: cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha" },
-                  { label: 'Fecha de Cosecha', value: cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha" },
+                  { label: "Lote", value: cultivo.lote },
+                  { label: "Nombre del Cultivo", value: cultivo.nombrecultivo },
+                  { label: "Fecha de Siembra", value: cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha" },
+                  { label: "Fecha de Cosecha", value: cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha" },
                 ];
 
                 const actions: CardAction[] = [
                   {
-                    label: 'Ver Fichas',
+                    label: "Ver Fichas",
                     onClick: () => handleOpenFichaModal(cultivo.ficha),
-                    size: 'sm',
-                    variant: 'bordered',
+                    size: "sm",
+                    variant: "bordered",
                   },
                   {
-                    label: 'Actividades',
+                    label: "Actividades",
                     onClick: () => {},
-                    size: 'sm',
-                    variant: 'bordered',
+                    size: "sm",
+                    variant: "bordered",
                   },
                   {
-                    label: 'Financiero',
+                    label: "Financiero",
                     onClick: () => {},
-                    size: 'sm',
-                    variant: 'bordered',
+                    size: "sm",
+                    variant: "bordered",
                   },
                   {
-                    label: cultivo.estado === 0 ? 'Registrar Venta' : 'Registrar Cosecha',
-                    onClick: () => cultivo.estado === 0 ? handleOpenVentaModal(cultivo) : handleOpenCosechaModal(cultivo),
-                    size: 'sm',
+                    label: cultivo.estado === 0 ? "Registrar Venta" : "Registrar Cosecha",
+                    onClick: () =>
+                      cultivo.estado === 0
+                        ? handleOpenVentaModal(cultivo)
+                        : handleOpenCosechaModal(cultivo),
+                    size: "sm",
                   },
                   {
-                    label: 'Exportar',
+                    label: "Exportar",
                     onClick: () => exportToExcel(cultivo),
-                    size: 'sm',
-                    variant: 'bordered',
+                    size: "sm",
+                    variant: "bordered",
                   },
                 ];
 
-                return <MobileCard key={`${cultivo.cvzid}-${index}`} fields={fields} actions={actions} />;
+                return (
+                  <MobileCard
+                    key={`${cultivo.cvzid}-${index}`}
+                    fields={fields}
+                    actions={actions}
+                  />
+                );
               })}
             </div>
           )}
@@ -358,8 +386,14 @@ const CultivosPage: React.FC = () => {
       </div>
 
       {/* Modales */}
-      <TipoCultivoModal isOpen={isTipoCultivoModalOpen} onClose={() => setIsTipoCultivoModalOpen(false)} />
-      <VariedadModal isOpen={isVariedadModalOpen} onClose={() => setIsVariedadModalOpen(false)} />
+      <TipoCultivoModal
+        isOpen={isTipoCultivoModalOpen}
+        onClose={() => setIsTipoCultivoModalOpen(false)}
+      />
+      <VariedadModal
+        isOpen={isVariedadModalOpen}
+        onClose={() => setIsVariedadModalOpen(false)}
+      />
       <CosechaModal
         isOpen={isCosechaModalOpen}
         onClose={() => setIsCosechaModalOpen(false)}

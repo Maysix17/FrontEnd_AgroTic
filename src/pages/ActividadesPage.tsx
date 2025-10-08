@@ -91,22 +91,24 @@ const ActividadesPage: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 h-full overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h1 className="text-2xl font-bold">Gestión de Actividades</h1>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium">Seleccionar Mes:</label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date || new Date())}
-            dateFormat="MM/yyyy"
-            showMonthYearPicker
-            className="border border-gray-300 rounded-lg p-2 text-sm"
-          />
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0 pt-6">
+        <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Actividades</h1>
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Seleccionar Mes:</label>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date || new Date())}
+              dateFormat="MM/yyyy"
+              showMonthYearPicker
+              className="border border-gray-300 rounded-lg p-2 text-sm"
+            />
+          </div>
         </div>
       </div>
 
       {/* Calendar */}
-      <div className="bg-white p-4 rounded-lg shadow-md flex-1 overflow-hidden">
+      <div className="bg-white p-4 rounded-lg shadow-md flex-1 overflow-hidden overflow-x-auto">
         <Calendar
           localizer={localizer}
           culture="es"
