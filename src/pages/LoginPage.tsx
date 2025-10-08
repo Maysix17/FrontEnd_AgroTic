@@ -14,19 +14,20 @@ const LoginPage: React.FC = () => {
       navigate("/app");
     } catch (error) {
       console.error("Login failed:", error);
-      // Optionally show error message
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen bg-white px-6">
-      {/* Columna izquierda con logo */}
+    <div className="flex flex-col md:flex-row items-center justify-center min-h-screen bg-white px-6 overflow-hidden">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
-        <img src={logo} alt="Logo" className="w-90 h-auto mb-6" />
+        <img
+          src={logo}
+          alt="Logo"
+          className="w-40 sm:w-56 md:w-80 lg:w-96 h-auto mb-6 object-contain"
+        />
       </div>
 
-      {/* Columna derecha con LoginCard */}
-      <div className="flex-1 flex justify-center mt-10 md:mt-0">
+      <div className="flex-1 flex justify-center w-full mt-6 md:mt-0">
         <LoginCard onLogin={handleLogin} />
       </div>
     </div>
@@ -34,7 +35,5 @@ const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
-
-
 
 

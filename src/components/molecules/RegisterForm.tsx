@@ -4,8 +4,7 @@ import UserInputs from "../atoms/UserInputs";
 import type { RegisterFormProps } from "../../types/Register";
 import type { RegisterFormData } from "../../types/Auth";
 import { registerUser } from "../../services/authService";
-import Swal from "sweetalert2"; // ✅ Importar SweetAlert2
-
+import Swal from "sweetalert2"; 
 type ErrorState = {
   nombres?: string;
   apellidos?: string;
@@ -38,16 +37,15 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
     try {
       const data = await registerUser(formData);
 
-      // ✅ Mostrar alerta de éxito
       Swal.fire({
         icon: "success",
         title: "¡Registro exitoso!",
         text: data.message || "Usuario registrado correctamente",
         confirmButtonText: "Iniciar sesión",
-        confirmButtonColor: "#16a34a", // verde
+        confirmButtonColor: "#16a34a", 
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = "/login"; // redirige al login
+          window.location.href = "/login"; 
         }
       });
 
