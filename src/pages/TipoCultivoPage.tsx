@@ -59,8 +59,12 @@ const TipoCultivoPage = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm("¿Seguro que deseas eliminar este tipo de cultivo?")) {
-      await deleteTipoCultivo(id);
-      fetchCultivos();
+      try {
+        await deleteTipoCultivo(id);
+        fetchCultivos();
+      } catch (error: any) {
+        alert(error.message || "Error al eliminar el tipo de cultivo");
+      }
     }
   };
 

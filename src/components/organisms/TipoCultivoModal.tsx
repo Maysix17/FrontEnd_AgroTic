@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
-import TipoCultivoForm from '../molecules/CultivoForm';
+import TipoCultivoForm from '../molecules/TipoCultivoForm';
 import type { TipoCultivoData } from '../../types/tipoCultivo.types';
 import {
   getTipoCultivos,

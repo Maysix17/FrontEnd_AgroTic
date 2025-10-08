@@ -10,6 +10,7 @@ import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
+import CultivoModal from "../components/organisms/CultivoModal";
 import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
 import FichaModal from "../components/organisms/FichaModal";
@@ -21,6 +22,7 @@ const CultivosPage: React.FC = () => {
   const [filters, setFilters] = useState<SearchCultivoDto>({});
   const [isTipoCultivoModalOpen, setIsTipoCultivoModalOpen] = useState(false);
   const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
+  const [isCultivoModalOpen, setIsCultivoModalOpen] = useState(false);
   const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
@@ -127,6 +129,44 @@ const CultivosPage: React.FC = () => {
   };
 
   return (
+    <div className="flex flex-col gap-6 p-6">
+      {/* Header with title and action buttons */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
+        <div className="flex gap-2">
+          <CustomButton
+            label="Exportar Todos"
+            onClick={() => exportToExcel()}
+          />
+          <CustomButton
+            label="Registrar Tipo de Cultivo"
+            onClick={() => setIsTipoCultivoModalOpen(true)}
+          />
+          <CustomButton
+            label="Registrar Variedad"
+            onClick={() => setIsVariedadModalOpen(true)}
+          />
+          <CustomButton
+            label="Registro del Cultivo"
+            onClick={() => setIsCultivoModalOpen(true)}
+          />
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-white p-4 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold mb-4">Filtros de Búsqueda</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Zone Search */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Buscar por Zona</label>
+            <InputSearch
+              placeholder="Nombre de zona..."
+              value={filters.buscar || ""}
+              onChange={(e) => handleFilterChange("buscar", e.target.value)}
+            />
+          </div>
     <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 overflow-y-auto">
       <div className="flex flex-col flex-grow gap-6 p-6">
 
@@ -410,6 +450,12 @@ const CultivosPage: React.FC = () => {
         isOpen={isFichaModalOpen}
         onClose={() => setIsFichaModalOpen(false)}
         fichas={selectedFichas}
+      />
+
+      <CultivoModal
+        isOpen={isCultivoModalOpen}
+        onClose={() => setIsCultivoModalOpen(false)}
+        onSuccess={() => handleSearch()}
       />
     </div>
   );
