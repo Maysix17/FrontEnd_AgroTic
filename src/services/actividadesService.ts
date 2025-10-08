@@ -57,6 +57,11 @@ export const getActividadesByDate = async (date: string): Promise<Actividad[]> =
   return response.data;
 };
 
+export const getActividadesByDateWithActive = async (date: string): Promise<Actividad[]> => {
+  const response = await apiClient.get(`/actividades/by-date-active/${date}`);
+  return response.data;
+};
+
 export const createActividad = async (data: CreateActividadData): Promise<Actividad> => {
   const response = await apiClient.post('/actividades', data);
   return response.data;
@@ -91,4 +96,17 @@ export const createInventarioXActividad = async (data: InventarioXActividad): Pr
 
 export const createMovimiento = async (data: Movimiento): Promise<void> => {
   await apiClient.post('/movimientos', data);
+};
+
+export const finalizarActividad = async (id: string, data: { observacion?: string; imgUrl?: File; horas?: number; precioHora?: number }): Promise<void> => {
+  const formData = new FormData();
+  if (data.observacion) formData.append('observacion', data.observacion);
+  if (data.imgUrl) formData.append('imgUrl', data.imgUrl);
+  if (data.horas !== undefined) formData.append('horas', data.horas.toString());
+  if (data.precioHora !== undefined) formData.append('precioHora', data.precioHora.toString());
+  await apiClient.patch(`/actividades/${id}/finalizar`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 };

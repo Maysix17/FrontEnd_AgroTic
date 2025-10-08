@@ -32,6 +32,9 @@ interface Categoria {
 interface Zona {
   id: string;
   nombre: string;
+  zonaId?: string;
+  cultivoId?: string;
+  variedadNombre?: string;
 }
 
 interface ActividadModalProps {
@@ -276,7 +279,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       materiales: Object.values(selectedMateriales).map(mat => ({ id: mat.material.id, nombre: mat.material.nombre, qty: mat.qty, isSurplus: mat.isSurplus })),
       categoria,
       descripcion,
-      lote
+      lote: selectedLote?.id
     };
     onSave(data);
     onClose();

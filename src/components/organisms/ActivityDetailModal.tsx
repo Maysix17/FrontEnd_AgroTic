@@ -7,10 +7,13 @@ interface Activity {
   categoriaActividad: { nombre: string };
   cultivoVariedadZona: {
     zona: { nombre: string };
-    cultivoXVariedad: { cultivo: { nombre: string } };
+    cultivoXVariedad: {
+      cultivo: { nombre: string; ficha: { numero: string } };
+      variedad: { nombre: string; tipoCultivo: { nombre: string } };
+    };
   };
-  usuarios_x_actividades?: { usuario: { numero_documento: number; nombres: string; apellidos: string } }[];
-  inventario_x_actividades?: { inventario: { nombre: string }; cantidadUsada: number }[];
+  usuariosAsignados?: { usuario: { dni: number; nombres: string; apellidos: string }; activo: boolean }[];
+  inventarioUsado?: { inventario: { nombre: string }; cantidadUsada: number; activo: boolean }[];
 }
 
 interface ActivityDetailModalProps {
@@ -37,8 +40,12 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
 
   useEffect(() => {
     if (activity) {
+      console.log('ActivityDetailModal activity:', activity);
       setCategoria(activity.categoriaActividad.nombre);
-      setUbicacion(`${activity.cultivoVariedadZona.cultivoXVariedad.cultivo.nombre} - ${activity.cultivoVariedadZona.zona.nombre}`);
+      const tipoCultivoName = activity.cultivoVariedadZona?.cultivoXVariedad?.variedad?.tipoCultivo?.nombre || 'Tipo Cultivo';
+      const variedadName = activity.cultivoVariedadZona?.cultivoXVariedad?.variedad?.nombre || 'Variedad';
+      const zoneName = activity.cultivoVariedadZona?.zona?.nombre || 'Zona';
+      setUbicacion(`${tipoCultivoName} - ${variedadName} - ${zoneName}`);
       setDescripcion(activity.descripcion);
     }
   }, [activity]);
@@ -72,9 +79,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Aprendices Responsables</h3>
               <div className="space-y-2 max-h-40 overflow-auto">
-                {activity.usuarios_x_actividades?.map((uxa, idx) => (
+                {activity.usuariosAsignados?.filter(u => u.activo).map((uxa, idx) => (
                   <div key={idx} className="p-2 border rounded">
-                    {uxa.usuario.numero_documento}
+                    {uxa.usuario.dni} - {uxa.usuario.nombres} {uxa.usuario.apellidos}
                   </div>
                 )) || <p className="text-gray-500">No hay aprendices</p>}
               </div>
@@ -84,7 +91,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Insumos / Materiales Apartados</h3>
               <div className="space-y-2 max-h-40 overflow-auto">
-                {activity.inventario_x_actividades?.map((ixa, idx) => (
+                {activity.inventarioUsado?.filter(i => i.activo).map((ixa, idx) => (
                   <div key={idx} className="p-2 border rounded flex justify-between">
                     <span>{ixa.inventario.nombre}</span>
                     <span className="font-semibold">{ixa.cantidadUsada}</span>
@@ -93,11 +100,13 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Fichas - Placeholder */}
+            {/* Fichas */}
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-2">Fichas</h3>
               <div className="space-y-2 max-h-40 overflow-auto">
-                <p className="text-gray-500">Fichas involucradas</p>
+                <div className="p-2 border rounded">
+                  {activity.cultivoVariedadZona?.cultivoXVariedad?.cultivo?.ficha?.numero || 'Sin ficha'}
+                </div>
               </div>
             </div>
           </div>
@@ -107,25 +116,17 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Categoria de la actividad</label>
-                <Select selectedKeys={[categoria]} onSelectionChange={(keys) => setCategoria(Array.from(keys)[0] as string)} disabled={!isEditing}>
-                  <SelectItem key="Siembra">Siembra</SelectItem>
-                  <SelectItem key="Cosecha">Cosecha</SelectItem>
-                  <SelectItem key="Fertilización">Fertilización</SelectItem>
-                </Select>
+                <div className="p-2 border rounded">{categoria}</div>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Ubicación</label>
-                <Input value={ubicacion} disabled />
+                <label className="block text-sm font-medium mb-1">Ubicación del Cultivo</label>
+                <div className="p-2 border rounded">{ubicacion}</div>
               </div>
             </div>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Descripción</label>
-                <Textarea
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  disabled={!isEditing}
-                />
+                <div className="p-2 border rounded min-h-[80px]">{descripcion}</div>
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="ghost" onClick={() => setIsEditing(!isEditing)}>

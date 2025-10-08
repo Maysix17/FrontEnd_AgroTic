@@ -3,6 +3,9 @@ import apiClient from '../lib/axios/axios';
 export interface Zone {
   id: string;
   nombre: string;
+  zonaId?: string;
+  cultivoId?: string;
+  variedadNombre?: string;
 }
 
 export interface PaginatedResponse<T> {

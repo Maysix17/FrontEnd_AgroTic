@@ -13,15 +13,16 @@ import {
   getActividadesByDateRange,
   getActividadesCountByDate,
   getActividadesByDate,
+  getActividadesByDateWithActive,
   createActividad,
   updateActividad,
   deleteActividad,
   uploadActividadEvidence,
   createUsuarioXActividad,
   createInventarioXActividad,
-  createMovimiento
+  createMovimiento,
+  finalizarActividad
 } from '../services/actividadesService';
-import { getZonaByNombre, getZonaCultivosVariedadXZona } from '../services/cultivosService';
 
 const localizer = dateFnsLocalizer({
   format,
@@ -149,7 +150,7 @@ const ActividadesPage: React.FC = () => {
 
               if (count > 0) {
                 // Fetch activities and open list modal
-                const activitiesData = await getActividadesByDate(dateStr);
+                const activitiesData = await getActividadesByDateWithActive(dateStr);
                 setActivities(activitiesData);
                 setIsListModalOpen(true);
               } else {
@@ -188,21 +189,13 @@ const ActividadesPage: React.FC = () => {
         selectedDate={modalDate}
         onSave={async (data) => {
           try {
-            // Find CVZ for the selected lote (zone)
-            const zone = await getZonaByNombre(data.lote);
-            if (!zone) throw new Error('Zona no encontrada');
-
-            // Find CVZ for the zone
-            const cvzs = await getZonaCultivosVariedadXZona(zone.id);
-            if (cvzs.length === 0) throw new Error('No hay cultivos en esta zona');
-
             const actividadData = {
               descripcion: data.descripcion,
               fechaAsignacion: data.fecha,
               horasDedicadas: 8, // default
               observacion: data.descripcion,
               estado: true,
-              fkCultivoVariedadZonaId: cvzs[0].cvzId,
+              fkCultivoVariedadZonaId: data.lote, // data.lote is cvz.id from search
               fkCategoriaActividadId: data.categoria,
             };
 
@@ -293,40 +286,12 @@ const ActividadesPage: React.FC = () => {
         activity={selectedActivity}
         onSave={async (data) => {
           try {
-            let imgUrl = '';
-            if (data.evidence) {
-              const uploadData = await uploadActividadEvidence(data.evidence);
-              imgUrl = uploadData.url;
-            }
-
-            // Update actividad with imgUrl and finalize
-            await updateActividad(data.activityId, { imgUrl, estado: false }); // finalized
-
-            // Release reservations and create returns/surplus movements
-            for (const ixa of selectedActivity.inventario_x_actividades || []) {
-              const invId = ixa.inventario.id;
-              const usedQty = ixa.cantidadUsada;
-              const returnedQty = data.returns[invId] || 0;
-              const surplusQty = data.surplus[invId] || 0;
-
-              // Release reservation (negative stockReservado)
-              await createMovimiento({ fkInventarioId: invId, stockReservado: -usedQty });
-
-              // Create return movement if any
-              if (returnedQty > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevuelto: returnedQty });
-              }
-
-              // Create surplus movement if any
-              if (surplusQty > 0) {
-                await createMovimiento({ fkInventarioId: invId, stockDevueltoSobrante: surplusQty });
-              }
-
-              // Release surplus reservation (negative stockReservadoSobrante)
-              // Since surplus is considered used when activity is finalized, release the reservation
-              await createMovimiento({ fkInventarioId: invId, stockReservadoSobrante: -usedQty });
-            }
-
+            await finalizarActividad(data.activityId, {
+              observacion: data.observacion,
+              imgUrl: data.evidence,
+              horas: data.horas,
+              precioHora: data.precioHora,
+            });
             alert('Actividad finalizada');
             setIsFinalizeModalOpen(false);
           } catch (error) {
