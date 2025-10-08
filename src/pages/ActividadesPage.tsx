@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -46,9 +46,47 @@ const ActividadesPage: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
 
+  const calendarRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     fetchEvents(selectedDate);
   }, [selectedDate]);
+
+  useEffect(() => {
+    console.log('Events state updated:', events);
+  }, [events]);
+
+  useEffect(() => {
+    console.log('Initial window.innerWidth:', window.innerWidth);
+    console.log('Initial calendar container width:', calendarRef.current?.clientWidth);
+    const handleResize = () => {
+      console.log('Window resize detected, innerWidth:', window.innerWidth);
+      console.log('Calendar container width on resize:', calendarRef.current?.clientWidth);
+    };
+    window.addEventListener('resize', handleResize);
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        if (entry.target === calendarRef.current) {
+          console.log('Calendar container resized:', entry.contentRect);
+        } else if (entry.target === pageRef.current) {
+          console.log('Page container resized:', entry.contentRect);
+        }
+      }
+    });
+    if (calendarRef.current) {
+      resizeObserver.observe(calendarRef.current);
+    }
+    if (pageRef.current) {
+      resizeObserver.observe(pageRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
 
   const fetchEvents = async (date: Date) => {
@@ -58,7 +96,9 @@ const ActividadesPage: React.FC = () => {
     const endStr = end.toISOString().split('T')[0];
 
     try {
+      console.log('Fetching activities for date range:', startStr, 'to', endStr);
       const activities = await getActividadesByDateRange(startStr, endStr);
+      console.log('Fetched activities:', activities);
       const formattedEvents = activities.map((activity: any) => ({
         id: activity.id,
         title: activity.descripcion || 'Actividad',
@@ -66,6 +106,7 @@ const ActividadesPage: React.FC = () => {
         end: new Date(activity.fechaAsignacion),
         resource: activity,
       }));
+      console.log('Formatted events:', formattedEvents);
       setEvents(formattedEvents);
 
       // Fetch activity counts for the month
@@ -90,7 +131,7 @@ const ActividadesPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4 h-full overflow-hidden">
+    <div ref={pageRef} className="flex flex-col gap-4 h-full overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0 pt-6">
         <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Actividades</h1>
@@ -109,7 +150,7 @@ const ActividadesPage: React.FC = () => {
       </div>
 
       {/* Calendar */}
-      <div className="bg-white p-4 rounded-lg shadow-md flex-1 overflow-hidden overflow-x-auto">
+      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md h-full w-full overflow-hidden overflow-x-auto min-w-[768px]">
         <Calendar
           localizer={localizer}
           culture="es"
@@ -238,6 +279,9 @@ const ActividadesPage: React.FC = () => {
         onClose={() => setIsListModalOpen(false)}
         activities={activities}
         onSelectActivity={(activity) => {
+          console.log('Opening detail modal, window.innerWidth:', window.innerWidth);
+          console.log('Calendar container width:', calendarRef.current?.clientWidth);
+          console.log('Calendar container height:', calendarRef.current?.clientHeight);
           setSelectedActivity(activity);
           setIsDetailModalOpen(true);
           setIsListModalOpen(false);
