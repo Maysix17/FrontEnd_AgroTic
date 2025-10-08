@@ -129,44 +129,6 @@ const CultivosPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Header with title and action buttons */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Gestión de Cultivos</h1>
-        <div className="flex gap-2">
-          <CustomButton
-            label="Exportar Todos"
-            onClick={() => exportToExcel()}
-          />
-          <CustomButton
-            label="Registrar Tipo de Cultivo"
-            onClick={() => setIsTipoCultivoModalOpen(true)}
-          />
-          <CustomButton
-            label="Registrar Variedad"
-            onClick={() => setIsVariedadModalOpen(true)}
-          />
-          <CustomButton
-            label="Registro del Cultivo"
-            onClick={() => setIsCultivoModalOpen(true)}
-          />
-        </div>
-      </div>
-
-      {/* Filters Section */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold mb-4">Filtros de Búsqueda</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* Zone Search */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Buscar por Zona</label>
-            <InputSearch
-              placeholder="Nombre de zona..."
-              value={filters.buscar || ""}
-              onChange={(e) => handleFilterChange("buscar", e.target.value)}
-            />
-          </div>
     <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 overflow-y-auto">
       <div className="flex flex-col flex-grow gap-6 p-6">
 
@@ -182,19 +144,21 @@ const CultivosPage: React.FC = () => {
               label="Exportar Todos"
               onClick={() => exportToExcel()}
               size="md"
-              className="sm:w-[240px]"
             />
             <CustomButton
-              label="Registrar Tipo de Cultivo"
+              label="Gestion Tipo de Cultivo"
               onClick={() => setIsTipoCultivoModalOpen(true)}
               size="md"
-              className="sm:w-[240px]"
             />
             <CustomButton
-              label="Registrar Variedad"
+              label="Gestion de Variedad"
               onClick={() => setIsVariedadModalOpen(true)}
               size="md"
-              className="sm:w-[240px]"
+            />
+            <CustomButton
+              label="Registro del Cultivo"
+              onClick={() => setIsCultivoModalOpen(true)}
+              size="md"
             />
           </div>
         </div>
