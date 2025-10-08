@@ -1,4 +1,4 @@
-import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
+import type { Cultivo, SearchCultivoDto, CreateCultivoData } from "../types/cultivos.types";
 
 const API_URL = "http://localhost:3000";
 
@@ -26,6 +26,20 @@ export const getAllCultivos = async (): Promise<Cultivo[]> => {
 
   if (!response.ok) {
     throw new Error("Error al obtener cultivos");
+  }
+
+  return response.json();
+};
+
+export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> => {
+  const response = await fetch(`${API_URL}/cultivos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error al crear cultivo");
   }
 
   return response.json();

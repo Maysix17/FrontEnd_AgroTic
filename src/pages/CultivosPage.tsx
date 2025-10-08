@@ -9,6 +9,7 @@ import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
+import CultivoModal from "../components/organisms/CultivoModal";
 import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
 import FichaModal from "../components/organisms/FichaModal";
@@ -20,6 +21,7 @@ const CultivosPage: React.FC = () => {
   const [filters, setFilters] = useState<SearchCultivoDto>({});
   const [isTipoCultivoModalOpen, setIsTipoCultivoModalOpen] = useState(false);
   const [isVariedadModalOpen, setIsVariedadModalOpen] = useState(false);
+  const [isCultivoModalOpen, setIsCultivoModalOpen] = useState(false);
   const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
@@ -159,6 +161,10 @@ const CultivosPage: React.FC = () => {
           <CustomButton
             label="Registrar Variedad"
             onClick={() => setIsVariedadModalOpen(true)}
+          />
+          <CustomButton
+            label="Registro del Cultivo"
+            onClick={() => setIsCultivoModalOpen(true)}
           />
         </div>
       </div>
@@ -352,6 +358,12 @@ const CultivosPage: React.FC = () => {
         isOpen={isFichaModalOpen}
         onClose={() => setIsFichaModalOpen(false)}
         fichas={selectedFichas}
+      />
+
+      <CultivoModal
+        isOpen={isCultivoModalOpen}
+        onClose={() => setIsCultivoModalOpen(false)}
+        onSuccess={() => handleSearch()}
       />
     </div>
   );

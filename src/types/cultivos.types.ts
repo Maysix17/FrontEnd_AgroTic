@@ -19,6 +19,12 @@ export interface SearchCultivoDto {
   estado_cultivo?: number; // Estado: 1=activo, 0=inactivo
 }
 
+export interface CreateCultivoData {
+  tipoCultivoId: string;
+  variedadId: string;
+  zonaId: string;
+}
+
 export interface ApiResponse {
   success: boolean;
   message: string;

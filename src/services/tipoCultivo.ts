@@ -55,6 +55,7 @@ export const deleteTipoCultivo = async (id: string): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error("Error al eliminar el tipo de cultivo");
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Error al eliminar el tipo de cultivo");
   }
 };
