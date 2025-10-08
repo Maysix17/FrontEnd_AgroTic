@@ -57,36 +57,6 @@ const ActividadesPage: React.FC = () => {
     console.log('Events state updated:', events);
   }, [events]);
 
-  useEffect(() => {
-    console.log('Initial window.innerWidth:', window.innerWidth);
-    console.log('Initial calendar container width:', calendarRef.current?.clientWidth);
-    const handleResize = () => {
-      console.log('Window resize detected, innerWidth:', window.innerWidth);
-      console.log('Calendar container width on resize:', calendarRef.current?.clientWidth);
-    };
-    window.addEventListener('resize', handleResize);
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        if (entry.target === calendarRef.current) {
-          console.log('Calendar container resized:', entry.contentRect);
-        } else if (entry.target === pageRef.current) {
-          console.log('Page container resized:', entry.contentRect);
-        }
-      }
-    });
-    if (calendarRef.current) {
-      resizeObserver.observe(calendarRef.current);
-    }
-    if (pageRef.current) {
-      resizeObserver.observe(pageRef.current);
-    }
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      resizeObserver.disconnect();
-    };
-  }, []);
 
 
   const fetchEvents = async (date: Date) => {
@@ -131,7 +101,7 @@ const ActividadesPage: React.FC = () => {
   };
 
   return (
-    <div ref={pageRef} className="flex flex-col gap-4 h-full overflow-hidden">
+    <div ref={pageRef} className="flex flex-col gap-4 overflow-hidden" style={{ height: '100%' }}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0 pt-6">
         <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Actividades</h1>
@@ -143,14 +113,14 @@ const ActividadesPage: React.FC = () => {
               onChange={(date) => setSelectedDate(date || new Date())}
               dateFormat="MM/yyyy"
               showMonthYearPicker
-              className="border border-gray-300 rounded-lg p-2 text-sm"
+              className="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-auto"
             />
           </div>
         </div>
       </div>
 
       {/* Calendar */}
-      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md h-full w-full overflow-hidden overflow-x-auto min-w-[768px]">
+      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md w-full overflow-hidden overflow-x-auto flex-1 md:min-w-[768px]">
         <Calendar
           localizer={localizer}
           culture="es"
@@ -170,8 +140,25 @@ const ActividadesPage: React.FC = () => {
               const isOffRange = value.getMonth() !== selectedDate.getMonth();
               return (
                 <div
-                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-green-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''}`}
+                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-green-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''} cursor-pointer`}
                   style={{ minHeight: '80px' }}
+                  onClick={async () => {
+                    try {
+                      const countClick = await getActividadesCountByDate(dateStr);
+                      if (countClick > 0) {
+                        const activitiesData = await getActividadesByDateWithActive(dateStr);
+                        setActivities(activitiesData);
+                        setIsListModalOpen(true);
+                      } else {
+                        setModalDate(value);
+                        setIsModalOpen(true);
+                      }
+                    } catch (error) {
+                      console.error('Error checking activities:', error);
+                      setModalDate(value);
+                      setIsModalOpen(true);
+                    }
+                  }}
                 >
                   {children}
                   {count > 0 && (
@@ -184,6 +171,7 @@ const ActividadesPage: React.FC = () => {
             }
           }}
           onSelectSlot={async (slotInfo) => {
+            console.log('onSelectSlot triggered, page height before:', pageRef.current?.clientHeight, 'calendar height before:', calendarRef.current?.clientHeight);
             const dateStr = slotInfo.start.toISOString().split('T')[0];
 
             try {
@@ -193,7 +181,9 @@ const ActividadesPage: React.FC = () => {
                 // Fetch activities and open list modal
                 const activitiesData = await getActividadesByDateWithActive(dateStr);
                 setActivities(activitiesData);
+                console.log('After fetch, page height:', pageRef.current?.clientHeight, 'calendar height:', calendarRef.current?.clientHeight);
                 setIsListModalOpen(true);
+                console.log('After setIsListModalOpen, page height:', pageRef.current?.clientHeight, 'calendar height:', calendarRef.current?.clientHeight);
               } else {
                 // Open create modal
                 setModalDate(slotInfo.start);
@@ -206,8 +196,7 @@ const ActividadesPage: React.FC = () => {
               setIsModalOpen(true);
             }
           }}
-          selectable
-          style={{ height: '100%' }}
+          style={{ height: '600px' }}
           messages={{
             allDay: 'Todo el día',
             previous: 'Anterior',
@@ -274,6 +263,7 @@ const ActividadesPage: React.FC = () => {
         }}
       />
 
+
       <ActivityListModal
         isOpen={isListModalOpen}
         onClose={() => setIsListModalOpen(false)}
@@ -293,7 +283,9 @@ const ActividadesPage: React.FC = () => {
         }}
       />
 
-      <ActivityDetailModal
+      
+       
+         <ActivityDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         activity={selectedActivity}
@@ -323,6 +315,10 @@ const ActividadesPage: React.FC = () => {
           setIsDetailModalOpen(false);
         }}
       />
+        
+      
+
+     
 
       <FinalizeActivityModal
         isOpen={isFinalizeModalOpen}

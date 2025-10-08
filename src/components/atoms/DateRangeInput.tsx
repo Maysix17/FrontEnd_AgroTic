@@ -21,7 +21,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({ label, onChange }) => {
         }}
         isClearable
         dateFormat="yyyy-MM-dd"
-        className="border border-gray-300 rounded-xl px-3 py-3 h-10 text-gray-700 focus:outline-none  w-64 "
+        className="border border-gray-300 rounded-xl px-3 py-3 h-10 text-gray-700 focus:outline-none w-full md:w-64"
+        calendarClassName="calendar-responsive"
       />
     </div>
   );
