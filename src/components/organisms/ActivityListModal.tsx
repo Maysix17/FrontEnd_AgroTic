@@ -17,11 +17,11 @@ interface ActivityListModalProps {
 
 const ActivityListModal: React.FC<ActivityListModalProps> = ({ isOpen, onClose, activities, onSelectActivity, onRegisterNew }) => {
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} size="md">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="xl">
       <ModalContent>
         <ModalHeader>
           <h2 className="text-xl font-semibold">Actividades del día</h2>
-          <Button onClick={onRegisterNew}>Registrar Nueva</Button>
+          <Button onClick={onRegisterNew} className="ml-20">Registrar Nueva</Button>
         </ModalHeader>
         <ModalBody>
           <div className="space-y-3">

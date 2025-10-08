@@ -286,7 +286,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} size="5xl">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl">
       <ModalContent className="bg-white p-6">
         <ModalHeader>
           <h2 className="text-2xl font-semibold">Registrar nueva actividad</h2>

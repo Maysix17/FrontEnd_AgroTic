@@ -129,7 +129,7 @@ const CultivosPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full min-h-screen bg-gray-50 overflow-y-auto">
+    <div className="flex flex-col w-full bg-gray-50 overflow-y-auto" style={{ height: '100%' }}>
       <div className="flex flex-col flex-grow gap-6 p-6">
 
         {/* Header adaptable */}
