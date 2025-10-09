@@ -3,9 +3,9 @@ import { Modal, ModalContent, ModalHeader, ModalBody, Input, Select, SelectItem,
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import InputSearch from '../atoms/buscador';
 import userSearchService from '../../services/userSearchService';
-import { inventoryService } from '../../services/inventoryService';
 import zoneSearchService from '../../services/zoneSearchService';
 import categoriaService from '../../services/categoriaService';
+import apiClient from '../../lib/axios/axios';
 
 interface Usuario {
   id: string;
@@ -14,12 +14,11 @@ interface Usuario {
   apellidos: string;
 }
 /*no hay grandes cambios*/ 
-interface Material {
+interface Product {
   id: string;
   nombre: string;
-  categoria: string;
-  stock: number;
-  stock_disponible?: number;
+  categoria?: { nombre: string };
+  cantidadDisponible: number;
   stock_devuelto?: number;
   stock_sobrante?: number;
 }
@@ -48,31 +47,48 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const [usuarioSearch, setUsuarioSearch] = useState('');
-  const [materialSearch, setMaterialSearch] = useState('');
+  const [productSearch, setProductSearch] = useState('');
   const [loteSearch, setLoteSearch] = useState('');
 
   const [debouncedUsuarioSearch, setDebouncedUsuarioSearch] = useState('');
-  const [debouncedMaterialSearch, setDebouncedMaterialSearch] = useState('');
+  const [debouncedProductSearch, setDebouncedProductSearch] = useState('');
   const [debouncedLoteSearch, setDebouncedLoteSearch] = useState('');
 
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
-  const [selectedMateriales, setSelectedMateriales] = useState<{ [key: string]: { material: Material; qty: number; custom: boolean; isSurplus?: boolean } }>({});
+  const [selectedProducts, setSelectedProducts] = useState<{ [key: string]: { product: Product; qty: number; custom: boolean; isSurplus?: boolean } }>({});
   const [selectedLote, setSelectedLote] = useState<Zona | null>(null);
 
   const [categoria, setCategoria] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [lote, setLote] = useState('');
 
   const [filteredUsuarios, setFilteredUsuarios] = useState<Usuario[]>([]);
-  const [filteredMateriales, setFilteredMateriales] = useState<Material[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [filteredZonas, setFilteredZonas] = useState<Zona[]>([]);
 
   /*cambios importantes */
-  // Fetch categorias
-  // Fetch data on open
+  // Reset form when modal opens
+  const resetForm = () => {
+    setUsuarioSearch('');
+    setProductSearch('');
+    setLoteSearch('');
+    setDebouncedUsuarioSearch('');
+    setDebouncedProductSearch('');
+    setDebouncedLoteSearch('');
+    setSelectedUsuarios([]);
+    setSelectedProducts({});
+    setSelectedLote(null);
+    setCategoria('');
+    setDescripcion('');
+    setFilteredUsuarios([]);
+    setFilteredProducts([]);
+    setFilteredZonas([]);
+  };
+
+  // Fetch categorias and reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       fetchCategorias();
+      resetForm();
     }
   }, [isOpen]);
 
@@ -84,13 +100,13 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     return () => clearTimeout(timer);
   }, [usuarioSearch]);
 
-  // Debounce material search
+  // Debounce product search
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedMaterialSearch(materialSearch);
+      setDebouncedProductSearch(productSearch);
     }, 300);
     return () => clearTimeout(timer);
-  }, [materialSearch]);
+  }, [productSearch]);
 
   // Debounce lote search
   useEffect(() => {
@@ -128,32 +144,25 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     fetchFilteredUsuarios();
   }, [debouncedUsuarioSearch]);
 
-  // Filter materiales with search
+  // Filter products with search
   useEffect(() => {
-    const fetchFilteredMateriales = async () => {
-      if (debouncedMaterialSearch.trim()) {
+    const fetchFilteredProducts = async () => {
+      if (debouncedProductSearch.trim()) {
         try {
-          const data = await inventoryService.search(debouncedMaterialSearch);
-          const mapped = data.items.map((item: any) => ({
-            id: item.id,
-            nombre: item.nombre,
-            categoria: item.categoria?.nombre || '',
-            stock: item.stock,
-            stock_disponible: item.stock_disponible || item.stock,
-            stock_devuelto: item.stock_devuelto || 0,
-            stock_sobrante: item.stock_sobrante || 0,
-          }));
-          setFilteredMateriales(mapped);
+          // Use the search endpoint which now considers availability
+          const response = await apiClient.get(`/inventario/search/${encodeURIComponent(debouncedProductSearch)}`);
+          const result = response.data;
+          setFilteredProducts(result.items || []);
         } catch (error) {
-          console.error('Error searching materiales:', error);
-          setFilteredMateriales([]);
+          console.error('Error searching products:', error);
+          setFilteredProducts([]);
         }
       } else {
-        setFilteredMateriales([]);
+        setFilteredProducts([]);
       }
     };
-    fetchFilteredMateriales();
-  }, [debouncedMaterialSearch]);
+    fetchFilteredProducts();
+  }, [debouncedProductSearch]);
 
   // Filter zonas with search
   useEffect(() => {
@@ -183,16 +192,16 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     setSelectedUsuarios(selectedUsuarios.filter(u => u.id !== id));
   };
 
-  const handleSelectMaterial = (material: Material) => {
-    if (selectedMateriales[material.id]) {
-      const newSelected = { ...selectedMateriales };
-      delete newSelected[material.id];
-      setSelectedMateriales(newSelected);
+  const handleSelectProduct = (product: Product) => {
+    if (selectedProducts[product.id]) {
+      const newSelected = { ...selectedProducts };
+      delete newSelected[product.id];
+      setSelectedProducts(newSelected);
     } else {
-      setSelectedMateriales({
-        ...selectedMateriales,
-        [material.id]: {
-          material,
+      setSelectedProducts({
+        ...selectedProducts,
+        [product.id]: {
+          product,
           qty: 0,
           custom: false,
           isSurplus: false
@@ -202,10 +211,10 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   };
 
   const handleQtyChange = (id: string, qty: number) => {
-    setSelectedMateriales({
-      ...selectedMateriales,
+    setSelectedProducts({
+      ...selectedProducts,
       [id]: {
-        ...selectedMateriales[id],
+        ...selectedProducts[id],
         qty,
         custom: true
       }
@@ -214,28 +223,26 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
 
   const handleSelectLote = (zona: Zona) => {
     setSelectedLote(zona);
-    setLote(zona.nombre);
     setLoteSearch('');
   };
 
   const handleRemoveLote = () => {
     setSelectedLote(null);
-    setLote('');
   };
 
   const handleUseSurplus = (id: string) => {
-    const material = selectedMateriales[id].material;
-    const surplus = material.stock_sobrante || 0;
+    const product = selectedProducts[id].product;
+    const surplus = product.stock_sobrante || 0;
     // Show confirmation dialog
     const confirmed = window.confirm(
-      `¿Desea usar el sobrante de ${surplus} unidades de ${material.nombre}? ` +
-      `(Stock disponible: ${material.stock_disponible || material.stock})`
+      `¿Desea usar el sobrante de ${surplus} unidades de ${product.nombre}? ` +
+      `(Stock disponible: ${product.cantidadDisponible})`
     );
     if (confirmed) {
-      setSelectedMateriales({
-        ...selectedMateriales,
+      setSelectedProducts({
+        ...selectedProducts,
         [id]: {
-          ...selectedMateriales[id],
+          ...selectedProducts[id],
           qty: surplus,
           custom: false,
           isSurplus: true
@@ -246,16 +253,16 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
 
   const handleSave = async () => {
     // Validate stock availability
-    const validationPromises = Object.values(selectedMateriales).map(async (mat) => {
-      if (mat.isSurplus) {
-        const surplusStock = mat.material.stock_sobrante || 0;
-        if (mat.qty > surplusStock) {
-          return { valid: false, material: mat.material.nombre, requested: mat.qty, available: surplusStock, type: 'sobrante' };
+    const validationPromises = Object.values(selectedProducts).map(async (prod) => {
+      if (prod.isSurplus) {
+        const surplusStock = prod.product.stock_sobrante || 0;
+        if (prod.qty > surplusStock) {
+          return { valid: false, product: prod.product.nombre, requested: prod.qty, available: surplusStock, type: 'sobrante' };
         }
       } else {
-        const availableStock = mat.material.stock_disponible || mat.material.stock;
-        if (mat.qty > availableStock) {
-          return { valid: false, material: mat.material.nombre, requested: mat.qty, available: availableStock, type: 'disponible' };
+        const availableStock = prod.product.cantidadDisponible;
+        if (prod.qty > availableStock) {
+          return { valid: false, product: prod.product.nombre, requested: prod.qty, available: availableStock, type: 'disponible' };
         }
       }
       return { valid: true };
@@ -267,7 +274,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     if (invalidResults.length > 0) {
       const messages = invalidResults.map(result => {
         const stockType = result.type === 'sobrante' ? 'sobrante' : 'disponible';
-        return `${result.material}: solicitado ${result.requested}, ${stockType} ${result.available}`;
+        return `${result.product}: solicitado ${result.requested}, ${stockType} ${result.available}`;
       });
       alert(`No hay suficiente stock para:\n${messages.join('\n')}`);
       return;
@@ -276,7 +283,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     const data = {
       fecha: selectedDate,
       usuarios: selectedUsuarios.map(u => u.id),
-      materiales: Object.values(selectedMateriales).map(mat => ({ id: mat.material.id, nombre: mat.material.nombre, qty: mat.qty, isSurplus: mat.isSurplus })),
+      materiales: Object.values(selectedProducts).map(prod => ({ id: prod.product.id, nombre: prod.product.nombre, qty: prod.qty, isSurplus: prod.isSurplus })),
       categoria,
       descripcion,
       lote: selectedLote?.id
@@ -330,24 +337,24 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
               </div>
             </div>
 
-            {/* Right Panel: Materiales */}
+            {/* Right Panel: Productos */}
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Insumos / Materiales</label>
+                <label className="block text-sm font-medium mb-2">Productos</label>
                 <Input
                   placeholder="Buscar..."
-                  value={materialSearch}
-                  onChange={(e) => setMaterialSearch(e.target.value)}
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
                   startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
                 />
                 <div className="mt-2 max-h-40 overflow-auto border rounded p-2">
-                  {filteredMateriales.slice(0, 10).map((material) => (
+                  {filteredProducts.slice(0, 10).map((product) => (
                     <button
-                      key={material.id}
+                      key={product.id}
                       className="w-full text-left p-2 hover:bg-gray-100 rounded"
-                      onClick={() => handleSelectMaterial(material)}
+                      onClick={() => handleSelectProduct(product)}
                     >
-                      {material.nombre}
+                      {product.nombre}
                     </button>
                   ))}
                 </div>
@@ -355,27 +362,27 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
               <div>
                 <label className="block text-sm font-medium mb-2">Seleccionados</label>
                 <div className="space-y-2">
-                  {Object.values(selectedMateriales).map((mat) => {
-                    const hasSurplus = (mat.material.stock_sobrante || 0) > 0;
-                    const availableStock = mat.material.stock_disponible || mat.material.stock;
-                    const isOverLimit = mat.qty > availableStock;
-                    const showSurplusButton = hasSurplus && !mat.isSurplus;
+                  {Object.values(selectedProducts).map((prod) => {
+                    const hasSurplus = (prod.product.stock_sobrante || 0) > 0;
+                    const availableStock = prod.product.cantidadDisponible;
+                    const isOverLimit = prod.qty > availableStock;
+                    const showSurplusButton = hasSurplus && !prod.isSurplus;
                     return (
-                      <div key={mat.material.id} className="flex items-center gap-2 p-2 border rounded">
+                      <div key={prod.product.id} className="flex items-center gap-2 p-2 border rounded">
                         <div className="flex-1">
-                          <div className="font-medium">{mat.material.nombre}</div>
+                          <div className="font-medium">{prod.product.nombre}</div>
                           <div className="text-sm text-gray-600">
-                            Disponible: {availableStock} | Sobrante: {mat.material.stock_sobrante || 0}
+                            Disponible: {availableStock} | Sobrante: {prod.product.stock_sobrante || 0}
                           </div>
                         </div>
-                        <Button size="sm" onClick={() => handleSelectMaterial(mat.material)}>
+                        <Button size="sm" onClick={() => handleSelectProduct(prod.product)}>
                           Remover
                         </Button>
                         <Input
                           type="number"
-                          placeholder="Stock a apartar..."
-                          value={mat.qty.toString()}
-                          onChange={(e) => handleQtyChange(mat.material.id, Number(e.target.value))}
+                          placeholder="Cantidad a reservar..."
+                          value={prod.qty.toString()}
+                          onChange={(e) => handleQtyChange(prod.product.id, Number(e.target.value))}
                           size="sm"
                           className={`w-32 ${isOverLimit ? 'border-red-500' : ''}`}
                           min="0"
@@ -385,7 +392,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                           <span className="text-red-500 text-sm">Excede stock disponible</span>
                         )}
                         {showSurplusButton && (
-                          <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(mat.material.id)}>
+                          <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(prod.product.id)}>
                             Usar Sobrante
                           </Button>
                         )}

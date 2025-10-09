@@ -1,13 +1,13 @@
 import React from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
-import type { InventoryItem } from '../../services/inventoryService';
+import type { LoteInventario } from '../../services/inventoryService';
 
 interface InventoryDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  item: InventoryItem | null;
-  onEdit: (item: InventoryItem) => void;
+  item: LoteInventario | null;
+  onEdit: (item: LoteInventario) => void;
   onDelete: (id: string) => void;
 }
 
@@ -38,26 +38,26 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Nombre</label>
-              <p className="mt-1 text-gray-900">{item.nombre}</p>
+              <p className="mt-1 text-gray-900">{item.producto.nombre}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Stock</label>
-              <p className="mt-1 text-gray-900">{item.stock}</p>
+              <label className="block text-sm font-medium text-gray-700">Stock Disponible</label>
+              <p className="mt-1 text-gray-900">{item.cantidadDisponible}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Precio</label>
-              <p className="mt-1 text-gray-900">${item.precio}</p>
+              <label className="block text-sm font-medium text-gray-700">Precio Venta</label>
+              <p className="mt-1 text-gray-900">${item.producto.precioVenta}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Capacidad Unidad</label>
-              <p className="mt-1 text-gray-900">{item.capacidadUnidad || '-'}</p>
+              <label className="block text-sm font-medium text-gray-700">Stock Reservado</label>
+              <p className="mt-1 text-gray-900">{item.cantidadReservada}</p>
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Descripción</label>
-            <p className="mt-1 text-gray-900">{item.descripcion || '-'}</p>
+            <p className="mt-1 text-gray-900">{item.producto.descripcion || '-'}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Fecha de Vencimiento</label>
@@ -65,24 +65,18 @@ const InventoryDetailsModal: React.FC<InventoryDetailsModalProps> = ({ isOpen, o
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Categoría</label>
-              <p className="mt-1 text-gray-900">{item.categoria?.nombre || '-'}</p>
+              <label className="block text-sm font-medium text-gray-700">SKU</label>
+              <p className="mt-1 text-gray-900">{item.producto.sku}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Bodega</label>
               <p className="mt-1 text-gray-900">{item.bodega?.nombre || '-'}</p>
             </div>
           </div>
-          {item.imgUrl && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Imagen</label>
-              <img
-                src={`http://localhost:3000/uploads/${item.imgUrl}`}
-                alt={item.nombre}
-                className="mt-1 w-32 h-32 object-cover rounded-lg"
-              />
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Fecha de Ingreso</label>
+            <p className="mt-1 text-gray-900">{new Date(item.fechaIngreso).toLocaleDateString()}</p>
+          </div>
         </div>
         <div className="flex justify-end mt-6">
           <Button onClick={onClose} variant="light">Cerrar</Button>

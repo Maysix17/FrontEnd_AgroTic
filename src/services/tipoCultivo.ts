@@ -26,13 +26,5 @@ export const updateTipoCultivo = async (
 
 // DELETE
 export const deleteTipoCultivo = async (id: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Error al eliminar el tipo de cultivo");
-  }
   await apiClient.delete(`/tipo-cultivos/${id}`);
 };

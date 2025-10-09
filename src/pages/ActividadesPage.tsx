@@ -8,21 +8,15 @@ import 'react-datepicker/dist/react-datepicker.css';
 import ActividadModal from '../components/organisms/ActividadModal';
 import ActivityListModal from '../components/organisms/ActivityListModal';
 import ActivityDetailModal from '../components/organisms/ActivityDetailModal';
-import FinalizeActivityModal from '../components/organisms/FinalizeActivityModal';
 import {
-  getActividadesByDateRange,
-  getActividadesCountByDate,
-  getActividadesByDate,
-  getActividadesByDateWithActive,
-  createActividad,
-  updateActividad,
-  deleteActividad,
-  uploadActividadEvidence,
-  createUsuarioXActividad,
-  createInventarioXActividad,
-  createMovimiento,
-  finalizarActividad
-} from '../services/actividadesService';
+   getActividadesByDateRange,
+   getActividadesCountByDate,
+   getActividadesByDateWithActive,
+   createActividad,
+   deleteActividad,
+   createUsuarioXActividad,
+   createReservationByProduct
+ } from '../services/actividadesService';
 
 const localizer = dateFnsLocalizer({
   format,
@@ -42,7 +36,6 @@ const ActividadesPage: React.FC = () => {
   const [activities, setActivities] = useState<any[]>([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<any>(null);
-  const [isFinalizeModalOpen, setIsFinalizeModalOpen] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
   const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
 
@@ -236,26 +229,28 @@ const ActividadesPage: React.FC = () => {
                await createUsuarioXActividad({ fkUsuarioId: userId, fkActividadId: actividad.id, fechaAsignacion: data.fecha });
              }
 
-            // Save materials and movements
+            // Save reservations
             console.log('Processing materials:', data.materiales);
             for (const mat of data.materiales) {
-               console.log('Processing material:', mat);
-               await createInventarioXActividad({ fkInventarioId: mat.id, fkActividadId: actividad.id, cantidadUsada: mat.qty });
-               console.log('InventarioXActividad created for:', mat.id);
-
-               // Create movement for reservation or surplus usage
-               if (mat.isSurplus) {
-                 console.log('Creating surplus movement for:', mat.id, 'quantity:', mat.qty);
-                 await createMovimiento({ fkInventarioId: mat.id, stockReservadoSobrante: mat.qty });
-                 console.log('Surplus movement created');
-               } else {
-                 console.log('Creating regular movement for:', mat.id, 'quantity:', mat.qty);
-                 await createMovimiento({ fkInventarioId: mat.id, stockReservado: mat.qty });
-                 console.log('Regular movement created');
+                 console.log('Processing material:', mat);
+                 await createReservationByProduct(actividad.id, { productId: mat.id, cantidadReservada: mat.qty });
+                 console.log('Reservation created for product:', mat.id);
                }
-             }
 
             alert('Actividad guardada exitosamente');
+
+            // Refresh calendar data and close modal
+            await fetchEvents(selectedDate);
+
+            // If the activity was created for the same date as currently viewed activities, refresh the list
+            const activityDateStr = format(data.fecha, 'yyyy-MM-dd');
+            const modalDateStr = format(modalDate, 'yyyy-MM-dd');
+            if (activityDateStr === modalDateStr && isListModalOpen) {
+              const updatedActivities = await getActividadesByDateWithActive(activityDateStr);
+              setActivities(updatedActivities);
+            }
+
+            setIsModalOpen(false);
           } catch (error) {
             console.error('Error saving actividad:', error);
             alert('Error al guardar la actividad');
@@ -277,7 +272,7 @@ const ActividadesPage: React.FC = () => {
           setIsListModalOpen(false);
         }}
         onRegisterNew={() => {
-          setModalDate(new Date()); // or from the date
+          setModalDate(modalDate); // Keep the same date as the list
           setIsModalOpen(true);
           setIsListModalOpen(false);
         }}
@@ -289,16 +284,6 @@ const ActividadesPage: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         activity={selectedActivity}
-        onUpdate={async (id, data) => {
-          try {
-            await updateActividad(id, data);
-            alert('Actividad actualizada');
-            setIsDetailModalOpen(false);
-          } catch (error) {
-            console.error('Error updating:', error);
-            alert('Error al actualizar');
-          }
-        }}
         onDelete={async (id) => {
           try {
             await deleteActividad(id);
@@ -309,37 +294,12 @@ const ActividadesPage: React.FC = () => {
             alert('Error al eliminar');
           }
         }}
-        onFinalize={(activity) => {
-          setSelectedActivity(activity);
-          setIsFinalizeModalOpen(true);
-          setIsDetailModalOpen(false);
-        }}
       />
         
       
 
      
 
-      <FinalizeActivityModal
-        isOpen={isFinalizeModalOpen}
-        onClose={() => setIsFinalizeModalOpen(false)}
-        activity={selectedActivity}
-        onSave={async (data) => {
-          try {
-            await finalizarActividad(data.activityId, {
-              observacion: data.observacion,
-              imgUrl: data.evidence,
-              horas: data.horas,
-              precioHora: data.precioHora,
-            });
-            alert('Actividad finalizada');
-            setIsFinalizeModalOpen(false);
-          } catch (error) {
-            console.error('Error finalizing:', error);
-            alert('Error al finalizar');
-          }
-        }}
-      />
 
     </div>
   );

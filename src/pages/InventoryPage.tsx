@@ -6,20 +6,20 @@ import MobileCard from '../components/atoms/MobileCard';
 import type { CardField, CardAction } from '../types/MobileCard.types';
 import InventoryModal from '../components/organisms/InventoryModal';
 import { inventoryService } from '../services/inventoryService';
-import type { InventoryItem } from '../services/inventoryService';
+import type { LoteInventario } from '../services/inventoryService';
 import InventoryDetailsModal from '../components/organisms/InventoryDetailsModal';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import Swal from 'sweetalert2';
 
 const InventoryPage: React.FC = () => {
   const [searchInput, setSearchInput] = useState('');
-  const [results, setResults] = useState<InventoryItem[]>([]);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [results, setResults] = useState<LoteInventario[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-  const [editItem, setEditItem] = useState<InventoryItem | null>(null);
+  const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [isSearchMode, setIsSearchMode] = useState(false);
@@ -27,41 +27,66 @@ const InventoryPage: React.FC = () => {
   const limit = 10; // Items per page
   const totalPages = Math.ceil(total / limit);
 
+  // Debounce search input
   useEffect(() => {
-    fetchInventory(currentPage);
-  }, [currentPage]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Fetch data based on debounced search
+  useEffect(() => {
+    if (debouncedSearch.trim()) {
+      handleSearch(debouncedSearch);
+    } else {
+      fetchInventory(1);
+      setCurrentPage(1);
+    }
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (isSearchMode && debouncedSearch.trim()) {
+      handleSearchWithPage(debouncedSearch, currentPage);
+    } else if (!debouncedSearch.trim()) {
+      fetchInventory(currentPage);
+    }
+  }, [currentPage, debouncedSearch, isSearchMode]);
 
   const fetchInventory = async (page: number) => {
+    console.log('Fetching inventory for page:', page);
     setLoading(true);
     setError(null);
     try {
       const response = await inventoryService.getAll(page, limit);
+      console.log('Inventory response:', response);
       setResults(response.items);
       setTotal(response.total);
       setIsSearchMode(false);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cargar inventario');
+    } catch (err: unknown) {
+      console.error('Error fetching inventory:', err);
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Error al cargar inventario');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchInput.trim()) {
-      fetchInventory(1);
-      setCurrentPage(1);
-      return;
-    }
+  const handleSearch = async (query: string) => {
+    console.log('Searching inventory with query:', query);
     setLoading(true);
     setError(null);
     try {
-      const response = await inventoryService.search(searchInput, 1, limit);
+      const response = await inventoryService.search(query, 1, limit);
+      console.log('Search response:', response);
       setResults(response.items);
       setTotal(response.total);
       setCurrentPage(1);
       setIsSearchMode(true);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al buscar inventario');
+    } catch (err: unknown) {
+      console.error('Error searching inventory:', err);
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Error al buscar inventario');
     } finally {
       setLoading(false);
     }
@@ -71,11 +96,22 @@ const InventoryPage: React.FC = () => {
     setCurrentPage(page);
   };
 
-  const handleEdit = (item: InventoryItem) => {
-    setEditItem(item);
-    setIsInventoryModalOpen(true);
-    setIsDetailsModalOpen(false);
+  const handleSearchWithPage = async (query: string, page: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await inventoryService.search(query, page, limit);
+      setResults(response.items);
+      setTotal(response.total);
+      setIsSearchMode(true);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || 'Error al buscar inventario');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const handleDelete = async (id: string) => {
     const result = await Swal.fire({
@@ -94,13 +130,13 @@ const InventoryPage: React.FC = () => {
         await inventoryService.delete(id);
         Swal.fire('Eliminado', 'El inventario ha sido eliminado.', 'success');
         fetchInventory(currentPage);
-      } catch (error) {
+      } catch {
         Swal.fire('Error', 'No se pudo eliminar el inventario.', 'error');
       }
     }
   };
 
-  const headers = ['Nombre', 'Stock', 'Precio', 'Categoría', 'Bodega', 'Ver más'];
+  const headers = ['Nombre', 'Stock Disponible', 'Precio Venta', 'SKU', 'Bodega', 'Ver más'];
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-6">
@@ -112,16 +148,16 @@ const InventoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="mb-4 flex gap-2 items-center">
+      {/* 
+       <div className="mb-4">
         <InputSearch
           placeholder="Buscar por nombre..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <CustomButton variant="solid" onClick={handleSearch}>Buscar</CustomButton>
-      </div>
+      </div>*/
+      }
+     
 
       {/* Desktop Table */}
       <div className="hidden md:block">
@@ -134,10 +170,10 @@ const InventoryPage: React.FC = () => {
             <Table headers={headers}>
               {results.map((item, index) => (
                 <tr key={item.id || index} className="border-b">
-                  <td className="px-4 py-2">{item.nombre}</td>
-                  <td className="px-4 py-2">{item.stock}</td>
-                  <td className="px-4 py-2">${item.precio}</td>
-                  <td className="px-4 py-2">{item.categoria?.nombre || '-'}</td>
+                  <td className="px-4 py-2">{item.producto.nombre}</td>
+                  <td className="px-4 py-2">{item.cantidadDisponible}</td>
+                  <td className="px-4 py-2">${item.producto.precioVenta}</td>
+                  <td className="px-4 py-2">{item.producto.sku}</td>
                   <td className="px-4 py-2">{item.bodega?.nombre || '-'}</td>
                   <td className="px-4 py-2">
                     <button
@@ -190,10 +226,10 @@ const InventoryPage: React.FC = () => {
           <>
             {results.map((item, index) => {
               const fields: CardField[] = [
-                { label: 'Nombre', value: item.nombre },
-                { label: 'Stock', value: item.stock.toString() },
-                { label: 'Precio', value: `$${item.precio}` },
-                { label: 'Categoría', value: item.categoria?.nombre || '-' },
+                { label: 'Nombre', value: item.producto.nombre },
+                { label: 'Stock Disponible', value: item.cantidadDisponible },
+                { label: 'Precio Venta', value: `$${item.producto.precioVenta}` },
+                { label: 'SKU', value: item.producto.sku },
                 { label: 'Bodega', value: item.bodega?.nombre || '-' },
               ];
 
@@ -239,19 +275,18 @@ const InventoryPage: React.FC = () => {
         isOpen={isInventoryModalOpen}
         onClose={() => {
           setIsInventoryModalOpen(false);
-          setEditItem(null);
         }}
         onInventoryCreated={() => {
           fetchInventory(currentPage);
         }}
-        editItem={editItem}
+        editItem={null}
       />
 
       <InventoryDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         item={selectedItem}
-        onEdit={handleEdit}
+        onEdit={() => {}} // Placeholder since edit is disabled
         onDelete={handleDelete}
       />
     </div>

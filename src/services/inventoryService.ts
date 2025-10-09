@@ -40,6 +40,27 @@ export interface InventoryItem {
   stock_sobrante?: number;
 }
 
+export interface LoteInventario {
+  id: string;
+  fkProductoId: string;
+  fkBodegaId: string;
+  cantidadDisponible: string;
+  cantidadReservada: string;
+  fechaIngreso: string;
+  fechaVencimiento?: string;
+  esParcial: boolean;
+  producto: {
+    id: string;
+    nombre: string;
+    descripcion?: string;
+    sku: string;
+    precioCompra: string;
+    precioVenta: string;
+    // Add other product fields as needed
+  };
+  bodega: Bodega;
+}
+
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
@@ -91,12 +112,12 @@ export const inventoryService = {
     return response.data;
   },
 
-  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<InventoryItem>> => {
+  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<LoteInventario>> => {
     const response = await apiClient.get(`/inventario?page=${page}&limit=${limit}`);
     return response.data;
   },
 
-  search: async (query: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<InventoryItem>> => {
+  search: async (query: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<LoteInventario>> => {
     const response = await apiClient.get(`/inventario/search/${query}?page=${page}&limit=${limit}`);
     return response.data;
   },
