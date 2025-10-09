@@ -42,6 +42,35 @@ export interface Movimiento {
   stockReservadoSobrante?: number;
 }
 
+export interface Reservation {
+  id: string;
+  fkActividadId: string;
+  fkLoteId: string;
+  fkEstadoId: number;
+  cantidadReservada: number;
+  cantidadUsada?: number;
+  cantidadDevuelta?: number;
+  actividad?: Actividad;
+  lote?: any; // LotesInventario
+  estado?: any; // EstadoReserva
+}
+
+export interface CreateReservationData {
+  loteId: string;
+  cantidadReservada: number;
+  estadoId?: number;
+}
+
+export interface CreateReservationByProductData {
+  productId: string;
+  cantidadReservada: number;
+  estadoId?: number;
+}
+
+export interface ConfirmUsageData {
+  cantidadUsada: number;
+}
+
 export const getActividadesByDateRange = async (start: string, end: string): Promise<Actividad[]> => {
   const response = await apiClient.get(`/actividades/by-date-range?start=${start}&end=${end}`);
   return response.data;
@@ -109,4 +138,23 @@ export const finalizarActividad = async (id: string, data: { observacion?: strin
       'Content-Type': 'multipart/form-data',
     },
   });
+};
+
+export const createReservation = async (actividadId: string, data: CreateReservationData): Promise<Reservation> => {
+  const response = await apiClient.post(`/actividades/${actividadId}/reservas`, data);
+  return response.data;
+};
+
+export const createReservationByProduct = async (actividadId: string, data: CreateReservationByProductData): Promise<Reservation> => {
+  const response = await apiClient.post(`/actividades/${actividadId}/reservas/producto`, data);
+  return response.data;
+};
+
+export const confirmUsage = async (reservaId: string, data: ConfirmUsageData): Promise<void> => {
+  await apiClient.patch(`/actividades/reservas/${reservaId}/confirm-usage`, data);
+};
+
+export const getReservationsByActivity = async (actividadId: string): Promise<Reservation[]> => {
+  const response = await apiClient.get(`/actividades/${actividadId}/reservas`);
+  return response.data;
 };

@@ -1,6 +1,5 @@
 import type { Cultivo, SearchCultivoDto, CreateCultivoData } from "../types/cultivos.types";
 import apiClient from '../lib/axios/axios';
-import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 
 export const searchCultivos = async (
   searchData: SearchCultivoDto
@@ -15,17 +14,8 @@ export const getAllCultivos = async (): Promise<Cultivo[]> => {
 };
 
 export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> => {
-  const response = await fetch(`${API_URL}/cultivos`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    throw new Error("Error al crear cultivo");
-  }
-
-  return response.json();
+  const response = await apiClient.post('/cultivos', data);
+  return response.data;
 };
 
 export const getCultivosVariedadXZonaByCultivo = async (cultivoId: string): Promise<any[]> => {
