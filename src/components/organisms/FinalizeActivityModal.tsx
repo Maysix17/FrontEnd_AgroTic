@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input, Textarea } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input } from '@heroui/react';
 
 const styles = `
   body {
@@ -190,6 +190,16 @@ interface Activity {
   descripcion: string;
   inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
   usuariosAsignados?: { usuario: { nombres: string; apellidos: string; id: string }; activo: boolean }[];
+  reservas?: {
+    id: string;
+    cantidadReservada: number;
+    lote: {
+      producto: {
+        nombre: string;
+        unidadMedida: { nombre: string; abreviatura: string };
+      };
+    };
+  }[];
 }
 
 interface FinalizeActivityModalProps {
@@ -200,34 +210,24 @@ interface FinalizeActivityModalProps {
 }
 
 const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, onClose, activity, onSave }) => {
-  const [returns, setReturns] = useState<{ [key: string]: number }>({});
-  const [surplus, setSurplus] = useState<{ [key: string]: number }>({});
-  const [horas, setHoras] = useState(0);
-  const [precioHora, setPrecioHora] = useState(''); // No default
-  const [observacion, setObservacion] = useState('');
-  const [evidence, setEvidence] = useState<File | null>(null);
+  const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     if (isOpen && activity) {
       // Reset states
-      setReturns({});
-      setSurplus({});
-      setHoras(0);
-      setPrecioHora('');
-      setObservacion('');
-      setEvidence(null);
+      setReturnedQuantities({});
     }
   }, [isOpen, activity]);
 
   const handleSave = () => {
+    const reservas = activity?.reservas?.map(reserva => ({
+      reservaId: reserva.id,
+      cantidadDevuelta: returnedQuantities[reserva.id] || 0,
+    })) || [];
+
     const data = {
-      activityId: activity?.id,
-      returns,
-      surplus,
-      horas,
-      precioHora,
-      observacion,
-      evidence,
+      actividadId: activity?.id,
+      reservas,
     };
     onSave(data);
     onClose();
@@ -235,9 +235,6 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
 
   if (!activity) return null;
 
-  // Filter active assignments
-  const activeInsumos = activity.inventarioUsado?.filter(i => i.activo && i.inventario?.categoria?.nombre !== 'Herramientas') || [];
-  const activeHerramientas = activity.inventarioUsado?.filter(i => i.activo && i.inventario?.categoria?.nombre === 'Herramientas') || [];
 
   return (
     <>
@@ -252,21 +249,24 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
         </ModalHeader>
         <ModalBody>
           <form className="activity-form">
-            {/* Cantidad sobrante devuelta (Insumos) */}
+            {/* Reservas realizadas */}
             <div className="section">
-              <h3>Cantidad sobrante devuelta</h3>
-              <div className="sobrantes-container">
+              <h3>Reservas realizadas</h3>
+              <div className="reservas-container">
                 <div className="form-group-pair">
-                  {activeInsumos.map((ixa) => (
-                    <div key={ixa.inventario.id} className="form-group">
-                      <label htmlFor={`return-${ixa.inventario.id}`}>{ixa.inventario.nombre}:</label>
+                  {activity?.reservas?.map((reserva) => (
+                    <div key={reserva.id} className="form-group">
+                      <label htmlFor={`return-${reserva.id}`}>
+                        {reserva.cantidadReservada} {reserva.lote.producto.unidadMedida.abreviatura} de {reserva.lote.producto.nombre}
+                      </label>
                       <Input
-                        id={`return-${ixa.inventario.id}`}
+                        id={`return-${reserva.id}`}
                         type="number"
-                        value={returns[ixa.inventario.id]?.toString() || ''}
-                        onChange={(e) => setReturns({ ...returns, [ixa.inventario.id]: Number(e.target.value) })}
+                        placeholder="Cantidad a devolver"
+                        value={returnedQuantities[reserva.id]?.toString() || ''}
+                        onChange={(e) => setReturnedQuantities({ ...returnedQuantities, [reserva.id]: Number(e.target.value) })}
                         min="0"
-                        max={ixa.cantidadUsada}
+                        max={reserva.cantidadReservada}
                         className="border-gray-300"
                       />
                     </div>
@@ -275,72 +275,6 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
               </div>
             </div>
 
-            {/* Herramientas devueltas */}
-            <div className="section">
-              <h3>Herramientas devueltas</h3>
-              <div className="herramientas-container">
-                <div className="form-group-pair">
-                  {activeHerramientas.map((ixa) => (
-                    <div key={ixa.inventario.id} className="form-group">
-                      <label htmlFor={`surplus-${ixa.inventario.id}`}>{ixa.inventario.nombre}:</label>
-                      <Input
-                        id={`surplus-${ixa.inventario.id}`}
-                        type="number"
-                        value={surplus[ixa.inventario.id]?.toString() || ''}
-                        onChange={(e) => setSurplus({ ...surplus, [ixa.inventario.id]: Number(e.target.value) })}
-                        min="0"
-                        className="border-gray-300"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Horas y Precio */}
-            <div className="form-group-pair">
-              <div className="form-group">
-                <label htmlFor="horas">Horas dedicadas:</label>
-                <Input
-                  id="horas"
-                  type="number"
-                  value={horas.toString()}
-                  onChange={(e) => setHoras(Number(e.target.value))}
-                  className="border-gray-300"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="precio">Precio por hora:</label>
-                <Input
-                  id="precio"
-                  value={precioHora}
-                  onChange={(e) => setPrecioHora(e.target.value)}
-                  className="border-gray-300"
-                />
-              </div>
-            </div>
-
-            {/* Observación */}
-            <div className="form-group full-width">
-              <label htmlFor="observacion">Observación: (opcional)</label>
-              <Textarea
-                id="observacion"
-                value={observacion}
-                onChange={(e) => setObservacion(e.target.value)}
-              />
-            </div>
-
-            {/* Evidencia */}
-            <div className="form-group full-width">
-              <label htmlFor="evidencia">Subir evidencia:</label>
-              <Input
-                id="evidencia"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setEvidence(e.target.files?.[0] || null)}
-                className="border-gray-300"
-              />
-            </div>
 
             {/* Botón */}
             <div className="button-container">
