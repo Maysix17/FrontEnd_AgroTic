@@ -4,7 +4,6 @@ import TipoCultivoForm from '../molecules/TipoCultivoForm';
 import type { TipoCultivoData } from '../../types/tipoCultivo.types';
 import {
   getTipoCultivos,
-  updateTipoCultivo,
   deleteTipoCultivo,
 } from '../../services/tipoCultivo';
 import Table from '../atoms/Table';

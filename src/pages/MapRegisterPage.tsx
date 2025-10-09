@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import MapModal from "../components/organisms/MapModal";
 import CustomButton from "../components/atoms/Boton";
 

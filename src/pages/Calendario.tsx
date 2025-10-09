@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import DateRangeInput from "../components/atoms/DateRangeInput";
 
 function Calendario() {

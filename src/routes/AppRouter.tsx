@@ -12,13 +12,9 @@ import UserProfilePage from "../pages/UserProfilePage";
 import PanelControl from "../components/organisms/PanelControl";
 import ProtectedRoute from "../components/ProtectedRoute";
 
-import TipoCultivoPage from "../pages/TipoCultivoPage";
-import VariedadPage from "../pages/VariedadPage";
 import Dashboard from "../pages/Dashboard";
 import CultivosPage from "../pages/CultivosPage";
 import ActividadesPage from "../pages/ActividadesPage";
-import BotonPage from "../pages/BotonPage";
-import TablePage from "../pages/TablePage";
 import ZapatoPage from "../pages/ZapatoPage";
 import InventoryPage from "../pages/InventoryPage";
 

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
 import DateRangeInput from "../components/atoms/DateRangeInput";
 import Table from "../components/atoms/Table";
 import MobileCard from "../components/atoms/MobileCard";
 import type { CardField, CardAction } from "../types/MobileCard.types";
-import { useNavigate } from "react-router-dom";
 import { searchCultivos } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
@@ -16,7 +15,6 @@ import VentaModal from "../components/organisms/VentaModal";
 import FichaModal from "../components/organisms/FichaModal";
 
 const CultivosPage: React.FC = () => {
-  const navigate = useNavigate();
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<SearchCultivoDto>({});
