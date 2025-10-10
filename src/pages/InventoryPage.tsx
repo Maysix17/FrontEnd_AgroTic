@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import InputSearch from '../components/atoms/buscador';
 import CustomButton from '../components/atoms/Boton';
 import Table from '../components/atoms/Table';
 import MobileCard from '../components/atoms/MobileCard';
@@ -12,8 +11,7 @@ import { EyeIcon } from '@heroicons/react/24/outline';
 import Swal from 'sweetalert2';
 
 const InventoryPage: React.FC = () => {
-  const [searchInput, setSearchInput] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = '';
   const [results, setResults] = useState<LoteInventario[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,14 +24,6 @@ const InventoryPage: React.FC = () => {
 
   const limit = 10; // Items per page
   const totalPages = Math.ceil(total / limit);
-
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
 
   // Fetch data based on debounced search
   useEffect(() => {

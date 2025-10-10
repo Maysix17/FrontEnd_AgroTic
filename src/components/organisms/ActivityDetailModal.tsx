@@ -8,7 +8,7 @@ interface Reservation {
   cantidadUsada?: number;
   lote?: {
     nombre: string;
-    producto: { nombre: string };
+    producto: { nombre: string; unidadMedida?: { abreviatura: string } };
   };
   estado?: { nombre: string };
 }
@@ -160,8 +160,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                     <div className="flex justify-between items-center">
                       <span>{res.lote?.producto?.nombre}</span>
                       <div className="text-sm">
-                        <div>Reservado: {res.cantidadReservada}</div>
-                        <div>Usado: {res.cantidadUsada || 0}</div>
+                        <div>Reservado: {res.cantidadReservada} {res.lote?.producto?.unidadMedida?.abreviatura}</div>
+                        <div>Usado: {res.cantidadUsada || 0} {res.lote?.producto?.unidadMedida?.abreviatura}</div>
                         <div>Estado: {res.estado?.nombre}</div>
                       </div>
                     </div>

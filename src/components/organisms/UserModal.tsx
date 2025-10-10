@@ -13,13 +13,8 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout, hasPermission } = usePermission();
+  const { user, hasPermission } = usePermission();
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
 
   const handleEditProfile = () => {
     // TODO: Navigate to edit profile page

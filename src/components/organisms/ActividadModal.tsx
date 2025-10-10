@@ -21,6 +21,7 @@ interface Product {
   cantidadDisponible: number;
   stock_devuelto?: number;
   stock_sobrante?: number;
+  unidadMedida?: { abreviatura: string };
 }
 
 interface Categoria {
@@ -372,7 +373,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                         <div className="flex-1">
                           <div className="font-medium">{prod.product.nombre}</div>
                           <div className="text-sm text-gray-600">
-                            Disponible: {availableStock} | Sobrante: {prod.product.stock_sobrante || 0}
+                            Disponible: {availableStock} {prod.product.unidadMedida?.abreviatura} | Sobrante: {prod.product.stock_sobrante || 0} {prod.product.unidadMedida?.abreviatura}
                           </div>
                         </div>
                         <Button size="sm" onClick={() => handleSelectProduct(prod.product)}>
