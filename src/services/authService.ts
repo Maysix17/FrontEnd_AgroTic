@@ -37,6 +37,9 @@ export const registerUser = async (
 export const logoutUser = async (): Promise<void> => {
   try {
     await apiClient.post("/auth/logout");
+    // Clear local storage and session storage
+    localStorage.clear();
+    sessionStorage.clear();
   } catch (error) {
     console.error("Error during logout:", error);
     throw error;
@@ -45,18 +48,29 @@ export const logoutUser = async (): Promise<void> => {
 
 export const loginUser = async (payload: LoginPayload): Promise<void> => {
   try {
-    await apiClient.post("/auth/login", payload);
+    console.log("AuthService: Attempting login with payload:", { ...payload, password: '[REDACTED]' });
+    const response = await apiClient.post("/auth/login", payload);
+    console.log("AuthService: Login response:", response.data);
+    console.log("AuthService: Cookies after login:", document.cookie);
+    return response.data;
   } catch (error) {
-    console.error("Login failed:", error);
+    console.error("AuthService: Login failed:", error);
+    console.error("AuthService: Login error response:", (error as any)?.response?.data);
     throw error;
   }
 };
 
 export const refreshToken = async (): Promise<void> => {
+  console.log("AuthService: Attempting to refresh token");
+  console.log("AuthService: Current cookies for refresh:", document.cookie);
+
   try {
-    await apiClient.post("/auth/refresh");
+    const response = await apiClient.post("/auth/refresh");
+    console.log("AuthService: Token refresh successful, new cookies:", document.cookie);
+    console.log("AuthService: Refresh response:", response.data);
   } catch (error) {
-    console.error("Refresh failed:", error);
+    console.error("AuthService: Refresh failed:", error);
+    console.error("AuthService: Refresh error response:", (error as any)?.response);
     throw error;
   }
 };

@@ -6,6 +6,7 @@ import {
 } from "@heroui/react";
 import { usePermission } from "../../contexts/PermissionContext";
 import { useNavigate } from "react-router-dom";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -13,7 +14,7 @@ interface UserModalProps {
 }
 
 const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
-  const { user, hasPermission } = usePermission();
+  const { user, hasPermission, logout } = usePermission();
   const navigate = useNavigate();
 
   const handleEditProfile = () => {
@@ -24,6 +25,14 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
   const handleControlPanel = () => {
     navigate('/app/panel-control');
     onClose();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // Logout now handles redirect internally
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   if (!user) return null;
@@ -81,21 +90,30 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-3 justify-center items-center mt-4">
-                <Button
-                  onClick={handleEditProfile}
-                  className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-none shadow-md hover:shadow-lg px-4 py-2 rounded-lg font-bold w-full md:w-auto"
-                >
-                  Editar perfil
-                </Button>
-                {hasPermission('Usuarios', 'panel de control', 'ver') && (
+              <div className="flex flex-col md:flex-row gap-3 justify-between items-center mt-4">
+                <div className="flex flex-col md:flex-row gap-3">
                   <Button
-                    onClick={handleControlPanel}
-                    className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold w-full md:w-auto"
+                    onClick={handleEditProfile}
+                    className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-none shadow-md hover:shadow-lg px-4 py-2 rounded-lg font-bold w-full md:w-auto"
                   >
-                    Panel de control
+                    Editar perfil
                   </Button>
-                )}
+                  {hasPermission('Usuarios', 'panel de control', 'ver') && (
+                    <Button
+                      onClick={handleControlPanel}
+                      className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold w-full md:w-auto"
+                    >
+                      Panel de control
+                    </Button>
+                  )}
+                </div>
+                <Button
+                  onClick={handleLogout}
+                  className="bg-red-500 text-white border-none shadow-md hover:shadow-lg px-4 py-2 rounded-lg font-bold w-full md:w-auto flex items-center gap-2"
+                >
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                  Cerrar sesión
+                </Button>
               </div>
             </div>
         </div>

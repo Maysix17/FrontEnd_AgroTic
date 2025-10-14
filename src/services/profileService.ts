@@ -14,11 +14,16 @@ export interface UpdateProfilePayload {
  * Obtiene los datos del perfil del usuario autenticado.
  */
 export const getProfile = async (): Promise<User> => {
+  console.log("ProfileService: Attempting to get user profile");
+  console.log("ProfileService: Current cookies:", document.cookie);
+
   try {
     const response = await apiClient.get<User>("/usuarios/me");
+    console.log("ProfileService: Profile fetched successfully:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error al obtener el perfil:", error);
+    console.error("ProfileService: Error al obtener el perfil:", error);
+    console.error("ProfileService: Error response:", (error as any)?.response);
     throw error;
   }
 };
