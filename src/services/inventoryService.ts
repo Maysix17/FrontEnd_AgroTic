@@ -198,4 +198,9 @@ export const inventoryService = {
     const response = await apiClient.put(`/lotes-inventario/${id}`, data);
     return response.data;
   },
+
+  createProductoWithLote: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/productos/with-lote', data);
+    return response.data;
+  },
 };

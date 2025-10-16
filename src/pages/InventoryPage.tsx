@@ -3,7 +3,7 @@ import CustomButton from '../components/atoms/Boton';
 import Table from '../components/atoms/Table';
 import MobileCard from '../components/atoms/MobileCard';
 import type { CardField, CardAction } from '../types/MobileCard.types';
-import InventoryModal from '../components/organisms/InventoryModal';
+import UnifiedProductModal from '../components/organisms/UnifiedProductModal';
 import { inventoryService } from '../services/inventoryService';
 import type { LoteInventario } from '../services/inventoryService';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -17,7 +17,7 @@ const InventoryPage: React.FC = () => {
    const [results, setResults] = useState<LoteInventario[]>([]);
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
-   const [isInventoryModalOpen, setIsInventoryModalOpen] = useState(false);
+   const [isUnifiedProductModalOpen, setIsUnifiedProductModalOpen] = useState(false);
      const [isImageModalOpen, setIsImageModalOpen] = useState(false);
      const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
      const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
@@ -123,7 +123,7 @@ const InventoryPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
         <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Inventario</h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
-          <CustomButton onClick={() => setIsInventoryModalOpen(true)}>Registrar Inventario</CustomButton>
+          <CustomButton onClick={() => setIsUnifiedProductModalOpen(true)}>Registrar Producto</CustomButton>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ const InventoryPage: React.FC = () => {
                       <button
                         onClick={() => {
                           setEditItem(item);
-                          setIsInventoryModalOpen(true);
+                          setIsUnifiedProductModalOpen(true);
                         }}
                         className="text-blue-500 hover:text-blue-700"
                         title="Editar"
@@ -247,7 +247,7 @@ const InventoryPage: React.FC = () => {
                   label: 'Editar',
                   onClick: () => {
                     setEditItem(item);
-                    setIsInventoryModalOpen(true);
+                    setIsUnifiedProductModalOpen(true);
                   },
                   size: 'sm',
                 },
@@ -285,16 +285,16 @@ const InventoryPage: React.FC = () => {
         )}
       </div>
 
-      <InventoryModal
-        isOpen={isInventoryModalOpen}
+      <UnifiedProductModal
+        isOpen={isUnifiedProductModalOpen}
         onClose={() => {
-          setIsInventoryModalOpen(false);
+          setIsUnifiedProductModalOpen(false);
           setEditItem(null);
         }}
-        onInventoryCreated={() => {
-          fetchInventory(currentPage);
+        onProductCreated={() => {
+          fetchAllInventory();
+          setCurrentPage(1);
         }}
-        editItem={editItem as any}
       />
 
       <Modal isOpen={isImageModalOpen} onOpenChange={setIsImageModalOpen} size="2xl">
