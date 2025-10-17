@@ -197,17 +197,25 @@ export const inventoryService = {
   },
 
   createLote: async (data: any): Promise<any> => {
-    const response = await apiClient.post('/lotes-inventario', data);
+    const response = await apiClient.post('/inventario', data);
     return response.data;
   },
 
   updateLote: async (id: string, data: any): Promise<any> => {
-    const response = await apiClient.put(`/lotes-inventario/${id}`, data);
+    const response = await apiClient.put(`/inventario/${id}`, data);
     return response.data;
   },
 
   createProductoWithLote: async (data: any): Promise<any> => {
     const response = await apiClient.post('/productos/with-lote', data);
+    return response.data;
+  },
+
+  updateInventoryItem: async (id: string, data: any): Promise<any> => {
+    console.log('DEBUG: updateInventoryItem called with ID:', id);
+    console.log('DEBUG: updateInventoryItem data:', data);
+    const response = await apiClient.patch(`/inventario/${id}`, data);
+    console.log('DEBUG: updateInventoryItem response:', response);
     return response.data;
   },
 };

@@ -10,12 +10,14 @@ interface UnifiedProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProductCreated: () => void;
+  editItem?: any;
 }
 
 const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
   isOpen,
   onClose,
   onProductCreated,
+  editItem,
 }) => {
   const [formData, setFormData] = useState({
     // Product fields
@@ -44,9 +46,13 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
       fetchCategorias();
       fetchBodegas();
       fetchUnidadesMedida();
-      resetForm();
+      if (editItem) {
+        populateFormWithEditData();
+      } else {
+        resetForm();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, editItem]);
 
   const resetForm = () => {
     setFormData({
@@ -63,6 +69,25 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
     });
     setSelectedFile(null);
     setErrors({});
+  };
+
+  const populateFormWithEditData = () => {
+    if (editItem) {
+      setFormData({
+        nombre: editItem.producto.nombre || '',
+        descripcion: editItem.producto.descripcion || '',
+        sku: editItem.producto.sku || '',
+        precioCompra: editItem.producto.precioCompra || '',
+        capacidadPresentacion: editItem.producto.capacidadPresentacion || '',
+        fkCategoriaId: editItem.producto.categoria?.id || '',
+        fkUnidadMedidaId: editItem.producto.unidadMedida?.id || '',
+        fkBodegaId: editItem.bodega?.id || '',
+        stock: editItem.stock?.toString() || '',
+        fechaVencimiento: editItem.fechaVencimiento ? new Date(editItem.fechaVencimiento).toISOString().split('T')[0] : '',
+      });
+      setSelectedFile(null);
+      setErrors({});
+    }
   };
 
   const fetchCategorias = async () => {
@@ -120,35 +145,54 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
         fechaVencimiento: formData.fechaVencimiento || undefined,
       };
 
-      await inventoryService.createProductoWithLote(data);
+      console.log('DEBUG: editItem:', editItem);
+      console.log('DEBUG: data to send:', data);
 
-      Swal.fire({
-        icon: 'success',
-        title: 'Producto registrado',
-        text: 'El producto y su lote de inventario han sido registrados exitosamente.',
-        confirmButtonText: 'Aceptar',
-      });
+      if (editItem) {
+        // Update existing item
+        console.log('DEBUG: Updating item with ID:', editItem.id);
+        await inventoryService.updateInventoryItem(editItem.id, data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto actualizado',
+          text: 'El producto ha sido actualizado exitosamente.',
+          confirmButtonText: 'Aceptar',
+        });
+      } else {
+        // Create new item
+        console.log('DEBUG: Creating new item');
+        await inventoryService.createProductoWithLote(data);
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto registrado',
+          text: 'El producto y su lote de inventario han sido registrados exitosamente.',
+          confirmButtonText: 'Aceptar',
+        });
+      }
 
       onProductCreated();
       onClose();
       resetForm();
     } catch (error: any) {
-      console.error('Error creating product with lote:', error);
-      setErrors({ general: 'Error al registrar el producto.' });
+      console.error('Error saving product:', error);
+      console.error('Error response:', error.response);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+      setErrors({ general: 'Error al guardar el producto.' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl">
-      <ModalContent className="bg-white p-6">
-        <h2 className="text-2xl font-bold mb-4">Registrar Nuevo Producto</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="3xl">
+      <ModalContent className="bg-white p-6 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4">{editItem ? 'Editar Producto' : 'Registrar Nuevo Producto'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Product Information */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="text-lg font-semibold text-gray-800">Información del Producto</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
                 <input
@@ -156,7 +200,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="nombre"
                   value={formData.nombre}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
@@ -167,7 +211,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="sku"
                   value={formData.sku}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               </div>
             </div>
@@ -178,10 +222,10 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                 name="descripcion"
                 value={formData.descripcion}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Precio de Compra *</label>
                 <input
@@ -190,7 +234,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="precioCompra"
                   value={formData.precioCompra}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
@@ -202,19 +246,19 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="capacidadPresentacion"
                   value={formData.capacidadPresentacion}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
                 <select
                   name="fkCategoriaId"
                   value={formData.fkCategoriaId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 >
                   <option value="">Seleccionar categoría</option>
                   {categorias.map(categoria => (
@@ -228,7 +272,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="fkUnidadMedidaId"
                   value={formData.fkUnidadMedidaId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 >
                   <option value="">Seleccionar unidad de medida</option>
                   {unidadesMedida.map(unidad => (
@@ -237,23 +281,19 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                 </select>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Imagen del Producto</label>
-              <ImageUpload onFileSelect={handleFileSelect} />
-            </div>
           </div>
 
           {/* Lot Inventory Information */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <h3 className="text-lg font-semibold text-gray-800">Información del Lote de Inventario</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Bodega *</label>
                 <select
                   name="fkBodegaId"
                   value={formData.fkBodegaId}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 >
                   <option value="">Seleccionar bodega</option>
@@ -270,7 +310,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                   name="stock"
                   value={formData.stock}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   required
                 />
               </div>
@@ -282,16 +322,24 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                 name="fechaVencimiento"
                 value={formData.fechaVencimiento}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
           </div>
 
+          {/* Image Upload - Last */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-gray-800">Imagen del Producto</h3>
+            <div>
+              <ImageUpload onFileSelect={handleFileSelect} />
+            </div>
+          </div>
+
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 pt-4 border-t">
             <Button onClick={onClose} variant="light">Cancelar</Button>
             <CustomButton
-              text={isLoading ? 'Registrando...' : 'Registrar Producto'}
+              text={isLoading ? (editItem ? 'Actualizando...' : 'Registrando...') : (editItem ? 'Actualizar Producto' : 'Registrar Producto')}
               type="submit"
               disabled={isLoading}
             />

@@ -303,6 +303,7 @@ const InventoryPage: React.FC = () => {
           fetchAllInventory();
           setCurrentPage(1);
         }}
+        editItem={editItem}
       />
 
       <BodegaModal
