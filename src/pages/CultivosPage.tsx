@@ -200,9 +200,9 @@ const CultivosPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-4">Estado del Cultivo</label>
+              <label className="block text-sm font-medium mb-1">Estado del Cultivo</label>
               <select
-                className="w-full border border-gray-300 rounded-xl h-10"
+                className="w-64 border border-gray-300 rounded-xl h-10 "
                 value={filters.estado_cultivo ?? ""}
                 onChange={(e) =>
                   handleFilterChange(

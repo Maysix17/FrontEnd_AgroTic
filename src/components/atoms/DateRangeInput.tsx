@@ -8,8 +8,8 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({ label, onChange }) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   return (
-    <div className="flex flex-col">
-      {label && <label className="block text-sm font-medium mb-4">{label}</label>}
+    <div className="w-64 flex flex-col">
+      {label && <label className="block text-sm font-medium mb-1">{label}</label>}
       <DatePicker
         selectsRange
         startDate={startDate}
