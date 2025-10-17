@@ -11,6 +11,8 @@ interface CategoriaFormProps {
 const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
   const [categoriaData, setCategoriaData] = useState<CategoriaData>({
     nombre: '',
+    descripcion: '',
+    esDivisible: false,
   });
   const [message, setMessage] = useState<string>('');
 
@@ -20,9 +22,13 @@ const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
       const fetchCategoria = async () => {
         try {
           const categorias = await getCategorias();
-          const categoria = categorias.find(c => c.id === editId);
+          const categoria = categorias.find((c: any) => c.id === editId);
           if (categoria) {
-            setCategoriaData({ nombre: categoria.nombre });
+            setCategoriaData({
+              nombre: categoria.nombre,
+              descripcion: categoria.descripcion || '',
+              esDivisible: categoria.esDivisible || false
+            });
           }
         } catch (error) {
           setMessage('Error al cargar datos para editar');
@@ -30,7 +36,7 @@ const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
       };
       fetchCategoria();
     } else {
-      setCategoriaData({ nombre: '' });
+      setCategoriaData({ nombre: '', descripcion: '', esDivisible: false });
     }
   }, [editId]);
 
@@ -44,7 +50,7 @@ const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
         await registerCategoria(categoriaData);
         setMessage('Registro exitoso');
       }
-      setCategoriaData({ nombre: '' });
+      setCategoriaData({ nombre: '', descripcion: '', esDivisible: false });
       onSuccess?.();
     } catch (error: any) {
       setMessage(error.message || 'Error en la operación');
@@ -65,6 +71,37 @@ const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
           className="w-full border border-gray-300 rounded-lg p-2"
           required
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Descripción</label>
+        <textarea
+          value={categoriaData.descripcion}
+          onChange={(e) =>
+            setCategoriaData({ ...categoriaData, descripcion: e.target.value })
+          }
+          placeholder="Ingrese una descripción opcional de la categoría"
+          className="w-full border border-gray-300 rounded-lg p-2"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={categoriaData.esDivisible}
+            onChange={(e) =>
+              setCategoriaData({ ...categoriaData, esDivisible: e.target.checked })
+            }
+            className="w-4 h-4"
+          />
+          <span className="text-sm font-medium">¿Es consumible?</span>
+        </label>
+        <p className="text-xs text-gray-500 mt-1">
+          Marque esta opción si los productos de esta categoría son consumibles (ej: semillas, abono, fertilizantes, fungicidas).
+          Deje sin marcar si no son consumibles (ej: herramientas, bolsas, martillo).
+        </p>
       </div>
 
       {message && <p className="text-center text-green-600">{message}</p>}

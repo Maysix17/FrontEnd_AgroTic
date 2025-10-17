@@ -4,6 +4,8 @@ import Table from '../components/atoms/Table';
 import MobileCard from '../components/atoms/MobileCard';
 import type { CardField, CardAction } from '../types/MobileCard.types';
 import UnifiedProductModal from '../components/organisms/UnifiedProductModal';
+import BodegaModal from '../components/organisms/BodegaModal';
+import CategoriaModal from '../components/organisms/CategoriaModal';
 import { inventoryService } from '../services/inventoryService';
 import type { LoteInventario } from '../services/inventoryService';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
@@ -22,6 +24,8 @@ const InventoryPage: React.FC = () => {
      const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
      const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
      const [editItem, setEditItem] = useState<LoteInventario | null>(null);
+     const [isBodegaModalOpen, setIsBodegaModalOpen] = useState(false);
+     const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
 
@@ -124,6 +128,8 @@ const InventoryPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Inventario</h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
           <CustomButton onClick={() => setIsUnifiedProductModalOpen(true)}>Registrar Producto</CustomButton>
+          <CustomButton onClick={() => setIsBodegaModalOpen(true)} variant="bordered">Gestionar Bodegas</CustomButton>
+          <CustomButton onClick={() => setIsCategoriaModalOpen(true)} variant="bordered">Gestionar Categorías</CustomButton>
         </div>
       </div>
 
@@ -297,6 +303,16 @@ const InventoryPage: React.FC = () => {
           fetchAllInventory();
           setCurrentPage(1);
         }}
+      />
+
+      <BodegaModal
+        isOpen={isBodegaModalOpen}
+        onClose={() => setIsBodegaModalOpen(false)}
+      />
+
+      <CategoriaModal
+        isOpen={isCategoriaModalOpen}
+        onClose={() => setIsCategoriaModalOpen(false)}
       />
 
       <Modal isOpen={isImageModalOpen} onOpenChange={setIsImageModalOpen} size="2xl">

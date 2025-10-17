@@ -51,34 +51,38 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const headers = ['Nombre', 'Acciones'];
+  const headers = ['Nombre', 'Descripción', '¿Consumible?', 'Acciones'];
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="3xl">
       <ModalContent className="bg-white p-6">
         <ModalHeader>
           <h2 className="text-xl font-semibold">Gestionar Categorías</h2>
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="max-h-[70vh] overflow-y-auto">
           <CategoriaForm editId={editId} onSuccess={() => { fetchCategorias(); setEditId(null); }} />
           {message && <p className="text-center text-green-600 mt-4">{message}</p>}
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-4">Lista de Categorías</h3>
-            <Table headers={headers}>
-              {categorias.map((categoria) => (
-                <tr key={categoria.id}>
-                  <td className="px-4 py-2 border-b">{categoria.nombre}</td>
-                  <td className="px-4 py-2 border-b">
-                    <div className="flex gap-2">
-                      <CustomButton onClick={() => handleEdit(categoria)}>Editar</CustomButton>
-                      <CustomButton onClick={() => handleDelete(categoria.id!)} variant="bordered">
-                        Eliminar
-                      </CustomButton>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </Table>
+            <div className="overflow-x-auto">
+              <Table headers={headers}>
+                {categorias.map((categoria) => (
+                  <tr key={categoria.id}>
+                    <td className="px-4 py-2 border-b">{categoria.nombre}</td>
+                    <td className="px-4 py-2 border-b">{categoria.descripcion || 'Sin descripción'}</td>
+                    <td className="px-4 py-2 border-b">{categoria.esDivisible ? 'Sí' : 'No'}</td>
+                    <td className="px-4 py-2 border-b">
+                      <div className="flex gap-2">
+                        <CustomButton onClick={() => handleEdit(categoria)}>Editar</CustomButton>
+                        <CustomButton onClick={() => handleDelete(categoria.id!)} variant="bordered">
+                          Eliminar
+                        </CustomButton>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </Table>
+            </div>
           </div>
         </ModalBody>
       </ModalContent>
