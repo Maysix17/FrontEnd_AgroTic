@@ -13,6 +13,7 @@ import CultivoModal from "../components/organisms/CultivoModal";
 import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
 import FichaModal from "../components/organisms/FichaModal";
+import ActivityHistoryModal from "../components/organisms/ActivityHistoryModal";
 
 const CultivosPage: React.FC = () => {
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
@@ -24,6 +25,7 @@ const CultivosPage: React.FC = () => {
   const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
+  const [isActivityHistoryModalOpen, setIsActivityHistoryModalOpen] = useState(false);
   const [selectedFichas, setSelectedFichas] = useState<string[]>([]);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
 
@@ -77,6 +79,11 @@ const CultivosPage: React.FC = () => {
     const fichas = fichaString.split(",").map((f) => f.trim()).filter((f) => f);
     setSelectedFichas(fichas);
     setIsFichaModalOpen(true);
+  };
+
+  const handleOpenActivityHistoryModal = (cultivo: Cultivo) => {
+    setSelectedCultivo(cultivo);
+    setIsActivityHistoryModalOpen(true);
   };
 
   const exportToExcel = (cultivo?: Cultivo): void => {
@@ -276,7 +283,7 @@ const CultivosPage: React.FC = () => {
                         : "Sin cosecha"}
                     </td>
                     <td className="px-4 py-2">
-                      <CustomButton label="Actividades" onClick={() => {}} size="sm" variant="bordered" />
+                      <CustomButton label="Actividades" onClick={() => handleOpenActivityHistoryModal(cultivo)} size="sm" variant="bordered" />
                     </td>
                     <td className="px-4 py-2">
                       <CustomButton label="Financiero" onClick={() => {}} size="sm" variant="bordered" />
@@ -348,7 +355,7 @@ const CultivosPage: React.FC = () => {
                   },
                   {
                     label: "Actividades",
-                    onClick: () => {},
+                    onClick: () => handleOpenActivityHistoryModal(cultivo),
                     size: "sm",
                     variant: "bordered",
                   },
@@ -412,6 +419,13 @@ const CultivosPage: React.FC = () => {
         isOpen={isFichaModalOpen}
         onClose={() => setIsFichaModalOpen(false)}
         fichas={selectedFichas}
+      />
+
+      <ActivityHistoryModal
+        isOpen={isActivityHistoryModalOpen}
+        onClose={() => setIsActivityHistoryModalOpen(false)}
+        cvzId={selectedCultivo?.cvzid || ""}
+        cultivoName={selectedCultivo?.nombrecultivo || ""}
       />
 
       <CultivoModal

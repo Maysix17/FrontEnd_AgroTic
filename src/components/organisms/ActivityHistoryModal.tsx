@@ -1,11 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
-import InputSearch from '../atoms/InputSearch';
+import InputSearch from '../atoms/buscador';
 import DateRangeInput from '../atoms/DateRangeInput';
 import Table from '../atoms/Table';
 import { getActividadesByCultivoVariedadZonaId } from '../../services/actividadesService';
 import ActivityHistoryDetailModal from './ActivityHistoryDetailModal';
 import type { Actividad } from '../../services/actividadesService';
+
+interface ExtendedActividad extends Actividad {
+  categoriaActividad?: { nombre: string };
+  cultivoVariedadZona?: {
+    zona: { nombre: string };
+  };
+  usuariosAsignados?: {
+    usuario: { nombres: string; apellidos: string };
+    activo: boolean;
+  }[];
+  reservas?: {
+    lote?: {
+      producto?: {
+        nombre: string;
+        unidadMedida?: { abreviatura: string };
+      };
+    };
+    cantidadUsada?: number;
+  }[];
+}
 
 interface ActivityHistoryModalProps {
   isOpen: boolean;
@@ -20,10 +40,10 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
   cvzId,
   cultivoName,
 }) => {
-  const [activities, setActivities] = useState<Actividad[]>([]);
-  const [filteredActivities, setFilteredActivities] = useState<Actividad[]>([]);
+  const [activities, setActivities] = useState<ExtendedActividad[]>([]);
+  const [filteredActivities, setFilteredActivities] = useState<ExtendedActividad[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Actividad | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<ExtendedActividad | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Filters
@@ -57,11 +77,11 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
     let filtered = activities;
 
     // Filter to only finalized activities (estado === false)
-    filtered = filtered.filter(activity => activity.estado === false);
+    filtered = filtered.filter((activity: ExtendedActividad) => activity.estado === false);
 
     // Filter by categoria
     if (categoriaFilter) {
-      filtered = filtered.filter(activity =>
+      filtered = filtered.filter((activity: ExtendedActividad) =>
         activity.categoriaActividad?.nombre?.toLowerCase().includes(categoriaFilter.toLowerCase())
       );
     }
@@ -70,7 +90,7 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
     if (dateRange[0] && dateRange[1]) {
       const startDate = dateRange[0];
       const endDate = dateRange[1];
-      filtered = filtered.filter(activity => {
+      filtered = filtered.filter((activity: ExtendedActividad) => {
         const activityDate = new Date(activity.fechaAsignacion);
         return activityDate >= startDate && activityDate <= endDate;
       });
@@ -79,7 +99,7 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
     setFilteredActivities(filtered);
   };
 
-  const handleViewDetails = (activity: Actividad) => {
+  const handleViewDetails = (activity: ExtendedActividad) => {
     setSelectedActivity(activity);
     setIsDetailModalOpen(true);
   };
@@ -93,18 +113,18 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
     return new Date(dateString).toLocaleDateString();
   };
 
-  const getUserNames = (activity: Actividad) => {
+  const getUserNames = (activity: ExtendedActividad) => {
     if (!activity.usuariosAsignados || activity.usuariosAsignados.length === 0) return 'Sin asignar';
     return activity.usuariosAsignados
-      .filter(u => u.activo)
-      .map(u => `${u.usuario.nombres} ${u.usuario.apellidos}`)
+      .filter((u: any) => u.activo)
+      .map((u: any) => `${u.usuario.nombres} ${u.usuario.apellidos}`)
       .join(', ');
   };
 
-  const getInventoryUsed = (activity: Actividad) => {
+  const getInventoryUsed = (activity: ExtendedActividad) => {
     if (!activity.reservas || activity.reservas.length === 0) return 'Sin inventario';
     return activity.reservas
-      .map(r => `${r.lote?.producto?.nombre} (${r.cantidadUsada || 0} ${r.lote?.producto?.unidadMedida?.abreviatura})`)
+      .map((r: any) => `${r.lote?.producto?.nombre} (${r.cantidadUsada || 0} ${r.lote?.producto?.unidadMedida?.abreviatura})`)
       .join(', ');
   };
 
@@ -122,9 +142,9 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
               <h3 className="text-lg font-semibold mb-4">Filtros</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría de Actividad</label>
+                  <label className="block text-sm font-medium mb-1">Buscar por Categoría</label>
                   <InputSearch
-                    placeholder="Buscar por categoría..."
+                    placeholder="Nombre de categoría..."
                     value={categoriaFilter}
                     onChange={(e) => setCategoriaFilter(e.target.value)}
                   />
@@ -135,14 +155,13 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
                     onChange={setDateRange}
                   />
                 </div>
-                <div className="flex items-end gap-2">
+                <div className="flex gap-2 items-center mt-6">
                   <Button
-                    color="secondary"
-                    variant="bordered"
+                    color="success"
                     onClick={clearFilters}
                     className="w-full"
                   >
-                    Limpiar Filtros
+                    Limpiar
                   </Button>
                 </div>
               </div>
@@ -202,9 +221,8 @@ const ActivityHistoryModal: React.FC<ActivityHistoryModalProps> = ({
                         <td className="px-4 py-2">
                           <Button
                             size="sm"
-                            variant="bordered"
+                            color="success"
                             onClick={() => handleViewDetails(activity)}
-                            className="text-blue-600 hover:text-blue-800 border-blue-600 hover:border-blue-800"
                           >
                             Ver Detalles
                           </Button>

@@ -47,7 +47,6 @@ interface ActivityDetailModalProps {
    onClose: () => void;
    activity: Activity | null;
    onDelete: (id: string) => void;
-   onActivityFinalized?: (activityId: string) => void;
   }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
@@ -55,7 +54,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
    onClose,
    activity,
    onDelete,
-   onActivityFinalized,
   }) => {
   const [categoria, setCategoria] = useState('');
    const [ubicacion, setUbicacion] = useState('');

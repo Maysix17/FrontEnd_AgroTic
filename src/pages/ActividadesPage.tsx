@@ -311,11 +311,6 @@ const ActividadesPage: React.FC = () => {
             alert('Error al eliminar');
           }
         }}
-        onActivityFinalized={async (activityDate: string) => {
-          // Update activity count for the finalized activity's date
-          const activityDateStr = format(new Date(activityDate), 'yyyy-MM-dd');
-          await updateActivityCount(activityDateStr);
-        }}
       />
         
       

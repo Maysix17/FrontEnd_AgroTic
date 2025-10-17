@@ -158,3 +158,8 @@ export const getReservationsByActivity = async (actividadId: string): Promise<Re
   const response = await apiClient.get(`/actividades/${actividadId}/reservas`);
   return response.data;
 };
+
+export const getActividadesByCultivoVariedadZonaId = async (cvzId: string): Promise<any[]> => {
+  const response = await apiClient.get(`/actividades/by-cultivo-variedad-zona/${cvzId}`);
+  return response.data;
+};
