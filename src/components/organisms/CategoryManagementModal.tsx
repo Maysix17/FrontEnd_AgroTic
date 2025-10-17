@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, Button } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import Swal from 'sweetalert2';
-import { categoriaService } from '../../services/categoriaService';
-import type { Categoria } from '../../services/categoriaService';
+import { categoriaService, registerCategoria, updateCategoria, deleteCategoria } from '../../services/categoriaService';
+import type { CategoriaData } from '../../types/categoria.types';
 
 interface CategoryManagementModalProps {
   isOpen: boolean;
@@ -16,11 +16,11 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
   onClose,
   onCategoryCreated,
 }) => {
-  const [categories, setCategories] = useState<Categoria[]>([]);
+  const [categories, setCategories] = useState<CategoriaData[]>([]);
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<Categoria | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoriaData | null>(null);
 
   // Form data for category
   const [categoryFormData, setCategoryFormData] = useState({
@@ -58,7 +58,7 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await categoriaService.create(categoryFormData);
+      await registerCategoria(categoryFormData);
       Swal.fire('Éxito', 'Categoría creada exitosamente.', 'success');
       setCategoryFormData({ nombre: '', esDivisible: false });
       setIsCreateModalOpen(false);
@@ -72,10 +72,10 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
 
   const handleEditCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCategory) return;
+    if (!selectedCategory?.id) return;
 
     try {
-      await categoriaService.update(selectedCategory.id, categoryFormData);
+      await updateCategoria(selectedCategory.id, categoryFormData);
       Swal.fire('Éxito', 'Categoría actualizada exitosamente.', 'success');
       setCategoryFormData({ nombre: '', esDivisible: false });
       setIsEditModalOpen(false);
@@ -102,7 +102,7 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
 
     if (result.isConfirmed) {
       try {
-        await categoriaService.delete(categoryId);
+        await deleteCategoria(categoryId);
         Swal.fire('Eliminado', 'La categoría ha sido eliminada.', 'success');
         fetchCategories();
         onCategoryCreated();
@@ -113,7 +113,7 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
     }
   };
 
-  const openEditModal = (category: Categoria) => {
+  const openEditModal = (category: CategoriaData) => {
     setSelectedCategory(category);
     setCategoryFormData({
       nombre: category.nombre,
@@ -171,7 +171,7 @@ const CategoryManagementModal: React.FC<CategoryManagementModalProps> = ({
                           size="sm"
                           color="danger"
                           variant="light"
-                          onClick={() => handleDeleteCategory(category.id)}
+                          onClick={() => category.id && handleDeleteCategory(category.id)}
                         >
                           Eliminar
                         </Button>

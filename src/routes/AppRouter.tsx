@@ -17,6 +17,7 @@ import CultivosPage from "../pages/CultivosPage";
 import ActividadesPage from "../pages/ActividadesPage";
 import ZapatoPage from "../pages/ZapatoPage";
 import InventoryPage from "../pages/InventoryPage";
+import MovementsPage from "../pages/MovementsPage";
 
 const AppRouter = () => {
   return (
@@ -56,6 +57,7 @@ const AppRouter = () => {
           <Route path="iot" element={<MapRegisterPage />} />
           <Route path="zapato" element={<ZapatoPage />} />
           <Route path="inventario" element={<InventoryPage />} />
+          <Route path="movements" element={<MovementsPage />} />
         </Route>
 
         <Route path="/reset-password" element={<ResetPasswordPage />} />

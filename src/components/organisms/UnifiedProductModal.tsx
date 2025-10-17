@@ -34,7 +34,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
     fechaVencimiento: '',
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [, setSelectedFile] = useState<File | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);

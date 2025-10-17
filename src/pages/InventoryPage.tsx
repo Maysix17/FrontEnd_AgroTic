@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CustomButton from '../components/atoms/Boton';
 import Table from '../components/atoms/Table';
 import MobileCard from '../components/atoms/MobileCard';
@@ -14,20 +15,21 @@ import Swal from 'sweetalert2';
 import { Modal, ModalContent } from '@heroui/react';
 
 const InventoryPage: React.FC = () => {
-   const [searchInput, setSearchInput] = useState('');
-   const [allItems, setAllItems] = useState<LoteInventario[]>([]);
-   const [results, setResults] = useState<LoteInventario[]>([]);
-   const [loading, setLoading] = useState(false);
-   const [error, setError] = useState<string | null>(null);
-   const [isUnifiedProductModalOpen, setIsUnifiedProductModalOpen] = useState(false);
-     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-     const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
-     const [editItem, setEditItem] = useState<LoteInventario | null>(null);
-     const [isBodegaModalOpen, setIsBodegaModalOpen] = useState(false);
-     const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
+    const navigate = useNavigate();
+    const [searchInput, setSearchInput] = useState('');
+    const [allItems, setAllItems] = useState<LoteInventario[]>([]);
+    const [results, setResults] = useState<LoteInventario[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isUnifiedProductModalOpen, setIsUnifiedProductModalOpen] = useState(false);
+      const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+      const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+      const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
+      const [editItem, setEditItem] = useState<LoteInventario | null>(null);
+      const [isBodegaModalOpen, setIsBodegaModalOpen] = useState(false);
+      const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+     const [currentPage, setCurrentPage] = useState(1);
+     const [total, setTotal] = useState(0);
 
   const limit = 10; // Items per page
 
@@ -130,6 +132,7 @@ const InventoryPage: React.FC = () => {
           <CustomButton onClick={() => setIsUnifiedProductModalOpen(true)}>Registrar Producto</CustomButton>
           <CustomButton onClick={() => setIsBodegaModalOpen(true)} variant="bordered">Gestionar Bodegas</CustomButton>
           <CustomButton onClick={() => setIsCategoriaModalOpen(true)} variant="bordered">Gestionar Categorías</CustomButton>
+          <CustomButton onClick={() => navigate('/app/movements')} variant="bordered">Historial de Movimientos</CustomButton>
         </div>
       </div>
 
