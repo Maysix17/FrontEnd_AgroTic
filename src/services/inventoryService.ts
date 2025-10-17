@@ -41,25 +41,45 @@ export interface InventoryItem {
 }
 
 export interface LoteInventario {
-  id: string;
-  fkProductoId: string;
-  fkBodegaId: string;
-  cantidadDisponible: string;
-  cantidadReservada: string;
-  fechaIngreso: string;
-  fechaVencimiento?: string;
-  esParcial: boolean;
-  producto: {
     id: string;
-    nombre: string;
-    descripcion?: string;
-    sku: string;
-    precioCompra: string;
-    precioVenta: string;
-    // Add other product fields as needed
-  };
-  bodega: Bodega;
-}
+    fkProductoId: string;
+    fkBodegaId: string;
+    cantidadDisponible: string;
+    cantidadParcial: string;
+    fechaIngreso: string;
+    fechaVencimiento?: string;
+    esParcial: boolean;
+    stock?: number;
+    stockTotal?: number;
+    cantidadDisponibleParaReservar?: number;
+    cantidadReservada?: number;
+    unidadAbreviatura?: string;
+    producto: {
+      id: string;
+      nombre: string;
+      descripcion?: string;
+      sku: string;
+      precioCompra: string;
+      precioVenta: string;
+      imgUrl?: string;
+      capacidadPresentacion?: number;
+      categoria?: {
+        id: string;
+        nombre: string;
+      };
+      unidadMedida?: {
+        id: string;
+        nombre: string;
+        abreviatura: string;
+      };
+      // Add other product fields as needed
+    };
+    bodega: {
+      id: string;
+      nombre: string;
+      numero?: string;
+    };
+  }
 
 export interface PaginatedResponse<T> {
   items: T[];
@@ -132,6 +152,11 @@ export const inventoryService = {
     return response.data;
   },
 
+  getUnidadesMedida: async (): Promise<any[]> => {
+    const response = await apiClient.get('/unidades-medida');
+    return response.data;
+  },
+
   getAvailableStock: async (id: string): Promise<number> => {
     const response = await apiClient.get(`/inventario/${id}/stock-disponible`);
     return response.data;
@@ -139,6 +164,58 @@ export const inventoryService = {
 
   validateStockAvailability: async (id: string, quantity: number): Promise<boolean> => {
     const response = await apiClient.get(`/inventario/${id}/validar-stock/${quantity}`);
+    return response.data;
+  },
+
+  getProductos: async (): Promise<any[]> => {
+    const response = await apiClient.get('/productos');
+    return response.data;
+  },
+
+  createProduct: async (data: any): Promise<any> => {
+    const formData = new FormData();
+    formData.append('nombre', data.nombre);
+    if (data.descripcion) formData.append('descripcion', data.descripcion);
+    formData.append('precioCompra', data.precioCompra.toString());
+    formData.append('precioVenta', data.precioVenta.toString());
+    if (data.sku) formData.append('sku', data.sku);
+    formData.append('fkCategoriaId', data.fkCategoriaId);
+    if (data.fkUnidadMedidaId) formData.append('fkUnidadMedidaId', data.fkUnidadMedidaId);
+    if (data.imgUrl) formData.append('imgUrl', data.imgUrl);
+
+    const response = await apiClient.post('/productos', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  createWarehouse: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/bodega', data);
+    return response.data;
+  },
+
+  createLote: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/inventario', data);
+    return response.data;
+  },
+
+  updateLote: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.put(`/inventario/${id}`, data);
+    return response.data;
+  },
+
+  createProductoWithLote: async (data: any): Promise<any> => {
+    const response = await apiClient.post('/productos/with-lote', data);
+    return response.data;
+  },
+
+  updateInventoryItem: async (id: string, data: any): Promise<any> => {
+    console.log('DEBUG: updateInventoryItem called with ID:', id);
+    console.log('DEBUG: updateInventoryItem data:', data);
+    const response = await apiClient.patch(`/inventario/${id}`, data);
+    console.log('DEBUG: updateInventoryItem response:', response);
     return response.data;
   },
 };

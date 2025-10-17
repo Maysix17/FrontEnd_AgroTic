@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input, Textarea } from '@heroui/react';
 
 const styles = `
   body {
@@ -77,10 +77,7 @@ const styles = `
   input[type="number"],
   input[type="text"],
   textarea {
-    padding: 10px;
-    border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 16px;
     transition: border-color 0.3s;
     background-color: #fff;
     width: 100%;
@@ -206,28 +203,59 @@ interface FinalizeActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   activity: Activity | null;
-  onSave: (data: any) => void;
+  onSave: (data: {
+    actividadId: string;
+    reservas: { reservaId: string; cantidadDevuelta: number }[];
+    horas: number;
+    precioHora: number;
+    observacion: string;
+    imgUrl?: File;
+  }) => void;
 }
 
 const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, onClose, activity, onSave }) => {
   const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
+  const [horas, setHoras] = useState('');
+  const [precioHora, setPrecioHora] = useState('');
+  const [observacion, setObservacion] = useState('');
+  const [evidencia, setEvidencia] = useState<File | null>(null);
 
   useEffect(() => {
     if (isOpen && activity) {
       // Reset states
       setReturnedQuantities({});
+      setHoras('');
+      setPrecioHora('');
+      setObservacion('');
+      setEvidencia(null);
     }
   }, [isOpen, activity]);
 
   const handleSave = () => {
+    // Validation
+    const horasNum = parseFloat(horas);
+    const precioNum = parseFloat(precioHora);
+    if (!horas || horasNum <= 0) {
+      alert('Horas dedicadas es requerido y debe ser un número positivo');
+      return;
+    }
+    if (!precioHora || isNaN(precioNum) || precioNum <= 0) {
+      alert('Precio por hora es requerido y debe ser un monto válido');
+      return;
+    }
+
     const reservas = activity?.reservas?.map(reserva => ({
       reservaId: reserva.id,
       cantidadDevuelta: returnedQuantities[reserva.id] || 0,
     })) || [];
 
     const data = {
-      actividadId: activity?.id,
+      actividadId: activity!.id,
       reservas,
+      horas: horasNum,
+      precioHora: precioNum,
+      observacion,
+      imgUrl: evidencia || undefined,
     };
     onSave(data);
     onClose();
@@ -275,11 +303,70 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
               </div>
             </div>
 
+            {/* Horas y Precio */}
+            <div className="section">
+              <h3>Información de finalización</h3>
+              <div className="form-group-pair">
+                <div className="form-group">
+                  <label htmlFor="horas">Horas dedicadas *</label>
+                  <Input
+                    id="horas"
+                    type="number"
+                    placeholder="Ej: 8"
+                    value={horas}
+                    onChange={(e) => setHoras(e.target.value)}
+                    min="0"
+                    step="0.5"
+                    className="border-gray-300"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="precioHora">Precio por hora *</label>
+                  <Input
+                    id="precioHora"
+                    type="number"
+                    placeholder="Ej: 15000"
+                    value={precioHora}
+                    onChange={(e) => setPrecioHora(e.target.value)}
+                    min="0"
+                    step="0.01"
+                    className="border-gray-300"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Observación */}
+            <div className="section">
+              <h3>Observación</h3>
+              <div className="form-group full-width">
+                <Textarea
+                  placeholder="Observaciones adicionales..."
+                  value={observacion}
+                  onChange={(e) => setObservacion(e.target.value)}
+                  rows={3}
+                  className="border-gray-300"
+                />
+              </div>
+            </div>
+
+            {/* Evidencia */}
+            <div className="section">
+              <h3>Evidencia</h3>
+              <div className="form-group full-width">
+                <Input
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setEvidencia(e.target.files?.[0] || null)}
+                  className="border-gray-300"
+                />
+              </div>
+            </div>
 
             {/* Botón */}
             <div className="button-container">
               <Button type="button" className="save-button" onClick={handleSave}>
-                Guardar
+                Finalizar Actividad
               </Button>
             </div>
           </form>

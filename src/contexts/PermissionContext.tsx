@@ -48,22 +48,22 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
     });
   };
 
-  const loadPermissionsFromCookie = (): Permission[] => {
-    const cookieData = Cookies.get('user_permissions');
-    if (cookieData) {
-      try {
-        return JSON.parse(cookieData);
-      } catch (error) {
-        console.error('Error parsing permissions from cookie:', error);
-        return [];
-      }
-    }
-    return [];
-  };
+  // const loadPermissionsFromCookie = (): Permission[] => {
+  //   const cookieData = Cookies.get('user_permissions');
+  //   if (cookieData) {
+  //     try {
+  //       return JSON.parse(cookieData);
+  //     } catch (error) {
+  //       console.error('Error parsing permissions from cookie:', error);
+  //       return [];
+  //     }
+  //   }
+  //   return [];
+  // };
 
-  const clearPermissionsCookie = () => {
-    Cookies.remove('user_permissions');
-  };
+  // const clearPermissionsCookie = () => {
+  //   Cookies.remove('user_permissions');
+  // };
 
   const updatePermissions = (newPermissions: Permission[]) => {
     setPermissions(newPermissions);
