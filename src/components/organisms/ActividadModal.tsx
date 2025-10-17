@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Input, Select, SelectItem, Button, Chip, Textarea } from '@heroui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { format } from 'date-fns';
 import userSearchService from '../../services/userSearchService';
 import zoneSearchService from '../../services/zoneSearchService';
 import categoriaService from '../../services/categoriaService';
@@ -45,13 +46,14 @@ interface Zona {
 }
 
 interface ActividadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedDate: Date;
-  onSave: (data: any) => void;
-}
+   isOpen: boolean;
+   onClose: () => void;
+   selectedDate: Date;
+   onSave: (data: any) => void;
+   onActivityCreated?: (dateStr: string) => void;
+ }
 
-const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave }) => {
+const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave, onActivityCreated }) => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const [usuarioSearch, setUsuarioSearch] = useState('');
@@ -328,6 +330,13 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       lote: selectedLote?.id
     };
     onSave(data);
+
+    // Notify parent component to update activity count for this date
+    if (onActivityCreated) {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      onActivityCreated(dateStr);
+    }
+
     onClose();
   };
 

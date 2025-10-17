@@ -16,44 +16,47 @@ interface Reservation {
 }
 
 interface Activity {
-    id: string;
-    descripcion: string;
-    categoriaActividad: { nombre: string };
-    cultivoVariedadZona: {
-      zona: { nombre: string };
-      cultivoXVariedad: {
-        cultivo: { nombre: string; ficha: { numero: string } };
-        variedad: { nombre: string; tipoCultivo: { nombre: string } };
-      };
-    };
-    usuariosAsignados?: { usuario: { dni: number; nombres: string; apellidos: string; ficha?: { numero: number } }; activo: boolean }[];
-    inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
-    reservations?: Reservation[];
-    reservas?: {
-      id: string;
-      cantidadReservada: number;
-      lote: {
-        producto: {
-          nombre: string;
-          unidadMedida: { nombre: string; abreviatura: string };
-        };
-      };
-    }[];
-  }
+     id: string;
+     descripcion: string;
+     fechaAsignacion: string;
+     categoriaActividad: { nombre: string };
+     cultivoVariedadZona: {
+       zona: { nombre: string };
+       cultivoXVariedad: {
+         cultivo: { nombre: string; ficha: { numero: string } };
+         variedad: { nombre: string; tipoCultivo: { nombre: string } };
+       };
+     };
+     usuariosAsignados?: { usuario: { dni: number; nombres: string; apellidos: string; ficha?: { numero: number } }; activo: boolean }[];
+     inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
+     reservations?: Reservation[];
+     reservas?: {
+       id: string;
+       cantidadReservada: number;
+       lote: {
+         producto: {
+           nombre: string;
+           unidadMedida: { nombre: string; abreviatura: string };
+         };
+       };
+     }[];
+   }
 
 interface ActivityDetailModalProps {
    isOpen: boolean;
    onClose: () => void;
    activity: Activity | null;
    onDelete: (id: string) => void;
- }
+   onActivityFinalized?: (activityId: string) => void;
+  }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
    isOpen,
    onClose,
    activity,
    onDelete,
- }) => {
+   onActivityFinalized,
+  }) => {
   const [categoria, setCategoria] = useState('');
    const [ubicacion, setUbicacion] = useState('');
    const [descripcion, setDescripcion] = useState('');
@@ -136,6 +139,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
        alert('Actividad finalizada exitosamente');
        setIsFinalizeModalOpen(false);
        onClose();
+       // Reload the page to update all activity counts
+       window.location.reload();
      } catch (error: any) {
        console.error('❌ ERROR: Error finalizing activity:', error);
        console.error('❌ ERROR: Error response:', error.response);

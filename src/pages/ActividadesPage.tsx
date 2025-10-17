@@ -29,15 +29,26 @@ const localizer = dateFnsLocalizer({
 });
 
 const ActividadesPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalDate, setModalDate] = useState(new Date());
-  const [isListModalOpen, setIsListModalOpen] = useState(false);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
-  const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
+   const [selectedDate, setSelectedDate] = useState(new Date());
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [modalDate, setModalDate] = useState(new Date());
+   const [isListModalOpen, setIsListModalOpen] = useState(false);
+   const [activities, setActivities] = useState<any[]>([]);
+   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+   const [events, setEvents] = useState<any[]>([]);
+   const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
+
+   // Function to update activity count for a specific date
+   const updateActivityCount = async (dateStr: string) => {
+     try {
+       const count = await getActividadesCountByDate(dateStr);
+       setActivityCounts(prev => ({ ...prev, [dateStr]: count }));
+     } catch (error) {
+       console.error('Error updating activity count:', error);
+       setActivityCounts(prev => ({ ...prev, [dateStr]: 0 }));
+     }
+   };
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -210,6 +221,7 @@ const ActividadesPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={modalDate}
+        onActivityCreated={updateActivityCount}
         onSave={async (data) => {
           try {
             const actividadData = {
@@ -278,8 +290,8 @@ const ActividadesPage: React.FC = () => {
         }}
       />
 
-      
-       
+
+
          <ActivityDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
@@ -289,10 +301,20 @@ const ActividadesPage: React.FC = () => {
             await deleteActividad(id);
             alert('Actividad eliminada');
             setIsDetailModalOpen(false);
+            // Update activity count for the deleted activity's date
+            if (selectedActivity) {
+              const activityDateStr = format(new Date(selectedActivity.fechaAsignacion), 'yyyy-MM-dd');
+              await updateActivityCount(activityDateStr);
+            }
           } catch (error) {
             console.error('Error deleting:', error);
             alert('Error al eliminar');
           }
+        }}
+        onActivityFinalized={async (activityDate: string) => {
+          // Update activity count for the finalized activity's date
+          const activityDateStr = format(new Date(activityDate), 'yyyy-MM-dd');
+          await updateActivityCount(activityDateStr);
         }}
       />
         
