@@ -115,7 +115,7 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const headers = ['Código', 'Producto', 'Categoría', 'Bodega', 'Stock', 'Disponible para Reservar', 'Reservado', 'Acciones'];
+  const headers = ['Código', 'Producto', 'Categoría', 'Bodega', 'Stock', 'Cantidad Disponible Total', 'Disponible para Reservar', 'Reservado', 'Acciones'];
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-6">
@@ -152,9 +152,10 @@ const InventoryPage: React.FC = () => {
                     <td className="px-4 py-2">{item.producto.nombre}</td>
                     <td className="px-4 py-2">{item.producto.categoria?.nombre || '-'}</td>
                     <td className="px-4 py-2">{item.bodega?.nombre || '-'}</td>
-                    <td className="px-4 py-2">{item.stockTotal?.toFixed(2) || '0.00'}</td>
-                    <td className="px-4 py-2">{item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'}</td>
-                    <td className="px-4 py-2">{item.cantidadReservada?.toFixed(2) || '0.00'}</td>
+                    <td className="px-4 py-2">{item.stock || '0.00'}</td>
+                    <td className="px-4 py-2">{item.stockTotal?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
+                    <td className="px-4 py-2">{item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
+                    <td className="px-4 py-2">{item.cantidadReservada?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
                     <td className="px-4 py-2 flex space-x-2">
                       <button
                         onClick={() => {
@@ -229,9 +230,10 @@ const InventoryPage: React.FC = () => {
                 { label: 'Producto', value: item.producto.nombre },
                 { label: 'Categoría', value: item.producto.categoria?.nombre || '-' },
                 { label: 'Bodega', value: item.bodega?.nombre || '-' },
-                { label: 'Stock', value: item.stockTotal?.toFixed(2) || '0.00' },
-                { label: 'Disponible para Reservar', value: item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00' },
-                { label: 'Reservado', value: item.cantidadReservada?.toFixed(2) || '0.00' },
+                { label: 'Stock', value: `${item.stock?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+                { label: 'Cantidad Disponible Total', value: `${item.stockTotal?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+                { label: 'Disponible para Reservar', value: `${item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+                { label: 'Reservado', value: `${item.cantidadReservada?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
               ];
 
               const actions: CardAction[] = [
@@ -355,17 +357,21 @@ const InventoryPage: React.FC = () => {
               {/* Información de stock */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Información de Stock</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">{selectedItem.stockTotal?.toFixed(2) || '0.00'}</p>
-                    <p className="text-sm text-gray-600">Stock Total</p>
+                    <p className="text-2xl font-bold text-blue-600">{selectedItem.stock || '0.00'} </p>
+                    <p className="text-sm text-gray-600">Stock</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{selectedItem.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl font-bold text-purple-600">{selectedItem.stockTotal?.toFixed(2) || '0.00'} {selectedItem.unidadAbreviatura || ''}</p>
+                    <p className="text-sm text-gray-600">Cantidad Disponible Total</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedItem.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} {selectedItem.unidadAbreviatura || ''}</p>
                     <p className="text-sm text-gray-600">Disponible para Reservar</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-orange-600">{selectedItem.cantidadReservada?.toFixed(2) || '0.00'}</p>
+                    <p className="text-2xl font-bold text-orange-600">{selectedItem.cantidadReservada?.toFixed(2) || '0.00'} {selectedItem.unidadAbreviatura || ''}</p>
                     <p className="text-sm text-gray-600">Reservado</p>
                   </div>
                 </div>

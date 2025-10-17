@@ -49,9 +49,11 @@ export interface LoteInventario {
     fechaIngreso: string;
     fechaVencimiento?: string;
     esParcial: boolean;
+    stock?: number;
     stockTotal?: number;
     cantidadDisponibleParaReservar?: number;
     cantidadReservada?: number;
+    unidadAbreviatura?: string;
     producto: {
       id: string;
       nombre: string;
@@ -64,6 +66,11 @@ export interface LoteInventario {
       categoria?: {
         id: string;
         nombre: string;
+      };
+      unidadMedida?: {
+        id: string;
+        nombre: string;
+        abreviatura: string;
       };
       // Add other product fields as needed
     };
