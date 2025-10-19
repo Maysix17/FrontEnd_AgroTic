@@ -8,6 +8,18 @@ export interface Cultivo {
   fechacosecha: string;
   estado: number; // Estado del cultivo: 1=En curso, 0=Finalizado
   cosechaid?: string; // ID de la cosecha para ventas
+
+  // NUEVOS CAMPOS PARA CARACTERÍSTICAS DEL CULTIVO
+  cantidad_plantas_inicial?: number;
+  cantidad_plantas_actual?: number;
+  fk_estado_fenologico?: number;
+  estado_fenologico?: EstadoFenologico;
+  estado_fenologico_nombre?: string; // Nombre del estado fenológico desde la query
+  estado_fenologico_descripcion?: string; // Descripción del estado fenológico desde la query
+  fecha_actualizacion?: string;
+  edad_dias?: number; // Calculado en frontend
+  area_terreno?: number; // De zona
+  rendimiento_promedio?: number; // Calculado de cosechas
 }
 
 export interface SearchCultivoDto {
@@ -17,12 +29,27 @@ export interface SearchCultivoDto {
   fecha_fin?: string; // Fecha fin del rango
   id_titulado?: string; // Número de ficha del titulado
   estado_cultivo?: number; // Estado: 1=activo, 0=inactivo
+  fk_estado_fenologico?: number; // Filtro por estado fenológico
 }
 
 export interface CreateCultivoData {
   tipoCultivoId: string;
   variedadId: string;
   zonaId: string;
+  cantidad_plantas_inicial?: number;
+  fk_estado_fenologico?: number;
+}
+
+
+export interface EstadoFenologico {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  orden: number;
+}
+
+export interface UpdateCantidadPlantasDto {
+  cantidad_plantas: number;
 }
 
 export interface ApiResponse {

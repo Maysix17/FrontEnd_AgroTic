@@ -76,8 +76,8 @@ const ActividadesPage: React.FC = () => {
       const formattedEvents = activities.map((activity: any) => ({
         id: activity.id,
         title: activity.descripcion || 'Actividad',
-        start: new Date(activity.fechaAsignacion),
-        end: new Date(activity.fechaAsignacion),
+        start: new Date(activity.fechaAsignacion + 'T00:00:00'),
+        end: new Date(activity.fechaAsignacion + 'T00:00:00'),
         resource: activity,
       }));
       console.log('Formatted events:', formattedEvents);
@@ -224,6 +224,10 @@ const ActividadesPage: React.FC = () => {
         onActivityCreated={updateActivityCount}
         onSave={async (data) => {
           try {
+            console.log('ActividadesPage onSave - data.fecha:', data.fecha);
+            console.log('ActividadesPage onSave - data.fecha ISO:', data.fecha.toISOString());
+            console.log('ActividadesPage onSave - data.fecha local:', data.fecha.toLocaleDateString());
+
             const actividadData = {
               descripcion: data.descripcion,
               fechaAsignacion: data.fecha,
@@ -233,6 +237,9 @@ const ActividadesPage: React.FC = () => {
               fkCultivoVariedadZonaId: data.lote, // data.lote is cvz.id from search
               fkCategoriaActividadId: data.categoria,
             };
+
+            console.log('ActividadesPage onSave - actividadData.fechaAsignacion:', actividadData.fechaAsignacion);
+            console.log('ActividadesPage onSave - actividadData.fechaAsignacion ISO:', actividadData.fechaAsignacion.toISOString());
 
             const actividad = await createActividad(actividadData);
 

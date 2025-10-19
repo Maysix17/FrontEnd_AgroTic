@@ -282,6 +282,11 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
   };
 
   const handleSave = async () => {
+    console.log('ActividadModal handleSave - selectedDate:', selectedDate);
+    console.log('ActividadModal handleSave - selectedDate type:', typeof selectedDate);
+    console.log('ActividadModal handleSave - selectedDate ISO:', selectedDate.toISOString());
+    console.log('ActividadModal handleSave - selectedDate local:', selectedDate.toLocaleDateString());
+
     // Validate stock availability
     const validationPromises = Object.values(selectedProducts).map(async (prod) => {
       if (prod.isSurplus) {
@@ -329,6 +334,9 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       descripcion,
       lote: selectedLote?.id
     };
+    console.log('ActividadModal handleSave - data.fecha:', data.fecha);
+    console.log('ActividadModal handleSave - data.fecha ISO:', data.fecha.toISOString());
+    console.log('ActividadModal handleSave - data.fecha local:', data.fecha.toLocaleDateString());
     onSave(data);
 
     // Notify parent component to update activity count for this date

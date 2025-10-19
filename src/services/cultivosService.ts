@@ -14,7 +14,24 @@ export const getAllCultivos = async (): Promise<Cultivo[]> => {
 };
 
 export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> => {
-  const response = await apiClient.post('/cultivos', data);
+  console.log('🌱 FRONTEND - Creando cultivo con datos:', data);
+
+  // Use the correct endpoint for creating cultivos
+  const payload = {
+    tipoCultivoId: data.tipoCultivoId,
+    variedadId: data.variedadId,
+    zonaId: data.zonaId,
+    estado: 1, // Default to active
+    siembra: new Date().toISOString(),
+    cantidad_plantas_inicial: data.cantidad_plantas_inicial,
+    fk_estado_fenologico: data.fk_estado_fenologico,
+  };
+
+  console.log('🌱 FRONTEND - Payload enviado al backend:', payload);
+
+  const response = await apiClient.post('/cultivos', payload);
+  console.log('🌱 FRONTEND - Respuesta del backend:', response.data);
+
   return response.data;
 };
 

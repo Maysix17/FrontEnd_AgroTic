@@ -1,7 +1,7 @@
 import apiClient from '../lib/axios/axios';
-import type { Cosecha } from '../types/cosechas.types';
+import type { Cosecha, CreateCosechaDto } from '../types/cosechas.types';
 
-export const createCosecha = async (data: Omit<Cosecha, 'id'>): Promise<Cosecha> => {
+export const createCosecha = async (data: CreateCosechaDto): Promise<Cosecha> => {
   const response = await apiClient.post('/cosechas', data);
   return response.data;
 };

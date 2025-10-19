@@ -18,6 +18,7 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     cantidad: 0,
     fecha: '',
     fkCultivosVariedadXZonaId: cvzId,
+    cantidad_plantas_cosechadas: undefined,
   });
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +81,20 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
                 value={formData.fecha || ''}
                 onChange={(e) => handleChange('fecha', e.target.value)}
               />
+              <TextInput
+                label="Cantidad de Plantas Cosechadas"
+                type="number"
+                value={formData.cantidad_plantas_cosechadas?.toString() || ''}
+                onChange={(e) => handleChange('cantidad_plantas_cosechadas', parseInt(e.target.value) || undefined)}
+                placeholder="Opcional - para calcular rendimiento por planta"
+              />
+              {formData.cantidad_plantas_cosechadas && formData.cantidad > 0 && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Rendimiento por planta: {(formData.cantidad / formData.cantidad_plantas_cosechadas).toFixed(2)} kg/planta
+                  </p>
+                </div>
+              )}
             </div>
           </ModalBody>
           <ModalFooter>

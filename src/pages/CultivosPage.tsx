@@ -14,6 +14,8 @@ import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
 import FichaModal from "../components/organisms/FichaModal";
 import ActivityHistoryModal from "../components/organisms/ActivityHistoryModal";
+import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
+import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
 
 const CultivosPage: React.FC = () => {
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
@@ -26,8 +28,11 @@ const CultivosPage: React.FC = () => {
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
   const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
   const [isActivityHistoryModalOpen, setIsActivityHistoryModalOpen] = useState(false);
+  const [isCultivoDetailsModalOpen, setIsCultivoDetailsModalOpen] = useState(false);
+  const [isEstadosFenologicosModalOpen, setIsEstadosFenologicosModalOpen] = useState(false);
   const [selectedFichas, setSelectedFichas] = useState<string[]>([]);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
+  const [selectedCultivoForDetails, setSelectedCultivoForDetails] = useState<Cultivo | null>(null);
 
   const handleSearch = async () => {
     await handleSearchWithFilters(filters);
@@ -86,52 +91,25 @@ const CultivosPage: React.FC = () => {
     setIsActivityHistoryModalOpen(true);
   };
 
-  const exportToExcel = (cultivo?: Cultivo): void => {
-    const dataToExport = cultivo ? [cultivo] : cultivos;
-    if (dataToExport.length === 0) {
-      alert("No hay datos para exportar");
-      return;
-    }
-
-    const headers = ["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha"];
-    const htmlContent = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head><meta charset="utf-8"><title>Cultivos Export</title></head>
-      <body>
-        <table border="1">
-          <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
-          <tbody>
-            ${dataToExport
-              .map(
-                (cultivo) => `
-              <tr>
-                <td>${cultivo.ficha}</td>
-                <td>${cultivo.lote}</td>
-                <td>${cultivo.nombrecultivo}</td>
-                <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha"}</td>
-                <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha"}</td>
-              </tr>
-            `
-              )
-              .join("")}
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([htmlContent], { type: "application/vnd.ms-excel" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    const fileName = cultivo
-      ? `cultivo_${cultivo.ficha}_${new Date().toISOString().split("T")[0]}.xls`
-      : `cultivos_${new Date().toISOString().split("T")[0]}.xls`;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleOpenCultivoDetailsModal = (cultivo: Cultivo) => {
+    setSelectedCultivoForDetails(cultivo);
+    setIsCultivoDetailsModalOpen(true);
   };
+
+  const handleRefreshCultivoDetails = async () => {
+    if (selectedCultivoForDetails) {
+      // Find the updated cultivo from the current list or refetch
+      const updatedCultivo = cultivos.find(c => c.cvzid === selectedCultivoForDetails.cvzid);
+      if (updatedCultivo) {
+        setSelectedCultivoForDetails(updatedCultivo);
+      } else {
+        // If not found, refresh the entire list
+        await handleSearch();
+      }
+    }
+  };
+
+  // Función de exportación movida al modal de detalles
 
   return (
     <div className="flex flex-col w-full bg-gray-50 overflow-y-auto" style={{ height: '100%' }}>
@@ -147,7 +125,39 @@ const CultivosPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
             <CustomButton
               label="Exportar Todos"
-              onClick={() => exportToExcel()}
+              onClick={() => {
+                const headers = ["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha"];
+                const htmlContent = `
+                  <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                  <head><meta charset="utf-8"><title>Cultivos Export</title></head>
+                  <body>
+                    <table border="1">
+                      <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
+                      <tbody>
+                        ${cultivos.map((cultivo) => `
+                          <tr>
+                            <td>${cultivo.ficha}</td>
+                            <td>${cultivo.lote}</td>
+                            <td>${cultivo.nombrecultivo}</td>
+                            <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha"}</td>
+                            <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha"}</td>
+                          </tr>
+                        `).join("")}
+                      </tbody>
+                    </table>
+                  </body>
+                  </html>
+                `;
+
+                const blob = new Blob([htmlContent], { type: "application/vnd.ms-excel" });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", `cultivos_${new Date().toISOString().split("T")[0]}.xls`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
               size="md"
             />
             <CustomButton
@@ -163,6 +173,11 @@ const CultivosPage: React.FC = () => {
             <CustomButton
               label="Registro del Cultivo"
               onClick={() => setIsCultivoModalOpen(true)}
+              size="md"
+            />
+            <CustomButton
+              label="Gestión Estados Fenológicos"
+              onClick={() => setIsEstadosFenologicosModalOpen(true)}
               size="md"
             />
           </div>
@@ -224,6 +239,29 @@ const CultivosPage: React.FC = () => {
               </select>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1">Estado Fenológico</label>
+              <select
+                className="w-64 border border-gray-300 rounded-xl h-10 "
+                value={filters.fk_estado_fenologico ?? ""}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "fk_estado_fenologico",
+                    e.target.value ? parseInt(e.target.value) : undefined
+                  )
+                }
+              >
+                <option value="">Todos</option>
+                {/* TODO: Load estados fenológicos dynamically */}
+                <option value="1">Germinación</option>
+                <option value="2">Crecimiento Vegetativo</option>
+                <option value="3">Floración</option>
+                <option value="4">Fructificación</option>
+                <option value="5">Maduración</option>
+                <option value="6">Senescencia</option>
+              </select>
+            </div>
+
             <div className="flex gap-2 items-center mt-6">
               <CustomButton label="Buscar" onClick={handleSearch} size="sm" />
               <CustomButton
@@ -249,7 +287,6 @@ const CultivosPage: React.FC = () => {
             <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-350px)]">
               <Table
                 headers={[
-                  "Ficha",
                   "Lote",
                   "Nombre del Cultivo",
                   "Fecha de Siembra",
@@ -257,19 +294,11 @@ const CultivosPage: React.FC = () => {
                   "Actividades",
                   "Finanzas",
                   "Cosecha/Venta",
-                  "Exportar",
+                  "Información",
                 ]}
               >
                 {cultivos.map((cultivo, index) => (
                   <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2">
-                      <CustomButton
-                        label="Ver Fichas"
-                        onClick={() => handleOpenFichaModal(cultivo.ficha)}
-                        size="sm"
-                        variant="bordered"
-                      />
-                    </td>
                     <td className="px-4 py-2">{cultivo.lote}</td>
                     <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
                     <td className="px-4 py-2">
@@ -305,8 +334,8 @@ const CultivosPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       <CustomButton
-                        label="Exportar"
-                        onClick={() => exportToExcel(cultivo)}
+                        label="Ver Detalles"
+                        onClick={() => handleOpenCultivoDetailsModal(cultivo)}
                         size="sm"
                         variant="bordered"
                       />
@@ -348,12 +377,6 @@ const CultivosPage: React.FC = () => {
 
                 const actions: CardAction[] = [
                   {
-                    label: "Ver Fichas",
-                    onClick: () => handleOpenFichaModal(cultivo.ficha),
-                    size: "sm",
-                    variant: "bordered",
-                  },
-                  {
                     label: "Actividades",
                     onClick: () => handleOpenActivityHistoryModal(cultivo),
                     size: "sm",
@@ -374,8 +397,8 @@ const CultivosPage: React.FC = () => {
                     size: "sm",
                   },
                   {
-                    label: "Exportar",
-                    onClick: () => exportToExcel(cultivo),
+                    label: "Ver Detalles",
+                    onClick: () => handleOpenCultivoDetailsModal(cultivo),
                     size: "sm",
                     variant: "bordered",
                   },
@@ -428,10 +451,22 @@ const CultivosPage: React.FC = () => {
         cultivoName={selectedCultivo?.nombrecultivo || ""}
       />
 
+      <CultivoDetailsModal
+        isOpen={isCultivoDetailsModalOpen}
+        onClose={() => setIsCultivoDetailsModalOpen(false)}
+        cultivo={selectedCultivoForDetails}
+        onRefresh={handleRefreshCultivoDetails}
+      />
+
       <CultivoModal
         isOpen={isCultivoModalOpen}
         onClose={() => setIsCultivoModalOpen(false)}
         onSuccess={() => handleSearch()}
+      />
+
+      <EstadosFenologicosModal
+        isOpen={isEstadosFenologicosModalOpen}
+        onClose={() => setIsEstadosFenologicosModalOpen(false)}
       />
     </div>
   );
