@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Input, Textarea } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Input } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import type { Cultivo } from '../../types/cultivos.types';
 import { actualizarCantidadPlantas } from '../../services/cultivosVariedadZonaService';

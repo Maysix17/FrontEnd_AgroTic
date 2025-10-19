@@ -18,4 +18,5 @@ export interface CreateCosechaDto {
 
   // NUEVO CAMPO
   cantidad_plantas_cosechadas?: number;
+  rendimiento_por_planta?: number;
 }

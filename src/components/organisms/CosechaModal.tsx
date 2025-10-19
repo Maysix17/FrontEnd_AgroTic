@@ -32,9 +32,15 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     e.preventDefault();
     if (!formData.fkCultivosVariedadXZonaId) return;
 
+    // Calcular rendimiento por planta si se proporciona cantidad de plantas cosechadas
+    const dataToSend = { ...formData };
+    if (formData.cantidad_plantas_cosechadas && formData.cantidad_plantas_cosechadas > 0) {
+      dataToSend.rendimiento_por_planta = formData.cantidad / formData.cantidad_plantas_cosechadas;
+    }
+
     setLoading(true);
     try {
-      await createCosecha(formData);
+      await createCosecha(dataToSend);
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -64,9 +70,9 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
                   className="w-full border rounded-lg px-3 py-2"
                   value={formData.unidadMedida}
                   onChange={(e) => handleChange('unidadMedida', e.target.value)}
-                  disabled
                 >
                   <option value="kg">Kilogramos</option>
+                  <option value="lb">Libras</option>
                 </select>
               </div>
               <TextInput
@@ -91,7 +97,7 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
               {formData.cantidad_plantas_cosechadas && formData.cantidad > 0 && (
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    Rendimiento por planta: {(formData.cantidad / formData.cantidad_plantas_cosechadas).toFixed(2)} kg/planta
+                    Rendimiento por planta: {(formData.cantidad / formData.cantidad_plantas_cosechadas).toFixed(2)} {formData.unidadMedida}/planta
                   </p>
                 </div>
               )}

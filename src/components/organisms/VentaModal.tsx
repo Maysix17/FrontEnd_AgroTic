@@ -16,10 +16,13 @@ interface VentaModalProps {
 const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuccess }) => {
   const [formData, setFormData] = useState<CreateVentaDto>({
     cantidad: 0,
-    fecha: '',
+    fecha: new Date().toISOString().split('T')[0], // Fecha automática del día actual
     fkCosechaId: '', // This needs to be set properly
     precioKilo: 0,
   });
+
+  // Ensure fecha is always a string
+  const fechaValue = formData.fecha || '';
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,6 +36,7 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
     try {
       await createVenta({
         ...formData,
+        fecha: fechaValue,
         fkCosechaId: cultivo.cosechaid,
       });
       onSuccess();
@@ -67,8 +71,9 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
               <TextInput
                 label="Fecha"
                 type="date"
-                value={formData.fecha}
+                value={fechaValue}
                 onChange={(e) => handleChange('fecha', e.target.value)}
+                disabled
               />
               <TextInput
                 label="Precio por Kilo"

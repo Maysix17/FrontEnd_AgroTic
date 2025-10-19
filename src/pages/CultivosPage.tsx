@@ -12,7 +12,6 @@ import VariedadModal from "../components/organisms/VariedadModal";
 import CultivoModal from "../components/organisms/CultivoModal";
 import CosechaModal from "../components/organisms/CosechaModal";
 import VentaModal from "../components/organisms/VentaModal";
-import FichaModal from "../components/organisms/FichaModal";
 import ActivityHistoryModal from "../components/organisms/ActivityHistoryModal";
 import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
 import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
@@ -26,11 +25,9 @@ const CultivosPage: React.FC = () => {
   const [isCultivoModalOpen, setIsCultivoModalOpen] = useState(false);
   const [isCosechaModalOpen, setIsCosechaModalOpen] = useState(false);
   const [isVentaModalOpen, setIsVentaModalOpen] = useState(false);
-  const [isFichaModalOpen, setIsFichaModalOpen] = useState(false);
   const [isActivityHistoryModalOpen, setIsActivityHistoryModalOpen] = useState(false);
   const [isCultivoDetailsModalOpen, setIsCultivoDetailsModalOpen] = useState(false);
   const [isEstadosFenologicosModalOpen, setIsEstadosFenologicosModalOpen] = useState(false);
-  const [selectedFichas, setSelectedFichas] = useState<string[]>([]);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
   const [selectedCultivoForDetails, setSelectedCultivoForDetails] = useState<Cultivo | null>(null);
 
@@ -80,11 +77,6 @@ const CultivosPage: React.FC = () => {
     setIsVentaModalOpen(true);
   };
 
-  const handleOpenFichaModal = (fichaString: string) => {
-    const fichas = fichaString.split(",").map((f) => f.trim()).filter((f) => f);
-    setSelectedFichas(fichas);
-    setIsFichaModalOpen(true);
-  };
 
   const handleOpenActivityHistoryModal = (cultivo: Cultivo) => {
     setSelectedCultivo(cultivo);
@@ -437,11 +429,6 @@ const CultivosPage: React.FC = () => {
         onClose={() => setIsVentaModalOpen(false)}
         cultivo={selectedCultivo}
         onSuccess={handleSearch}
-      />
-      <FichaModal
-        isOpen={isFichaModalOpen}
-        onClose={() => setIsFichaModalOpen(false)}
-        fichas={selectedFichas}
       />
 
       <ActivityHistoryModal

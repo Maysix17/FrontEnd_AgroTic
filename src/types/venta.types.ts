@@ -7,8 +7,8 @@ export interface Venta {
  }
 
 export interface CreateVentaDto {
-   cantidad: number;
-   fecha: string;
-   fkCosechaId: string;
-   precioKilo?: number;
- }
+    cantidad: number;
+    fecha?: string;
+    fkCosechaId: string;
+    precioKilo?: number;
+  }
