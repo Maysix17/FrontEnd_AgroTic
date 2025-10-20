@@ -11,6 +11,11 @@ export const getCosechas = async (): Promise<Cosecha[]> => {
   return response.data;
 };
 
+export const getCosechasByCultivo = async (cvzId: string): Promise<Cosecha[]> => {
+  const response = await apiClient.get(`/cosechas/cultivo/${cvzId}`);
+  return response.data;
+};
+
 export const updateCosecha = async (id: string, data: Partial<Cosecha>): Promise<Cosecha> => {
   const response = await apiClient.patch(`/cosechas/${id}`, data);
   return response.data;

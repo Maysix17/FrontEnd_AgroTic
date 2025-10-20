@@ -232,7 +232,7 @@ const ActividadesPage: React.FC = () => {
               descripcion: data.descripcion,
               fechaAsignacion: data.fecha,
               horasDedicadas: 0, // 0 initially, set when finalizing
-              observacion: null, // null initially, set when finalizing
+              observacion: '', // empty string initially, set when finalizing
               estado: true,
               fkCultivoVariedadZonaId: data.lote, // data.lote is cvz.id from search
               fkCategoriaActividadId: data.categoria,

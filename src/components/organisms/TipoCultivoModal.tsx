@@ -51,7 +51,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
     }
   };
 
-  const headers = ['Nombre', 'Acciones'];
+  const headers = ['Nombre', 'Clasificación del Cultivo', 'Acciones'];
 
   return (
     <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl">
@@ -68,6 +68,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
               {cultivos.map((cultivo) => (
                 <tr key={cultivo.id}>
                   <td className="px-4 py-2 border-b">{cultivo.nombre}</td>
+                  <td className="px-4 py-2 border-b">{cultivo.esPerenne ? "Perene" : "Transitorio"}</td>
                   <td className="px-4 py-2 border-b">
                     <div className="flex gap-2">
                       <CustomButton onClick={() => handleEdit(cultivo)}>Editar</CustomButton>

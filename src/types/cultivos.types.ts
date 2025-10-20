@@ -20,6 +20,12 @@ export interface Cultivo {
   edad_dias?: number; // Calculado en frontend
   area_terreno?: number; // De zona
   rendimiento_promedio?: number; // Calculado de cosechas
+
+  // Información del tipo de cultivo
+  tipoCultivo?: {
+    nombre: string;
+    esPerenne: boolean;
+  };
 }
 
 export interface SearchCultivoDto {

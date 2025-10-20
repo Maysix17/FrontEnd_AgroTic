@@ -22,6 +22,7 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
   });
   const [tipoCultivos, setTipoCultivos] = useState<TipoCultivoData[]>([]);
   const [variedades, setVariedades] = useState<VariedadData[]>([]);
+  const [filteredVariedades, setFilteredVariedades] = useState<VariedadData[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
   const [message, setMessage] = useState<string>("");
 
@@ -32,6 +33,7 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         setTipoCultivos(tipos);
         const vars = await getVariedades();
         setVariedades(vars);
+        setFilteredVariedades(vars); // Inicialmente mostrar todas las variedades
         const zons = await getAllZonas();
         setZonas(zons);
       } catch (error) {
@@ -40,6 +42,20 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
     };
     fetchData();
   }, []);
+
+  // Filtrar variedades cuando cambia el tipo de cultivo seleccionado
+  useEffect(() => {
+    if (cultivoData.tipoCultivoId) {
+      const filtered = variedades.filter(v => v.fkTipoCultivoId === cultivoData.tipoCultivoId);
+      setFilteredVariedades(filtered);
+      // Resetear la variedad seleccionada si no pertenece al nuevo tipo de cultivo
+      if (cultivoData.variedadId && !filtered.find(v => v.id === cultivoData.variedadId)) {
+        setCultivoData({ ...cultivoData, variedadId: "" });
+      }
+    } else {
+      setFilteredVariedades(variedades); // Mostrar todas si no hay tipo seleccionado
+    }
+  }, [cultivoData.tipoCultivoId, variedades]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +103,10 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
             setCultivoData({ ...cultivoData, variedadId: e.target.value })
           }
         >
-          <option value="">Seleccione una variedad</option>
-          {variedades.map((varie) => (
+          <option value="">
+            {cultivoData.tipoCultivoId ? "Seleccione una variedad" : "Primero seleccione un tipo de cultivo"}
+          </option>
+          {filteredVariedades.map((varie) => (
             <option key={varie.id} value={varie.id}>
               {varie.nombre}
             </option>

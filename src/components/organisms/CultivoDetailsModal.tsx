@@ -5,18 +5,16 @@ import type { Cultivo } from '../../types/cultivos.types';
 import { calcularEdadCultivo } from '../../services/cultivosVariedadZonaService';
 
 interface CultivoDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  cultivo: Cultivo | null;
-  onRefresh?: () => void;
-}
+   isOpen: boolean;
+   onClose: () => void;
+   cultivo: Cultivo | null;
+ }
 
 const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
-  isOpen,
-  onClose,
-  cultivo,
-  onRefresh
-}) => {
+   isOpen,
+   onClose,
+   cultivo
+ }) => {
   const [currentCultivo, setCurrentCultivo] = useState<Cultivo | null>(cultivo);
 
   // Update local state when cultivo prop changes

@@ -5,7 +5,7 @@ import DateRangeInput from "../components/atoms/DateRangeInput";
 import Table from "../components/atoms/Table";
 import MobileCard from "../components/atoms/MobileCard";
 import type { CardField, CardAction } from "../types/MobileCard.types";
-import { searchCultivos } from "../services/cultivosService";
+import { searchCultivos, finalizeCultivo } from "../services/cultivosService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
@@ -15,6 +15,7 @@ import VentaModal from "../components/organisms/VentaModal";
 import ActivityHistoryModal from "../components/organisms/ActivityHistoryModal";
 import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
 import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
+import HarvestSellModal from "../components/organisms/HarvestSellModal";
 
 const CultivosPage: React.FC = () => {
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
@@ -28,6 +29,7 @@ const CultivosPage: React.FC = () => {
   const [isActivityHistoryModalOpen, setIsActivityHistoryModalOpen] = useState(false);
   const [isCultivoDetailsModalOpen, setIsCultivoDetailsModalOpen] = useState(false);
   const [isEstadosFenologicosModalOpen, setIsEstadosFenologicosModalOpen] = useState(false);
+  const [isHarvestSellModalOpen, setIsHarvestSellModalOpen] = useState(false);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
   const [selectedCultivoForDetails, setSelectedCultivoForDetails] = useState<Cultivo | null>(null);
 
@@ -67,14 +69,23 @@ const CultivosPage: React.FC = () => {
     setCultivos([]);
   };
 
-  const handleOpenCosechaModal = (cultivo: Cultivo) => {
+  // Funciones removidas ya que ahora se usan desde HarvestSellModal
+
+  const handleOpenHarvestSellModal = (cultivo: Cultivo) => {
     setSelectedCultivo(cultivo);
-    setIsCosechaModalOpen(true);
+    setIsHarvestSellModalOpen(true);
   };
 
-  const handleOpenVentaModal = (cultivo: Cultivo) => {
-    setSelectedCultivo(cultivo);
-    setIsVentaModalOpen(true);
+  const handleFinalizeCultivo = async (cultivo: Cultivo) => {
+    try {
+      await finalizeCultivo(cultivo.id);
+      console.log('Cultivo finalizado:', cultivo.id);
+      // Actualizar la lista para reflejar el cambio
+      await handleSearch();
+    } catch (error) {
+      console.error('Error finalizando cultivo:', error);
+      alert('Error al finalizar el cultivo');
+    }
   };
 
 
@@ -88,18 +99,7 @@ const CultivosPage: React.FC = () => {
     setIsCultivoDetailsModalOpen(true);
   };
 
-  const handleRefreshCultivoDetails = async () => {
-    if (selectedCultivoForDetails) {
-      // Find the updated cultivo from the current list or refetch
-      const updatedCultivo = cultivos.find(c => c.cvzid === selectedCultivoForDetails.cvzid);
-      if (updatedCultivo) {
-        setSelectedCultivoForDetails(updatedCultivo);
-      } else {
-        // If not found, refresh the entire list
-        await handleSearch();
-      }
-    }
-  };
+  // Función removida ya que no se usa
 
   // Función de exportación movida al modal de detalles
 
@@ -288,19 +288,11 @@ const CultivosPage: React.FC = () => {
                       <CustomButton label="Financiero" onClick={() => {}} size="sm" variant="bordered" />
                     </td>
                     <td className="px-4 py-2">
-                      {cultivo.estado === 0 ? (
-                        <CustomButton
-                          label="Registrar Venta"
-                          onClick={() => handleOpenVentaModal(cultivo)}
-                          size="sm"
-                        />
-                      ) : (
-                        <CustomButton
-                          label="Registrar Cosecha"
-                          onClick={() => handleOpenCosechaModal(cultivo)}
-                          size="sm"
-                        />
-                      )}
+                      <CustomButton
+                        label="Cosecha/Venta"
+                        onClick={() => handleOpenHarvestSellModal(cultivo)}
+                        size="sm"
+                      />
                     </td>
                     <td className="px-4 py-2">
                       <CustomButton
@@ -359,11 +351,8 @@ const CultivosPage: React.FC = () => {
                     variant: "bordered",
                   },
                   {
-                    label: cultivo.estado === 0 ? "Registrar Venta" : "Registrar Cosecha",
-                    onClick: () =>
-                      cultivo.estado === 0
-                        ? handleOpenVentaModal(cultivo)
-                        : handleOpenCosechaModal(cultivo),
+                    label: "Cosecha/Venta",
+                    onClick: () => handleOpenHarvestSellModal(cultivo),
                     size: "sm",
                   },
                   {
@@ -420,7 +409,6 @@ const CultivosPage: React.FC = () => {
         isOpen={isCultivoDetailsModalOpen}
         onClose={() => setIsCultivoDetailsModalOpen(false)}
         cultivo={selectedCultivoForDetails}
-        onRefresh={handleRefreshCultivoDetails}
       />
 
       <CultivoModal
@@ -432,6 +420,15 @@ const CultivosPage: React.FC = () => {
       <EstadosFenologicosModal
         isOpen={isEstadosFenologicosModalOpen}
         onClose={() => setIsEstadosFenologicosModalOpen(false)}
+      />
+
+      <HarvestSellModal
+        isOpen={isHarvestSellModalOpen}
+        onClose={() => setIsHarvestSellModalOpen(false)}
+        cultivo={selectedCultivo}
+        onHarvest={() => setIsCosechaModalOpen(true)}
+        onSell={() => setIsVentaModalOpen(true)}
+        onFinalize={() => selectedCultivo && handleFinalizeCultivo(selectedCultivo)}
       />
     </div>
   );

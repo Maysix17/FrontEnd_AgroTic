@@ -11,6 +11,7 @@ interface TipoCultivoFormProps {
 const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) => {
   const [tipoCultivoData, setTipoCultivoData] = useState<TipoCultivoData>({
     nombre: '',
+    esPerenne: false,
   });
   const [message, setMessage] = useState<string>('');
 
@@ -22,7 +23,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
           const tipos = await getTipoCultivos();
           const tipo = tipos.find(t => t.id === editId);
           if (tipo) {
-            setTipoCultivoData({ nombre: tipo.nombre });
+            setTipoCultivoData({ nombre: tipo.nombre, esPerenne: tipo.esPerenne || false });
           }
         } catch (error) {
           setMessage('Error al cargar datos para editar');
@@ -30,7 +31,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
       };
       fetchTipoCultivo();
     } else {
-      setTipoCultivoData({ nombre: '' });
+      setTipoCultivoData({ nombre: '', esPerenne: false });
     }
   }, [editId]);
 
@@ -44,7 +45,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
         await registerTipoCultivo(tipoCultivoData);
         setMessage('Registro exitoso');
       }
-      setTipoCultivoData({ nombre: '' });
+      setTipoCultivoData({ nombre: '', esPerenne: false });
       onSuccess?.();
     } catch (error: any) {
       setMessage(error.message || 'Error en la operación');
@@ -65,6 +66,42 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
           className="w-full border border-gray-300 rounded-lg p-2"
           required
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Clasificación del Cultivo</label>
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="perenne"
+              name="clasificacion"
+              checked={tipoCultivoData.esPerenne === true}
+              onChange={() =>
+                setTipoCultivoData({ ...tipoCultivoData, esPerenne: true })
+              }
+              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+            />
+            <label htmlFor="perenne" className="ml-2 text-sm text-gray-700">
+              Perenne - Cultivos que viven más de una temporada (árboles frutales, café, etc.)
+            </label>
+          </div>
+          <div className="flex items-center">
+            <input
+              type="radio"
+              id="transitorio"
+              name="clasificacion"
+              checked={tipoCultivoData.esPerenne === false}
+              onChange={() =>
+                setTipoCultivoData({ ...tipoCultivoData, esPerenne: false })
+              }
+              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+            />
+            <label htmlFor="transitorio" className="ml-2 text-sm text-gray-700">
+              Transitorio - Cultivos que completan su ciclo en una temporada (maíz, arroz, etc.)
+            </label>
+          </div>
+        </div>
       </div>
 
       {message && <p className="text-center text-green-600">{message}</p>}

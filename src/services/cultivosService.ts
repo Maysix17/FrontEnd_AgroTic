@@ -53,3 +53,8 @@ export const getZonaByNombre = async (nombre: string): Promise<any> => {
   }
   return zona;
 };
+
+export const finalizeCultivo = async (id: string): Promise<Cultivo> => {
+  const response = await apiClient.patch(`/cultivos/${id}/finalize`, { estado: 0 });
+  return response.data;
+};
