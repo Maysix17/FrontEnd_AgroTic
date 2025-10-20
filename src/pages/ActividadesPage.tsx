@@ -76,8 +76,8 @@ const ActividadesPage: React.FC = () => {
       const formattedEvents = activities.map((activity: any) => ({
         id: activity.id,
         title: activity.descripcion || 'Actividad',
-        start: new Date(activity.fechaAsignacion + 'T00:00:00'),
-        end: new Date(activity.fechaAsignacion + 'T00:00:00'),
+        start: new Date(activity.fechaAsignacion.split('T')[0]),
+        end: new Date(activity.fechaAsignacion.split('T')[0]),
         resource: activity,
       }));
       console.log('Formatted events:', formattedEvents);
@@ -231,8 +231,8 @@ const ActividadesPage: React.FC = () => {
             const actividadData = {
               descripcion: data.descripcion,
               fechaAsignacion: data.fecha,
-              horasDedicadas: 8, // default
-              observacion: data.descripcion,
+              horasDedicadas: 0, // 0 initially, set when finalizing
+              observacion: null, // null initially, set when finalizing
               estado: true,
               fkCultivoVariedadZonaId: data.lote, // data.lote is cvz.id from search
               fkCategoriaActividadId: data.categoria,

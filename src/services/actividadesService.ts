@@ -15,8 +15,8 @@ export interface Actividad {
 export interface CreateActividadData {
   descripcion: string;
   fechaAsignacion: string;
-  horasDedicadas: number;
-  observacion: string;
+  horasDedicadas?: number;
+  observacion?: string;
   estado: boolean;
   fkCultivoVariedadZonaId: string;
   fkCategoriaActividadId: string;
