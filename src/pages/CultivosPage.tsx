@@ -231,28 +231,6 @@ const CultivosPage: React.FC = () => {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">Estado Fenológico</label>
-              <select
-                className="w-64 border border-gray-300 rounded-xl h-10 "
-                value={filters.fk_estado_fenologico ?? ""}
-                onChange={(e) =>
-                  handleFilterChange(
-                    "fk_estado_fenologico",
-                    e.target.value ? parseInt(e.target.value) : undefined
-                  )
-                }
-              >
-                <option value="">Todos</option>
-                {/* TODO: Load estados fenológicos dynamically */}
-                <option value="1">Germinación</option>
-                <option value="2">Crecimiento Vegetativo</option>
-                <option value="3">Floración</option>
-                <option value="4">Fructificación</option>
-                <option value="5">Maduración</option>
-                <option value="6">Senescencia</option>
-              </select>
-            </div>
 
             <div className="flex gap-2 items-center mt-6">
               <CustomButton label="Buscar" onClick={handleSearch} size="sm" />

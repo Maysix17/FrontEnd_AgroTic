@@ -24,7 +24,6 @@ export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> =
     estado: 1, // Default to active
     siembra: new Date().toISOString(),
     cantidad_plantas_inicial: data.cantidad_plantas_inicial,
-    fk_estado_fenologico: data.fk_estado_fenologico,
   };
 
   console.log('🌱 FRONTEND - Payload enviado al backend:', payload);

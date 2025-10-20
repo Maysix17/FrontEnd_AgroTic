@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input, Textarea } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
+import UpdateEstadoFenologicoModal from './UpdateEstadoFenologicoModal';
+import UpdateCantidadPlantasModal from './UpdateCantidadPlantasModal';
 
 const styles = `
   body {
@@ -183,21 +186,34 @@ const styles = `
 `;
 
 interface Activity {
-  id: string;
-  descripcion: string;
-  inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
-  usuariosAsignados?: { usuario: { nombres: string; apellidos: string; id: string }; activo: boolean }[];
-  reservas?: {
-    id: string;
-    cantidadReservada: number;
-    lote: {
-      producto: {
-        nombre: string;
-        unidadMedida: { nombre: string; abreviatura: string };
-      };
-    };
-  }[];
-}
+   id: string;
+   descripcion: string;
+   categoriaActividad?: { nombre: string };
+   cultivoVariedadZona?: {
+     id?: string;
+     zona: { nombre: string };
+     cultivoXVariedad: {
+       cultivo: { id?: string; nombre: string; ficha: { numero: string }; siembra?: string; cosecha?: string; estado?: number; estado_fenologico?: any };
+       variedad: { nombre: string; tipoCultivo: { nombre: string } };
+     };
+     cantidadPlantasInicial?: number;
+     cantidadPlantasActual?: number;
+     areaTerreno?: number;
+     rendimientoPromedio?: number;
+   };
+   inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
+   usuariosAsignados?: { usuario: { nombres: string; apellidos: string; id: string }; activo: boolean }[];
+   reservas?: {
+     id: string;
+     cantidadReservada: number;
+     lote: {
+       producto: {
+         nombre: string;
+         unidadMedida: { nombre: string; abreviatura: string };
+       };
+     };
+   }[];
+ }
 
 interface FinalizeActivityModalProps {
   isOpen: boolean;
@@ -214,11 +230,13 @@ interface FinalizeActivityModalProps {
 }
 
 const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, onClose, activity, onSave }) => {
-  const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
-  const [horas, setHoras] = useState('');
-  const [precioHora, setPrecioHora] = useState('');
-  const [observacion, setObservacion] = useState('');
-  const [evidencia, setEvidencia] = useState<File | null>(null);
+   const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
+   const [horas, setHoras] = useState('');
+   const [precioHora, setPrecioHora] = useState('');
+   const [observacion, setObservacion] = useState('');
+   const [evidencia, setEvidencia] = useState<File | null>(null);
+   const [isUpdateEstadoModalOpen, setIsUpdateEstadoModalOpen] = useState(false);
+   const [isUpdateCantidadModalOpen, setIsUpdateCantidadModalOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && activity) {
@@ -228,6 +246,8 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
       setPrecioHora('');
       setObservacion('');
       setEvidencia(null);
+      setIsUpdateEstadoModalOpen(false);
+      setIsUpdateCantidadModalOpen(false);
     }
   }, [isOpen, activity]);
 
@@ -363,6 +383,27 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
               </div>
             </div>
 
+            {/* Botones de actualización para observación */}
+            {activity?.categoriaActividad?.nombre === 'observación' && (
+              <div className="section">
+                <h3>Actualización de Cultivo</h3>
+                <div className="flex gap-2 mt-2">
+                  <CustomButton
+                    label="Actualizar Estado Fenológico"
+                    onClick={() => setIsUpdateEstadoModalOpen(true)}
+                    size="sm"
+                    variant="bordered"
+                  />
+                  <CustomButton
+                    label="Actualizar Cantidad de Plantas"
+                    onClick={() => setIsUpdateCantidadModalOpen(true)}
+                    size="sm"
+                    variant="bordered"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Botón */}
             <div className="button-container">
               <Button type="button" className="save-button" onClick={handleSave}>
@@ -373,6 +414,56 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
         </ModalBody>
       </ModalContent>
     </Modal>
+
+    {/* Update Estado Fenológico Modal */}
+    <UpdateEstadoFenologicoModal
+      isOpen={isUpdateEstadoModalOpen}
+      onClose={() => setIsUpdateEstadoModalOpen(false)}
+      cultivo={activity?.cultivoVariedadZona ? {
+        cvzid: activity.cultivoVariedadZona.id || '',
+        id: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.id || '',
+        nombrecultivo: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.nombre,
+        estado_fenologico: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico,
+        estado_fenologico_nombre: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico?.nombre,
+        ficha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.ficha?.numero || '',
+        lote: activity.cultivoVariedadZona.zona.nombre,
+        fechasiembra: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.siembra || '',
+        fechacosecha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.cosecha || '',
+        estado: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado || 1,
+        cantidad_plantas_inicial: activity.cultivoVariedadZona.cantidadPlantasInicial,
+        cantidad_plantas_actual: activity.cultivoVariedadZona.cantidadPlantasActual,
+        area_terreno: activity.cultivoVariedadZona.areaTerreno,
+        rendimiento_promedio: activity.cultivoVariedadZona.rendimientoPromedio
+      } as any : null}
+      onSuccess={() => {
+        setIsUpdateEstadoModalOpen(false);
+      }}
+    />
+
+    {/* Update Cantidad Plantas Modal */}
+    <UpdateCantidadPlantasModal
+      isOpen={isUpdateCantidadModalOpen}
+      onClose={() => setIsUpdateCantidadModalOpen(false)}
+      cultivo={activity?.cultivoVariedadZona ? {
+        cvzid: activity.cultivoVariedadZona.id || '',
+        id: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.id || '',
+        nombrecultivo: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.nombre,
+        estado_fenologico: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico,
+        estado_fenologico_nombre: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico?.nombre,
+        ficha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.ficha?.numero || '',
+        lote: activity.cultivoVariedadZona.zona.nombre,
+        fechasiembra: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.siembra || '',
+        fechacosecha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.cosecha || '',
+        estado: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado || 1,
+        cantidad_plantas_inicial: activity.cultivoVariedadZona.cantidadPlantasInicial,
+        cantidad_plantas_actual: activity.cultivoVariedadZona.cantidadPlantasActual,
+        area_terreno: activity.cultivoVariedadZona.areaTerreno,
+        rendimiento_promedio: activity.cultivoVariedadZona.rendimientoPromedio
+      } as any : null}
+      onSuccess={() => {
+        setIsUpdateCantidadModalOpen(false);
+      }}
+    />
     </>
   );
 };

@@ -29,7 +29,6 @@ export interface SearchCultivoDto {
   fecha_fin?: string; // Fecha fin del rango
   id_titulado?: string; // Número de ficha del titulado
   estado_cultivo?: number; // Estado: 1=activo, 0=inactivo
-  fk_estado_fenologico?: number; // Filtro por estado fenológico
 }
 
 export interface CreateCultivoData {
@@ -37,7 +36,6 @@ export interface CreateCultivoData {
   variedadId: string;
   zonaId: string;
   cantidad_plantas_inicial?: number;
-  fk_estado_fenologico?: number;
 }
 
 

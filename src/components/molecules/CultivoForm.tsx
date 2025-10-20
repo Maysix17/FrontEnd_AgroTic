@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomButton from "../atoms/Boton";
-import type { CreateCultivoData, EstadoFenologico } from "../../types/cultivos.types";
+import type { CreateCultivoData } from "../../types/cultivos.types";
 import type { TipoCultivoData } from "../../types/tipoCultivo.types";
 import type { VariedadData } from "../../types/variedad.types";
 import type { Zona } from "../../services/zonasService";
@@ -8,7 +8,6 @@ import { createCultivo } from "../../services/cultivosService";
 import { getTipoCultivos } from "../../services/tipoCultivo";
 import { getVariedades } from "../../services/variedad";
 import { getAllZonas } from "../../services/zonasService";
-import { getEstadosFenologicos } from "../../services/estadosFenologicosService";
 
 interface CultivoFormProps {
   onSuccess?: () => void;
@@ -20,12 +19,10 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
     variedadId: "",
     zonaId: "",
     cantidad_plantas_inicial: undefined,
-    fk_estado_fenologico: undefined,
   });
   const [tipoCultivos, setTipoCultivos] = useState<TipoCultivoData[]>([]);
   const [variedades, setVariedades] = useState<VariedadData[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
-  const [estadosFenologicos, setEstadosFenologicos] = useState<EstadoFenologico[]>([]);
   const [message, setMessage] = useState<string>("");
 
   useEffect(() => {
@@ -37,8 +34,6 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         setVariedades(vars);
         const zons = await getAllZonas();
         setZonas(zons);
-        const estados = await getEstadosFenologicos();
-        setEstadosFenologicos(estados);
       } catch (error) {
         setMessage("Error al cargar datos");
       }
@@ -57,7 +52,6 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         variedadId: "",
         zonaId: "",
         cantidad_plantas_inicial: undefined,
-        fk_estado_fenologico: undefined,
       });
       onSuccess?.();
     } catch (err: any) {
@@ -136,23 +130,6 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">Estado Fenológico Inicial</label>
-        <select
-          className="w-full border border-gray-300 rounded-lg p-2"
-          value={cultivoData.fk_estado_fenologico || ""}
-          onChange={(e) =>
-            setCultivoData({ ...cultivoData, fk_estado_fenologico: e.target.value ? parseInt(e.target.value) : undefined })
-          }
-        >
-          <option value="">Sin definir (se puede actualizar después)</option>
-          {estadosFenologicos.map((estado) => (
-            <option key={estado.id} value={estado.id}>
-              {estado.nombre} - {estado.descripcion}
-            </option>
-          ))}
-        </select>
-      </div>
 
       {message && <p className="text-center text-green-600">{message}</p>}
 

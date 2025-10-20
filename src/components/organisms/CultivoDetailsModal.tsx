@@ -3,8 +3,6 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@herou
 import CustomButton from '../atoms/Boton';
 import type { Cultivo } from '../../types/cultivos.types';
 import { calcularEdadCultivo } from '../../services/cultivosVariedadZonaService';
-import UpdateEstadoFenologicoModal from './UpdateEstadoFenologicoModal';
-import UpdateCantidadPlantasModal from './UpdateCantidadPlantasModal';
 
 interface CultivoDetailsModalProps {
   isOpen: boolean;
@@ -19,8 +17,6 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
   cultivo,
   onRefresh
 }) => {
-  const [isUpdateEstadoModalOpen, setIsUpdateEstadoModalOpen] = useState(false);
-  const [isUpdateCantidadModalOpen, setIsUpdateCantidadModalOpen] = useState(false);
   const [currentCultivo, setCurrentCultivo] = useState<Cultivo | null>(cultivo);
 
   // Update local state when cultivo prop changes
@@ -146,23 +142,6 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
                   {currentCultivo.area_terreno ? `${currentCultivo.area_terreno} m²` : "N/A"}
                 </p>
               </div>
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">Acciones de Actualización</label>
-                <div className="flex gap-2 mt-2">
-                  <CustomButton
-                    label="Actualizar Estado Fenológico"
-                    onClick={() => setIsUpdateEstadoModalOpen(true)}
-                    size="sm"
-                    variant="bordered"
-                  />
-                  <CustomButton
-                    label="Actualizar Cantidad de Plantas"
-                    onClick={() => setIsUpdateCantidadModalOpen(true)}
-                    size="sm"
-                    variant="bordered"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
@@ -189,29 +168,6 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
         </ModalFooter>
       </ModalContent>
 
-      {/* Update Estado Fenológico Modal */}
-      <UpdateEstadoFenologicoModal
-        isOpen={isUpdateEstadoModalOpen}
-        onClose={() => setIsUpdateEstadoModalOpen(false)}
-        cultivo={currentCultivo}
-        onSuccess={() => {
-          // Refresh data if needed
-          setIsUpdateEstadoModalOpen(false);
-          onRefresh?.();
-        }}
-      />
-
-      {/* Update Cantidad Plantas Modal */}
-      <UpdateCantidadPlantasModal
-        isOpen={isUpdateCantidadModalOpen}
-        onClose={() => setIsUpdateCantidadModalOpen(false)}
-        cultivo={currentCultivo}
-        onSuccess={() => {
-          // Refresh data if needed
-          setIsUpdateCantidadModalOpen(false);
-          onRefresh?.();
-        }}
-      />
     </Modal>
   );
 };
