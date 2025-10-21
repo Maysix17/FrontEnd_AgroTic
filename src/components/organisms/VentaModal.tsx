@@ -21,7 +21,8 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
      cantidad: 0,
      fecha: new Date().toISOString().split('T')[0], // Fecha automática del día actual
      fkCosechaId: '', // This needs to be set properly
-     precioKilo: 0,
+     unidadMedida: 'kg',
+     precioUnitario: 0,
    });
 
    // Ensure fecha is always a string
@@ -261,6 +262,17 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
 
               {/* Panel derecho: Cantidad, fecha y precio */}
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Unidad de Medida</label>
+                  <select
+                    className="w-full border rounded-lg px-3 py-2"
+                    value={formData.unidadMedida}
+                    onChange={(e) => handleChange('unidadMedida', e.target.value)}
+                  >
+                    <option value="kg">Kilogramos</option>
+                    <option value="lb">Libras</option>
+                  </select>
+                </div>
                 <TextInput
                   label="Cantidad"
                   type="number"
@@ -280,10 +292,10 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
                   disabled
                 />
                 <TextInput
-                  label="Precio por Kilo"
+                  label={`Precio por ${formData.unidadMedida === 'kg' ? 'Kilo' : 'Libra'}`}
                   type="number"
-                  value={formData.precioKilo?.toString() || ''}
-                  onChange={(e) => handleChange('precioKilo', parseFloat(e.target.value))}
+                  value={formData.precioUnitario?.toString() || ''}
+                  onChange={(e) => handleChange('precioUnitario', parseFloat(e.target.value))}
                 />
               </div>
             </div>

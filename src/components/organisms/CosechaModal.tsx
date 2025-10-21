@@ -89,8 +89,10 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
                   onChange={(e) => handleChange('unidadMedida', e.target.value)}
                 >
                   <option value="kg">Kilogramos</option>
-                  <option value="lb">Libras</option>
                 </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Solo se permite cosechar en kilogramos para mantener consistencia en el sistema.
+                </p>
               </div>
               <TextInput
                 label="Cantidad"

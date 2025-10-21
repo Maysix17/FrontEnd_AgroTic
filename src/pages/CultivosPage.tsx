@@ -17,6 +17,7 @@ import ActivityHistoryModal from "../components/organisms/ActivityHistoryModal";
 import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
 import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
 import HarvestSellModal from "../components/organisms/HarvestSellModal";
+import { FinancialAnalysisModal } from "../components/organisms/FinancialAnalysisModal";
 
 const CultivosPage: React.FC = () => {
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
@@ -31,8 +32,10 @@ const CultivosPage: React.FC = () => {
   const [isCultivoDetailsModalOpen, setIsCultivoDetailsModalOpen] = useState(false);
   const [isEstadosFenologicosModalOpen, setIsEstadosFenologicosModalOpen] = useState(false);
   const [isHarvestSellModalOpen, setIsHarvestSellModalOpen] = useState(false);
+  const [isFinancialAnalysisModalOpen, setIsFinancialAnalysisModalOpen] = useState(false);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
   const [selectedCultivoForDetails, setSelectedCultivoForDetails] = useState<Cultivo | null>(null);
+  const [selectedCosechaId, setSelectedCosechaId] = useState<string>("");
 
   const handleSearch = async () => {
     await handleSearchWithFilters(filters);
@@ -98,6 +101,16 @@ const CultivosPage: React.FC = () => {
   const handleOpenCultivoDetailsModal = (cultivo: Cultivo) => {
     setSelectedCultivoForDetails(cultivo);
     setIsCultivoDetailsModalOpen(true);
+  };
+
+  const handleOpenFinancialAnalysisModal = (cultivo: Cultivo) => {
+    // For now, we'll use the cosechaid if available, or show a message
+    if (cultivo.cosechaid) {
+      setSelectedCosechaId(cultivo.cosechaid);
+      setIsFinancialAnalysisModalOpen(true);
+    } else {
+      alert('Este cultivo no tiene cosechas registradas para análisis financiero');
+    }
   };
 
   // Función removida ya que no se usa
@@ -286,7 +299,7 @@ const CultivosPage: React.FC = () => {
                       <CustomButton label="Actividades" onClick={() => handleOpenActivityHistoryModal(cultivo)} size="sm" variant="bordered" />
                     </td>
                     <td className="px-4 py-2">
-                      <CustomButton label="Financiero" onClick={() => {}} size="sm" variant="bordered" />
+                      <CustomButton label="Financiero" onClick={() => handleOpenFinancialAnalysisModal(cultivo)} size="sm" variant="bordered" />
                     </td>
                     <td className="px-4 py-2">
                       <CustomButton
@@ -347,7 +360,7 @@ const CultivosPage: React.FC = () => {
                   },
                   {
                     label: "Financiero",
-                    onClick: () => {},
+                    onClick: () => handleOpenFinancialAnalysisModal(cultivo),
                     size: "sm",
                     variant: "bordered",
                   },
@@ -452,6 +465,12 @@ const CultivosPage: React.FC = () => {
             }
           }
         }}
+      />
+
+      <FinancialAnalysisModal
+        isOpen={isFinancialAnalysisModalOpen}
+        onClose={() => setIsFinancialAnalysisModalOpen(false)}
+        cosechaId={selectedCosechaId}
       />
     </div>
   );
