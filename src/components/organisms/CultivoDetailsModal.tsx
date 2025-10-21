@@ -32,7 +32,7 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
     const data = [
       ["Ficha", currentCultivo.ficha],
       ["Lote", currentCultivo.lote],
-      ["Nombre del Cultivo", currentCultivo.nombrecultivo],
+      ["Nombre del Cultivo", `${currentCultivo.tipoCultivo?.nombre} ${currentCultivo.nombrecultivo}`],
       ["Fecha de Siembra", currentCultivo.fechasiembra],
       ["Fecha de Cosecha", currentCultivo.fechacosecha],
       ["Edad del Cultivo", currentCultivo.fechasiembra ? `${calcularEdadCultivo(currentCultivo.fechasiembra)} días` : "N/A"],
@@ -90,7 +90,7 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700">Nombre del Cultivo</label>
-              <p className="text-sm text-gray-900">{currentCultivo.nombrecultivo}</p>
+              <p className="text-sm text-gray-900">{currentCultivo.tipoCultivo?.nombre} {currentCultivo.nombrecultivo}</p>
             </div>
           </div>
 

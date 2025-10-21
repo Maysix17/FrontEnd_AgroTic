@@ -5,12 +5,26 @@ export const searchCultivos = async (
   searchData: SearchCultivoDto
 ): Promise<Cultivo[]> => {
   const response = await apiClient.post('/cultivos/search', searchData);
-  return response.data;
+  // Map backend response to nest tipoCultivo object
+  return response.data.map((item: any) => ({
+    ...item,
+    tipoCultivo: {
+      nombre: item.tipo_cultivo_nombre,
+      esPerenne: item.tipo_cultivo_es_perenne,
+    },
+  }));
 };
 
 export const getAllCultivos = async (): Promise<Cultivo[]> => {
   const response = await apiClient.get('/cultivos');
-  return response.data;
+  // Map backend response to nest tipoCultivo object
+  return response.data.map((item: any) => ({
+    ...item,
+    tipoCultivo: {
+      nombre: item.tipo_cultivo_nombre,
+      esPerenne: item.tipo_cultivo_es_perenne,
+    },
+  }));
 };
 
 export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> => {

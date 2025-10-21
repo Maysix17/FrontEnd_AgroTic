@@ -11,4 +11,8 @@ export interface CreateVentaDto {
     fecha?: string;
     fkCosechaId: string;
     precioKilo?: number;
+    multipleHarvests?: Array<{
+      id: string;
+      cantidad: number;
+    }>;
   }

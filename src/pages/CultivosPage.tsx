@@ -6,6 +6,7 @@ import Table from "../components/atoms/Table";
 import MobileCard from "../components/atoms/MobileCard";
 import type { CardField, CardAction } from "../types/MobileCard.types";
 import { searchCultivos, finalizeCultivo } from "../services/cultivosService";
+import { closeAllHarvestsByCultivo } from "../services/cosechasService";
 import type { Cultivo, SearchCultivoDto } from "../types/cultivos.types";
 import TipoCultivoModal from "../components/organisms/TipoCultivoModal";
 import VariedadModal from "../components/organisms/VariedadModal";
@@ -130,7 +131,7 @@ const CultivosPage: React.FC = () => {
                           <tr>
                             <td>${cultivo.ficha}</td>
                             <td>${cultivo.lote}</td>
-                            <td>${cultivo.nombrecultivo}</td>
+                            <td>${cultivo.tipoCultivo?.nombre} ${cultivo.nombrecultivo}</td>
                             <td>${cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha"}</td>
                             <td>${cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha"}</td>
                           </tr>
@@ -270,7 +271,7 @@ const CultivosPage: React.FC = () => {
                 {cultivos.map((cultivo, index) => (
                   <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
                     <td className="px-4 py-2">{cultivo.lote}</td>
-                    <td className="px-4 py-2">{cultivo.nombrecultivo}</td>
+                    <td className="px-4 py-2">{cultivo.tipoCultivo?.nombre} {cultivo.nombrecultivo}</td>
                     <td className="px-4 py-2">
                       {cultivo.fechasiembra
                         ? new Date(cultivo.fechasiembra).toLocaleDateString()
@@ -332,7 +333,7 @@ const CultivosPage: React.FC = () => {
               {cultivos.map((cultivo, index) => {
                 const fields: CardField[] = [
                   { label: "Lote", value: cultivo.lote },
-                  { label: "Nombre del Cultivo", value: cultivo.nombrecultivo },
+                  { label: "Nombre del Cultivo", value: `${cultivo.tipoCultivo?.nombre} ${cultivo.nombrecultivo}` },
                   { label: "Fecha de Siembra", value: cultivo.fechasiembra ? new Date(cultivo.fechasiembra).toLocaleDateString() : "Sin fecha" },
                   { label: "Fecha de Cosecha", value: cultivo.fechacosecha ? new Date(cultivo.fechacosecha).toLocaleDateString() : "Sin cosecha" },
                 ];
@@ -390,6 +391,8 @@ const CultivosPage: React.FC = () => {
         onClose={() => setIsCosechaModalOpen(false)}
         cvzId={selectedCultivo?.cvzid || ""}
         onSuccess={handleSearch}
+        isPerenne={selectedCultivo?.tipoCultivo?.esPerenne || false}
+        cultivo={selectedCultivo}
       />
       <VentaModal
         isOpen={isVentaModalOpen}
@@ -402,7 +405,7 @@ const CultivosPage: React.FC = () => {
         isOpen={isActivityHistoryModalOpen}
         onClose={() => setIsActivityHistoryModalOpen(false)}
         cvzId={selectedCultivo?.cvzid || ""}
-        cultivoName={selectedCultivo?.nombrecultivo || ""}
+        cultivoName={`${selectedCultivo?.tipoCultivo?.nombre} ${selectedCultivo?.nombrecultivo}` || ""}
       />
 
       <CultivoDetailsModal
@@ -429,6 +432,26 @@ const CultivosPage: React.FC = () => {
         onHarvest={() => setIsCosechaModalOpen(true)}
         onSell={() => setIsVentaModalOpen(true)}
         onFinalize={() => selectedCultivo && handleFinalizeCultivo(selectedCultivo)}
+        onCloseHarvest={async () => {
+          if (selectedCultivo) {
+            try {
+              await closeAllHarvestsByCultivo(selectedCultivo.cvzid);
+              console.log('Todas las cosechas cerradas para el cultivo:', selectedCultivo.cvzid);
+
+              // For transitorio crops, also finalize the crop
+              if (selectedCultivo.tipoCultivo && !selectedCultivo.tipoCultivo.esPerenne) {
+                await finalizeCultivo(selectedCultivo.id);
+                console.log('Cultivo transitorio finalizado:', selectedCultivo.id);
+              }
+
+              // Actualizar la lista para reflejar el cambio
+              await handleSearch();
+            } catch (error) {
+              console.error('Error cerrando cosechas:', error);
+              alert('Error al cerrar las cosechas');
+            }
+          }
+        }}
       />
     </div>
   );

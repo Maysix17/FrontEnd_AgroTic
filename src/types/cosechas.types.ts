@@ -8,6 +8,10 @@ export interface Cosecha {
   // NUEVOS CAMPOS
   rendimiento_por_planta?: number;
   cantidad_plantas_cosechadas?: number;
+
+  // CAMPOS DE INVENTARIO
+  cantidadDisponible: number;
+  cerrado: boolean;
 }
 
 export interface CreateCosechaDto {

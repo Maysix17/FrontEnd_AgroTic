@@ -10,9 +10,11 @@ interface CosechaModalProps {
   onClose: () => void;
   cvzId: string;
   onSuccess: () => void;
+  isPerenne?: boolean;
+  cultivo?: any; // Para mostrar información del cultivo
 }
 
-const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onSuccess }) => {
+const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onSuccess, cultivo }) => {
   const [formData, setFormData] = useState<CreateCosechaDto>({
     unidadMedida: 'kg',
     cantidad: 0,
@@ -41,6 +43,11 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     setLoading(true);
     try {
       await createCosecha(dataToSend);
+
+      // Nota: No finalizamos automáticamente cultivos perennes después de cosechar
+      // Solo se finalizan cuando el usuario presiona el botón "Finalizar Cultivo"
+      // Los cultivos transitorios se finalizan automáticamente después de vender
+
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -59,7 +66,17 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     <Modal isOpen={isOpen} onOpenChange={onClose} size="md">
       <ModalContent className="bg-white p-6">
         <ModalHeader>
-          <h2 className="text-xl font-semibold">Registrar Cosecha</h2>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Registrar Cosecha</h2>
+            {cultivo && (
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div><strong>Cultivo:</strong> {cultivo.tipoCultivo?.nombre || 'N/A'} {cultivo.nombrecultivo || 'N/A'}</div>
+                  <div><strong>Zona:</strong> {cultivo.lote || 'N/A'}</div>
+                </div>
+              </div>
+            )}
+          </div>
         </ModalHeader>
         <form onSubmit={handleSubmit}>
           <ModalBody>
