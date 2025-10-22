@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import InputSearch from "../components/atoms/buscador";
 import CustomButton from "../components/atoms/Boton";
+import IconButton from "../components/atoms/IconButton";
 import DateRangeInput from "../components/atoms/DateRangeInput";
 import Table from "../components/atoms/Table";
 import MobileCard from "../components/atoms/MobileCard";
@@ -18,6 +19,16 @@ import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
 import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
 import HarvestSellModal from "../components/organisms/HarvestSellModal";
 import { FinancialAnalysisModal } from "../components/organisms/FinancialAnalysisModal";
+import {
+  DocumentTextIcon,
+  CurrencyDollarIcon,
+  TruckIcon,
+  EyeIcon,
+  PlusIcon,
+  CogIcon,
+  EllipsisVerticalIcon
+} from "@heroicons/react/24/outline";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/react";
 
 const CultivosPage: React.FC = () => {
   const [cultivos, setCultivos] = useState<Cultivo[]>([]);
@@ -122,15 +133,15 @@ const CultivosPage: React.FC = () => {
       <div className="flex flex-col flex-grow gap-6 p-6">
 
         {/* Header adaptable */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <h1 className="text-2xl font-bold text-left whitespace-nowrap">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
             Gestión de Cultivos
           </h1>
 
-          {/* 🔹 Botones: apilados en móvil, alineados en web */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
+          {/* Toolbar compacto */}
+          <div className="flex items-center gap-3">
             <CustomButton
-              label="Exportar Todos"
+              label="Exportar"
               onClick={() => {
                 const headers = ["Ficha", "Lote", "Nombre del Cultivo", "Fecha de Siembra", "Fecha de Cosecha"];
                 const htmlContent = `
@@ -166,26 +177,47 @@ const CultivosPage: React.FC = () => {
               }}
               size="md"
             />
-            <CustomButton
-              label="Gestion Tipo de Cultivo"
-              onClick={() => setIsTipoCultivoModalOpen(true)}
-              size="md"
-            />
-            <CustomButton
-              label="Gestion de Variedad"
-              onClick={() => setIsVariedadModalOpen(true)}
-              size="md"
-            />
-            <CustomButton
-              label="Registro del Cultivo"
+
+            <IconButton
+              icon={<PlusIcon className="w-4 h-4" />}
+              tooltip="Crear cultivo"
               onClick={() => setIsCultivoModalOpen(true)}
-              size="md"
+              color="primary"
             />
-            <CustomButton
-              label="Gestión Estados Fenológicos"
-              onClick={() => setIsEstadosFenologicosModalOpen(true)}
-              size="md"
-            />
+
+            <Dropdown>
+              <DropdownTrigger>
+                <IconButton
+                  icon={<EllipsisVerticalIcon className="w-4 h-4" />}
+                  tooltip="Más acciones"
+                  color="secondary"
+                  variant="light"
+                />
+              </DropdownTrigger>
+              <DropdownMenu aria-label="Acciones adicionales">
+                <DropdownItem
+                  key="tipo-cultivo"
+                  startContent={<CogIcon className="w-4 h-4" />}
+                  onClick={() => setIsTipoCultivoModalOpen(true)}
+                >
+                  Gestionar Tipo de Cultivo
+                </DropdownItem>
+                <DropdownItem
+                  key="variedad"
+                  startContent={<CogIcon className="w-4 h-4" />}
+                  onClick={() => setIsVariedadModalOpen(true)}
+                >
+                  Gestionar Variedad
+                </DropdownItem>
+                <DropdownItem
+                  key="estados"
+                  startContent={<CogIcon className="w-4 h-4" />}
+                  onClick={() => setIsEstadosFenologicosModalOpen(true)}
+                >
+                  Gestión Estados Fenológicos
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </div>
         </div>
 
@@ -275,46 +307,54 @@ const CultivosPage: React.FC = () => {
                   "Nombre del Cultivo",
                   "Fecha de Siembra",
                   "Fecha de Cosecha",
-                  "Actividades",
-                  "Finanzas",
-                  "Cosecha/Venta",
-                  "Información",
+                  "Acciones",
                 ]}
               >
                 {cultivos.map((cultivo, index) => (
-                  <tr key={`${cultivo.cvzid}-${index}`} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-2">{cultivo.lote}</td>
-                    <td className="px-4 py-2">{cultivo.tipoCultivo?.nombre} {cultivo.nombrecultivo}</td>
-                    <td className="px-4 py-2">
+                  <tr key={`${cultivo.cvzid}-${index}`} className={`border-b ${index % 2 === 0 ? 'bg-gray-50/30' : ''} hover:bg-gray-100/50`}>
+                    <td className="px-4 py-3">{cultivo.lote}</td>
+                    <td className="px-4 py-3">{cultivo.tipoCultivo?.nombre} {cultivo.nombrecultivo}</td>
+                    <td className="px-4 py-3">
                       {cultivo.fechasiembra
                         ? new Date(cultivo.fechasiembra).toLocaleDateString()
                         : "Sin fecha"}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-3">
                       {cultivo.fechacosecha
                         ? new Date(cultivo.fechacosecha).toLocaleDateString()
                         : "Sin cosecha"}
                     </td>
-                    <td className="px-4 py-2">
-                      <CustomButton label="Actividades" onClick={() => handleOpenActivityHistoryModal(cultivo)} size="sm" variant="bordered" />
-                    </td>
-                    <td className="px-4 py-2">
-                      <CustomButton label="Financiero" onClick={() => handleOpenFinancialAnalysisModal(cultivo)} size="sm" variant="bordered" />
-                    </td>
-                    <td className="px-4 py-2">
-                      <CustomButton
-                        label="Cosecha/Venta"
-                        onClick={() => handleOpenHarvestSellModal(cultivo)}
-                        size="sm"
-                      />
-                    </td>
-                    <td className="px-4 py-2">
-                      <CustomButton
-                        label="Ver Detalles"
-                        onClick={() => handleOpenCultivoDetailsModal(cultivo)}
-                        size="sm"
-                        variant="bordered"
-                      />
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        <IconButton
+                          icon={<DocumentTextIcon className="w-4 h-4" />}
+                          tooltip="Ver actividades"
+                          onClick={() => handleOpenActivityHistoryModal(cultivo)}
+                          color="secondary"
+                          variant="light"
+                        />
+                        <IconButton
+                          icon={<CurrencyDollarIcon className="w-4 h-4" />}
+                          tooltip="Análisis financiero"
+                          onClick={() => handleOpenFinancialAnalysisModal(cultivo)}
+                          color="secondary"
+                          variant="light"
+                        />
+                        <IconButton
+                          icon={<TruckIcon className="w-4 h-4" />}
+                          tooltip="Cosecha/Venta"
+                          onClick={() => handleOpenHarvestSellModal(cultivo)}
+                          color="primary"
+                          variant="light"
+                        />
+                        <IconButton
+                          icon={<EyeIcon className="w-4 h-4" />}
+                          tooltip="Ver detalles"
+                          onClick={() => handleOpenCultivoDetailsModal(cultivo)}
+                          color="secondary"
+                          variant="light"
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -353,27 +393,32 @@ const CultivosPage: React.FC = () => {
 
                 const actions: CardAction[] = [
                   {
-                    label: "Actividades",
+                    icon: <DocumentTextIcon className="w-4 h-4" />,
+                    tooltip: "Ver actividades",
                     onClick: () => handleOpenActivityHistoryModal(cultivo),
-                    size: "sm",
-                    variant: "bordered",
+                    color: "secondary",
+                    variant: "light",
                   },
                   {
-                    label: "Financiero",
+                    icon: <CurrencyDollarIcon className="w-4 h-4" />,
+                    tooltip: "Análisis financiero",
                     onClick: () => handleOpenFinancialAnalysisModal(cultivo),
-                    size: "sm",
-                    variant: "bordered",
+                    color: "secondary",
+                    variant: "light",
                   },
                   {
-                    label: "Cosecha/Venta",
+                    icon: <TruckIcon className="w-4 h-4" />,
+                    tooltip: "Cosecha/Venta",
                     onClick: () => handleOpenHarvestSellModal(cultivo),
-                    size: "sm",
+                    color: "primary",
+                    variant: "light",
                   },
                   {
-                    label: "Ver Detalles",
+                    icon: <EyeIcon className="w-4 h-4" />,
+                    tooltip: "Ver detalles",
                     onClick: () => handleOpenCultivoDetailsModal(cultivo),
-                    size: "sm",
-                    variant: "bordered",
+                    color: "secondary",
+                    variant: "light",
                   },
                 ];
 

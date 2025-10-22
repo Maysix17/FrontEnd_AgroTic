@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import MenuButton from "../molecules/MenuButton";
+import { useNavigate, useLocation } from "react-router-dom";
 import UserModal from "./UserModal";
 import {
   HomeIcon,
-  DocumentTextIcon,
+  ArchiveBoxIcon,
+  ClipboardDocumentListIcon,
   CubeIcon,
   CpuChipIcon,
   UserIcon,
@@ -12,39 +12,42 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import logo from "../../assets/AgroTic.png";
-import logo2 from "../../assets/logoSena.png";
+import logoSena from "../../assets/logoSena.png";
 import { usePermission } from "../../contexts/PermissionContext";
-import { useMenu } from "../../contexts/MenuContext"; 
+import { useMenu } from "../../contexts/MenuContext";
 
 const Menu: React.FC = () => {
   const { permissions, isAuthenticated } = usePermission();
   const navigate = useNavigate();
-  const { isMobileMenuOpen, setIsMobileMenuOpen } = useMenu(); 
+  const location = useLocation();
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useMenu();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUserCardModalOpen, setIsUserCardModalOpen] = useState(false);
-  const [isCultivosSubmenuOpen, setIsCultivosSubmenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsCultivosSubmenuOpen(false);
+        // Close any open submenus if needed
       }
     };
 
-    if (isCultivosSubmenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isCultivosSubmenuOpen]);
+  }, []);
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
 
   const mainModules = [
     { nombre: "Inicio" },
     { nombre: "IOT" },
     { nombre: "Cultivos" },
+    { nombre: "Actividades" },
     { nombre: "Inventario" },
     { nombre: "Usuarios" },
   ];
@@ -57,8 +60,10 @@ const Menu: React.FC = () => {
         return CpuChipIcon;
       case "Cultivos":
         return CubeIcon;
+      case "Actividades":
+        return ClipboardDocumentListIcon;
       case "Inventario":
-        return DocumentTextIcon;
+        return ArchiveBoxIcon;
       case "Usuarios":
         return UserIcon;
       default:
@@ -74,6 +79,8 @@ const Menu: React.FC = () => {
         return "/app/iot";
       case "Cultivos":
         return "/app/cultivos";
+      case "Actividades":
+        return "/app/actividades";
       case "Inventario":
         return "/app/inventario";
       default:
@@ -85,10 +92,10 @@ const Menu: React.FC = () => {
     (module) =>
       permissions.some(
         (perm) => perm.modulo === module.nombre && perm.accion === "ver"
-      ) || module.nombre === "Usuarios"
+      ) || module.nombre === "Usuarios" || module.nombre === "Actividades"
   );
 
-  const priorityOrder = ["Inicio", "IOT", "Cultivos", "Inventario", "Usuarios"];
+  const priorityOrder = ["Inicio", "IOT", "Cultivos", "Actividades", "Inventario", "Usuarios"];
   const sortedFilteredModules = [...filteredModules].sort((a, b) => {
     const aIndex = priorityOrder.indexOf(a.nombre);
     const bIndex = priorityOrder.indexOf(b.nombre);
@@ -120,18 +127,18 @@ const Menu: React.FC = () => {
       {/*Menú lateral (desktop + mobile con animación) */}
       <div
         ref={menuRef}
-        className={`fixed top-0 left-0 h-screen w-56 bg-gray-50 p-4 flex flex-col justify-between rounded-tr-3xl rounded-br-3xl shadow-xl transform transition-transform duration-300 ease-in-out
-          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} 
-          z-40`}
+        className={`fixed top-0 left-0 h-screen bg-white flex flex-col justify-between shadow-xl transform transition-all duration-200 ease-in-out w-20
+          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          z-40 border-r border-gray-200`}
       >
-        <div>
-          {/* Logo principal */}
-          <div className="flex flex-col items-center mb-8">
-            <img src={logo} alt="Logo tic" className="w-40 h-auto mb-6" />
+        <div className="p-4">
+          {/* Logo AgroTic arriba */}
+          <div className="flex justify-center mb-10">
+            <img src={logo} alt="AgroTic" className="w-14 h-auto" />
           </div>
 
           {/* Botones del menú */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col items-center gap-2">
             {sortedFilteredModules.map((module) => {
               const IconComponent = getIcon(module.nombre);
               const label =
@@ -141,74 +148,44 @@ const Menu: React.FC = () => {
                 module.nombre === "Usuarios"
                   ? () => {
                       setIsUserCardModalOpen(true);
-                      setIsCultivosSubmenuOpen(false);
                       setIsMobileMenuOpen(false);
                     }
-                  : module.nombre === "Cultivos"
-                  ? () => setIsCultivosSubmenuOpen(!isCultivosSubmenuOpen)
                   : () => {
                       navigate(getRoute(module.nombre));
-                      setIsCultivosSubmenuOpen(false);
                       setIsMobileMenuOpen(false); // Cierra el menú móvil al navegar
                     };
 
-              if (module.nombre === "Cultivos") {
-                return (
-                  <React.Fragment key={module.nombre}>
-                    <MenuButton
-                      icon={IconComponent}
-                      label={label}
-                      onClick={onClickHandler}
-                    />
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isCultivosSubmenuOpen
-                          ? "max-h-32 opacity-100"
-                          : "max-h-0 opacity-0"
-                      }`}
-                    >
-                      <div className="flex flex-col gap-2">
-                        <button
-                          className="ml-2 py-1 px-2 w-full rounded-lg bg-white text-gray-600 shadow-sm hover:bg-gray-50 transition-all duration-150 ease-in-out select-none focus:outline-none text-sm"
-                          onClick={() => {
-                            navigate(getRoute("Cultivos"));
-                            setIsCultivosSubmenuOpen(false);
-                            setIsMobileMenuOpen(false);
-                          }}
-                        >
-                          Gestionar Cultivos
-                        </button>
-                        <button
-                          className="ml-2 py-1 px-2 w-full rounded-lg bg-white text-gray-600 shadow-sm hover:bg-gray-50 transition-all duration-150 ease-in-out select-none focus:outline-none text-sm"
-                          onClick={() => {
-                            navigate("/app/actividades");
-                            setIsCultivosSubmenuOpen(false);
-                            setIsMobileMenuOpen(false);
-                          }}
-                        >
-                          Gestionar Actividades
-                        </button>
-                      </div>
-                    </div>
-                  </React.Fragment>
-                );
-              }
+              const active = isActive(getRoute(module.nombre));
 
               return (
-                <MenuButton
-                  key={module.nombre}
-                  icon={IconComponent}
-                  label={label}
-                  onClick={onClickHandler}
-                />
+                <div key={module.nombre} className="relative group flex justify-center">
+                  <button
+                    onClick={onClickHandler}
+                    className={`
+                      w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200
+                      ${active
+                        ? 'bg-primary-100 text-primary-700 shadow-md'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800 hover:shadow-sm hover:-translate-y-0.5'
+                      }
+                    `}
+                    aria-label={label}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                  </button>
+
+                  {/* Tooltip siempre visible */}
+                  <div className="absolute left-full ml-3 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    {label}
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
 
-        {/* Logo secundario */}
-        <div className="flex flex-col items-center mt-6">
-          <img src={logo2} alt="Logo secundario" className="w-28 h-auto" />
+        {/* Logo SENA abajo */}
+        <div className="flex flex-col items-center mb-4">
+          <img src={logoSena} alt="SENA" className="w-12 h-auto" />
         </div>
 
         <UserModal

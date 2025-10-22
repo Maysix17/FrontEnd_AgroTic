@@ -5,6 +5,7 @@ export type MenuButtonProps = {
   label: string;
   active?: boolean;
   onClick?: () => void;
+  className?: string;
 };
 
 export type MenuItem = {
