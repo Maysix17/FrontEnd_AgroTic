@@ -59,7 +59,7 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
         <ModalHeader>
           <h2 className="text-xl font-semibold">Gestionar Tipos de Cultivo</h2>
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="overflow-y-auto max-h-96">
           <TipoCultivoForm editId={editId} onSuccess={() => { fetchCultivos(); setEditId(null); }} />
           {message && <p className="text-center text-green-600 mt-4">{message}</p>}
           <div className="mt-6">

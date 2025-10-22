@@ -360,6 +360,9 @@ const InventoryPage: React.FC = () => {
                     <p><span className="font-medium">Descripción:</span> {selectedItem.producto.descripcion || 'No disponible'}</p>
                     <p><span className="font-medium">Precio de Compra:</span> ${parseFloat(selectedItem.producto.precioCompra).toFixed(2)}</p>
                     <p><span className="font-medium">Capacidad de Presentación:</span> {selectedItem.producto.capacidadPresentacion || 'No especificada'}</p>
+                    {selectedItem.producto.vidaUtilPromedioPorUsos && (
+                      <p><span className="font-medium">Vida Útil Promedio por Usos:</span> {selectedItem.producto.vidaUtilPromedioPorUsos} usos</p>
+                    )}
                   </div>
                 </div>
 

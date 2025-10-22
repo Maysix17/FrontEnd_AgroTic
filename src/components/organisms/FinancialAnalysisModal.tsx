@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import apiClient from '../../lib/axios/axios';
 
 interface FinanzasCosecha {
@@ -75,29 +77,19 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
     return new Intl.NumberFormat('es-CO').format(num);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="5xl" scrollBehavior="inside">
+      <ModalContent className="max-h-[90vh]">
+        <ModalHeader>
           <div className="flex items-center space-x-3">
             <div className="h-6 w-6 bg-green-600 rounded text-white flex items-center justify-center font-bold">💰</div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-semibold">
               {cultivoId ? 'Análisis Financiero del Cultivo' : 'Análisis Financiero de Cosecha'}
             </h2>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            ✕
-          </button>
-        </div>
+        </ModalHeader>
+        <ModalBody className="max-h-[calc(90vh-120px)] overflow-y-auto">
 
-        {/* Content */}
-        <div className="p-6">
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -113,85 +105,106 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
 
           {finanzas && (
             <div className="space-y-6">
-              {/* Resumen Ejecutivo */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 p-6 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 bg-blue-600 rounded text-white flex items-center justify-center">📦</div>
-                    <div>
-                      <p className="text-sm font-medium text-blue-600">Producción</p>
-                      <p className="text-2xl font-bold text-blue-900">
-                        {formatNumber(finanzas.cantidadCosechada)} KG
-                      </p>
+              {/* Resumen Ejecutivo y Gráfico */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Summary Cards Grid */}
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <div className="space-y-6">
+                    {/* Top Row: Producción and Ingresos Totales */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-8 w-8 bg-blue-600 rounded text-white flex items-center justify-center">📦</div>
+                          <div>
+                            <p className="text-sm font-medium text-blue-600">Producción</p>
+                            <p className="text-xl font-bold text-blue-900">
+                              {formatNumber(finanzas.cantidadCosechada)} KG
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-8 w-8 bg-green-600 rounded text-white flex items-center justify-center">💵</div>
+                          <div>
+                            <p className="text-sm font-medium text-green-600">Ingresos Totales</p>
+                            <p className="text-xl font-bold text-green-900">
+                              {formatCurrency(finanzas.ingresosTotales)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Second Row: Ganancias */}
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className={`p-4 rounded-lg ${finanzas.ganancias >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                        <div className="flex items-center space-x-3">
+                          <div className={`h-8 w-8 rounded text-white flex items-center justify-center ${finanzas.ganancias >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
+                            {finanzas.ganancias >= 0 ? '📈' : '📉'}
+                          </div>
+                          <div>
+                            <p className={`text-sm font-medium ${finanzas.ganancias >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {finanzas.ganancias >= 0 ? 'Ganancias' : 'Pérdidas'}
+                            </p>
+                            <p className={`text-xl font-bold ${finanzas.ganancias >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+                              {formatCurrency(Math.abs(finanzas.ganancias))}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Third Row: Costos Totales */}
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="bg-red-50 p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="h-8 w-8 bg-red-600 rounded text-white flex items-center justify-center">💸</div>
+                          <div>
+                            <p className="text-sm font-medium text-red-600">Costo Total de Producción</p>
+                            <p className="text-xl font-bold text-red-900">
+                              {formatCurrency(finanzas.costoTotalProduccion)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-green-50 p-6 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-8 w-8 bg-green-600 rounded text-white flex items-center justify-center">💵</div>
-                    <div>
-                      <p className="text-sm font-medium text-green-600">Ingresos Totales</p>
-                      <p className="text-2xl font-bold text-green-900">
-                        {formatCurrency(finanzas.ingresosTotales)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`p-6 rounded-lg ${finanzas.ganancias >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-                  <div className="flex items-center space-x-3">
-                    <div className={`h-8 w-8 rounded text-white flex items-center justify-center ${finanzas.ganancias >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
-                      {finanzas.ganancias >= 0 ? '📈' : '📉'}
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${finanzas.ganancias >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {finanzas.ganancias >= 0 ? 'Ganancias' : 'Pérdidas'}
-                      </p>
-                      <p className={`text-2xl font-bold ${finanzas.ganancias >= 0 ? 'text-green-900' : 'text-red-900'}`}>
-                        {formatCurrency(Math.abs(finanzas.ganancias))}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Gráfico de Inversión vs Ganancias */}
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Distribución: Inversión vs Resultados
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Costo de Producción</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {formatCurrency(finanzas.costoTotalProduccion)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div
-                      className="bg-blue-600 h-4 rounded-full"
-                      style={{
-                        width: `${finanzas.costoTotalProduccion > 0 ?
-                          (finanzas.costoTotalProduccion / (finanzas.costoTotalProduccion + finanzas.ingresosTotales)) * 100 : 0}%`
-                      }}
-                    ></div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">Ingresos por Ventas</span>
-                    <span className="text-sm font-bold text-gray-900">
-                      {formatCurrency(finanzas.ingresosTotales)}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div
-                      className="bg-green-600 h-4 rounded-full"
-                      style={{
-                        width: `${finanzas.ingresosTotales > 0 ?
-                          (finanzas.ingresosTotales / (finanzas.costoTotalProduccion + finanzas.ingresosTotales)) * 100 : 0}%`
-                      }}
-                    ></div>
+                {/* Pie Chart */}
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Cosecha
+                  </h3>
+                  <div style={{ width: '100%', height: '300px', minWidth: '300px', minHeight: '300px' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            {
+                              name: 'Costo \n de Producción',
+                              value: parseFloat(finanzas.costoTotalProduccion.toString()),
+                              fill: '#DC2626'
+                            },
+                            {
+                              name: 'Ingresos\npor Ventas',
+                              value: parseFloat(finanzas.ingresosTotales.toString()),
+                              fill: '#16A34A'
+                            }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ percent }) => `${((percent as number) * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          dataKey="value"
+                        />
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
@@ -300,13 +313,7 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
               </div>
 
               {/* Métricas Adicionales */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Margen de Ganancia</h4>
-                  <p className={`text-2xl font-bold ${finanzas.margenGanancia >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {typeof finanzas.margenGanancia === 'number' ? finanzas.margenGanancia.toFixed(2) : '0.00'}%
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 gap-6">
                 <div className="bg-gray-50 p-6 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-500 mb-2">Eficiencia de Ventas</h4>
                   <p className="text-2xl font-bold text-blue-600">
@@ -320,25 +327,20 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
               </div>
             </div>
           )}
-        </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-6 border-t bg-gray-50">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            Cerrar
-          </button>
-          <button
-            onClick={loadFinancialData}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-          >
-            {loading ? 'Recalculando...' : 'Recalcular'}
-          </button>
-        </div>
-      </div>
-    </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end space-x-3 p-6 border-t bg-gray-50">
+            <Button onClick={onClose} variant="light">Cerrar</Button>
+            <Button
+              onClick={loadFinancialData}
+              disabled={loading}
+              color="success"
+            >
+              {loading ? 'Recalculando...' : 'Recalcular'}
+            </Button>
+          </div>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };

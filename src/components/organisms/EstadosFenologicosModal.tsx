@@ -88,7 +88,7 @@ const EstadosFenologicosModal: React.FC<EstadosFenologicosModalProps> = ({ isOpe
         <ModalHeader>
           <h2 className="text-xl font-semibold">Gestión Estados Fenológicos</h2>
         </ModalHeader>
-        <ModalBody className="space-y-6">
+        <ModalBody className="space-y-6 overflow-y-auto max-h-96">
         {/* Formulario */}
         <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">

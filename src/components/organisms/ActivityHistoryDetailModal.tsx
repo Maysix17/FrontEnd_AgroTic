@@ -79,7 +79,6 @@ const ActivityHistoryDetailModal: React.FC<ActivityHistoryDetailModalProps> = ({
       <ModalContent>
         <ModalHeader>
           <h2 className="text-2xl font-semibold">Detalles de Actividad Finalizada</h2>
-          <Button variant="light" onClick={onClose}>✕</Button>
         </ModalHeader>
         <ModalBody>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
