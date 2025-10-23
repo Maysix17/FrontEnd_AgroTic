@@ -1,6 +1,5 @@
 import React from 'react';
 import CustomButton from './Boton';
-import IconButton from './IconButton';
 import type { MobileCardProps } from '../../types/MobileCard.types';
 
 const MobileCard: React.FC<MobileCardProps> = ({ fields, actions }) => {
@@ -24,7 +23,7 @@ const MobileCard: React.FC<MobileCardProps> = ({ fields, actions }) => {
         <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-gray-200 justify-center">
           {actions.map((action, index) => (
             action.icon ? (
-              <IconButton
+              <CustomButton
                 key={index}
                 icon={action.icon}
                 tooltip={action.tooltip}
@@ -32,6 +31,7 @@ const MobileCard: React.FC<MobileCardProps> = ({ fields, actions }) => {
                 color={action.color || 'primary'}
                 variant={action.variant || 'light'}
                 ariaLabel={action.tooltip}
+                size="sm"
               />
             ) : (
               <CustomButton

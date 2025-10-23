@@ -8,6 +8,7 @@ import {
 } from '../../services/categoriaService';
 import Table from '../atoms/Table';
 import CustomButton from '../atoms/Boton';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface CategoriaModalProps {
   isOpen: boolean;
@@ -72,11 +73,23 @@ const CategoriaModal: React.FC<CategoriaModalProps> = ({ isOpen, onClose }) => {
                     <td className="px-4 py-2 border-b">{categoria.descripcion || 'Sin descripción'}</td>
                     <td className="px-4 py-2 border-b">{categoria.esDivisible ? 'Sí' : 'No'}</td>
                     <td className="px-4 py-2 border-b">
-                      <div className="flex gap-2">
-                        <CustomButton onClick={() => handleEdit(categoria)}>Editar</CustomButton>
-                        <CustomButton onClick={() => handleDelete(categoria.id!)} variant="bordered">
-                          Eliminar
-                        </CustomButton>
+                      <div className="flex gap-1">
+                        <CustomButton
+                          icon={<PencilIcon className="w-4 h-4" />}
+                          tooltip="Editar"
+                          onClick={() => handleEdit(categoria)}
+                          color="secondary"
+                          variant="light"
+                          size="sm"
+                        />
+                        <CustomButton
+                          icon={<TrashIcon className="w-4 h-4" />}
+                          tooltip="Eliminar"
+                          onClick={() => handleDelete(categoria.id!)}
+                          color="danger"
+                          variant="light"
+                          size="sm"
+                        />
                       </div>
                     </td>
                   </tr>

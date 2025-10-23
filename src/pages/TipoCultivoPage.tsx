@@ -127,7 +127,7 @@ const TipoCultivoPage = () => {
                   onChange={() =>
                     setTipoCultivoData({ ...tipoCultivoData, esPerenne: true })
                   }
-                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
                 />
                 <label htmlFor="perenne-page" className="ml-2 text-sm text-gray-700">
                   Perenne - Cultivos que viven más de una temporada (árboles frutales, café, etc.)
@@ -142,7 +142,7 @@ const TipoCultivoPage = () => {
                   onChange={() =>
                     setTipoCultivoData({ ...tipoCultivoData, esPerenne: false })
                   }
-                  className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
                 />
                 <label htmlFor="transitorio-page" className="ml-2 text-sm text-gray-700">
                   Transitorio - Cultivos que completan su ciclo en una temporada (maíz, arroz, etc.)
@@ -152,12 +152,12 @@ const TipoCultivoPage = () => {
           </div>
 
           {message && (
-            <p className="text-center text-green-600 text-sm">{message}</p>
+            <p className="text-center text-primary-600 text-sm">{message}</p>
           )}
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-medium"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-md font-medium"
           >
             {editId ? "Actualizar" : "Registrar"}
           </button>

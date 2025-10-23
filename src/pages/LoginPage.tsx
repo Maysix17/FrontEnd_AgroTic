@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LoginCard from "../components/organisms/LoginCard";
-import logo from "../assets/AgroTic.png";
+import logo from "../assets/AgroTic_normal.png";
 import { usePermission } from "../contexts/PermissionContext";
 
 const LoginPage: React.FC = () => {

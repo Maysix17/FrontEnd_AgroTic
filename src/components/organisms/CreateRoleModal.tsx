@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Switch, Card, CardHeader, CardBody } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, Switch, Card, CardHeader, CardBody } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 import { getModulos, createRole, updateRole, assignPermissionsToRole } from '../../services/rolesService';
 
 interface Modulo {
@@ -186,6 +187,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
                         <p className="text-sm text-gray-600">Módulo principal</p>
                       </div>
                       <Switch
+                        size="md"
                         isSelected={selectedModules.has(modulo.id)}
                         onValueChange={(checked) => handleModuleToggle(modulo.id, checked)}
                       />
@@ -201,7 +203,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
                                   <p className="text-sm text-gray-600">Recurso</p>
                                 </div>
                                 <Switch
-                                  size="sm"
+                                  size="md"
                                   isSelected={selectedResources.has(recurso.id)}
                                   onValueChange={(checked) => handleResourceToggle(recurso.id, checked)}
                                 />
@@ -211,7 +213,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
                                   {recurso.permisos.map((permiso) => (
                                     <label key={permiso.id} className="flex items-center space-x-2">
                                       <Switch
-                                        size="sm"
+                                        size="md"
                                         isSelected={selectedPermissions.has(permiso.id)}
                                         onValueChange={(checked) => handlePermissionToggle(permiso.id, checked)}
                                       />
@@ -235,15 +237,13 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({ isOpen, onClose, onRo
           <div className="flex justify-between w-full">
             <div>Permisos activos: {activePermissionsCount}</div>
             <div className="space-x-2">
-              <Button variant="flat" onPress={onClose}>Cancelar</Button>
-              <Button
+              <CustomButton variant="bordered" onClick={onClose} label="Cancelar" />
+              <CustomButton
                 color="primary"
-                onPress={handleCreateRole}
-                isLoading={creating}
-                disabled={!roleName.trim() || activePermissionsCount === 0}
-              >
-                {editingRole ? 'Actualizar Rol' : 'Guardar Rol'}
-              </Button>
+                onClick={handleCreateRole}
+                disabled={creating || !roleName.trim() || activePermissionsCount === 0}
+                label={editingRole ? 'Actualizar Rol' : 'Guardar Rol'}
+              />
             </div>
           </div>
         </ModalFooter>

@@ -146,7 +146,7 @@ const ActivityManagementDetailModal: React.FC<ActivityManagementDetailModalProps
                   <div className="text-sm">
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       activity.estado === false
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-primary-100 text-primary-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {activity.estado === false ? 'Finalizada' : 'En Progreso'}

@@ -2,8 +2,8 @@ import React from "react";
 import {
   Modal,
   ModalContent,
-  Button,
 } from "@heroui/react";
+import CustomButton from "../atoms/Boton";
 import { usePermission } from "../../contexts/PermissionContext";
 import { useNavigate } from "react-router-dom";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
@@ -92,28 +92,32 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex flex-col md:flex-row gap-3 justify-between items-center mt-4">
                 <div className="flex flex-col md:flex-row gap-3">
-                  <Button
+                  <CustomButton
                     onClick={handleEditProfile}
-                    className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white border-none shadow-md hover:shadow-lg px-4 py-2 rounded-lg font-bold w-full md:w-auto"
-                  >
-                    Editar perfil
-                  </Button>
+                    color="primary"
+                    variant="solid"
+                    label="Editar perfil"
+                    className="w-full md:w-auto"
+                  />
                   {hasPermission('Usuarios', 'panel de control', 'ver') && (
-                    <Button
+                    <CustomButton
                       onClick={handleControlPanel}
-                      className="bg-transparent text-emerald-600 border border-emerald-200 hover:border-emerald-300 px-4 py-2 rounded-lg font-bold w-full md:w-auto"
-                    >
-                      Panel de control
-                    </Button>
+                      color="secondary"
+                      variant="light"
+                      label="Panel de control"
+                      className="w-full md:w-auto"
+                    />
                   )}
                 </div>
-                <Button
+                <CustomButton
                   onClick={handleLogout}
-                  className="bg-red-500 text-white border-none shadow-md hover:shadow-lg px-4 py-2 rounded-lg font-bold w-full md:w-auto flex items-center gap-2"
+                  color="danger"
+                  variant="solid"
+                  label="Cerrar sesión"
+                  className="w-full md:w-auto"
                 >
                   <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                  Cerrar sesión
-                </Button>
+                </CustomButton>
               </div>
             </div>
         </div>

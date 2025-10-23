@@ -8,6 +8,7 @@ import {
 } from '../../services/tipoCultivo';
 import Table from '../atoms/Table';
 import CustomButton from '../atoms/Boton';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface TipoCultivoModalProps {
   isOpen: boolean;
@@ -70,11 +71,23 @@ const TipoCultivoModal: React.FC<TipoCultivoModalProps> = ({ isOpen, onClose }) 
                   <td className="px-4 py-2 border-b">{cultivo.nombre}</td>
                   <td className="px-4 py-2 border-b">{cultivo.esPerenne ? "Perene" : "Transitorio"}</td>
                   <td className="px-4 py-2 border-b">
-                    <div className="flex gap-2">
-                      <CustomButton onClick={() => handleEdit(cultivo)}>Editar</CustomButton>
-                      <CustomButton onClick={() => handleDelete(cultivo.id!)} variant="bordered">
-                        Eliminar
-                      </CustomButton>
+                    <div className="flex gap-1">
+                      <CustomButton
+                        icon={<PencilIcon className="w-4 h-4" />}
+                        tooltip="Editar"
+                        onClick={() => handleEdit(cultivo)}
+                        color="secondary"
+                        variant="light"
+                        size="sm"
+                      />
+                      <CustomButton
+                        icon={<TrashIcon className="w-4 h-4" />}
+                        tooltip="Eliminar"
+                        onClick={() => handleDelete(cultivo.id!)}
+                        color="danger"
+                        variant="light"
+                        size="sm"
+                      />
                     </div>
                   </td>
                 </tr>

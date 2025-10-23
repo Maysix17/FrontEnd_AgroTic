@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import apiClient from '../../lib/axios/axios';
 
@@ -82,7 +83,7 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
       <ModalContent className="max-h-[90vh]">
         <ModalHeader>
           <div className="flex items-center space-x-3">
-            <div className="h-6 w-6 bg-green-600 rounded text-white flex items-center justify-center font-bold">💰</div>
+            <div className="h-6 w-6 bg-primary-600 rounded text-white flex items-center justify-center font-bold">💰</div>
             <h2 className="text-2xl font-semibold">
               {cultivoId ? 'Análisis Financiero del Cultivo' : 'Análisis Financiero de Cosecha'}
             </h2>
@@ -92,7 +93,7 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
 
           {loading && (
             <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
               <span className="ml-3 text-gray-600">Calculando análisis financiero...</span>
             </div>
           )}
@@ -124,12 +125,12 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
                         </div>
                       </div>
 
-                      <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="bg-primary-50 p-4 rounded-lg">
                         <div className="flex items-center space-x-3">
-                          <div className="h-8 w-8 bg-green-600 rounded text-white flex items-center justify-center">💵</div>
+                          <div className="h-8 w-8 bg-primary-600 rounded text-white flex items-center justify-center">💵</div>
                           <div>
-                            <p className="text-sm font-medium text-green-600">Ingresos Totales</p>
-                            <p className="text-xl font-bold text-green-900">
+                            <p className="text-sm font-medium text-primary-600">Ingresos Totales</p>
+                            <p className="text-xl font-bold text-primary-900">
                               {formatCurrency(finanzas.ingresosTotales)}
                             </p>
                           </div>
@@ -139,16 +140,16 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
 
                     {/* Second Row: Ganancias */}
                     <div className="grid grid-cols-1 gap-4">
-                      <div className={`p-4 rounded-lg ${finanzas.ganancias >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <div className={`p-4 rounded-lg ${finanzas.ganancias >= 0 ? 'bg-primary-50' : 'bg-red-50'}`}>
                         <div className="flex items-center space-x-3">
-                          <div className={`h-8 w-8 rounded text-white flex items-center justify-center ${finanzas.ganancias >= 0 ? 'bg-green-600' : 'bg-red-600'}`}>
+                          <div className={`h-8 w-8 rounded text-white flex items-center justify-center ${finanzas.ganancias >= 0 ? 'bg-primary-600' : 'bg-red-600'}`}>
                             {finanzas.ganancias >= 0 ? '📈' : '📉'}
                           </div>
                           <div>
-                            <p className={`text-sm font-medium ${finanzas.ganancias >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={`text-sm font-medium ${finanzas.ganancias >= 0 ? 'text-primary-600' : 'text-red-600'}`}>
                               {finanzas.ganancias >= 0 ? 'Ganancias' : 'Pérdidas'}
                             </p>
-                            <p className={`text-xl font-bold ${finanzas.ganancias >= 0 ? 'text-green-900' : 'text-red-900'}`}>
+                            <p className={`text-xl font-bold ${finanzas.ganancias >= 0 ? 'text-primary-900' : 'text-red-900'}`}>
                               {formatCurrency(Math.abs(finanzas.ganancias))}
                             </p>
                           </div>
@@ -302,7 +303,7 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
                           -
                         </td>
                         <td className={`px-6 py-4 whitespace-nowrap text-sm text-right font-bold ${
-                          finanzas.ganancias >= 0 ? 'text-green-600' : 'text-red-600'
+                          finanzas.ganancias >= 0 ? 'text-primary-600' : 'text-red-600'
                         }`}>
                           {finanzas.ganancias >= 0 ? '+' : ''}{formatCurrency(finanzas.ganancias)}
                         </td>
@@ -330,14 +331,13 @@ export const FinancialAnalysisModal: React.FC<FinancialAnalysisModalProps> = ({
 
           {/* Footer */}
           <div className="flex items-center justify-end space-x-3 p-6 border-t bg-gray-50">
-            <Button onClick={onClose} variant="light">Cerrar</Button>
-            <Button
+            <CustomButton onClick={onClose} variant="light" label="Cerrar" />
+            <CustomButton
               onClick={loadFinancialData}
               disabled={loading}
               color="success"
-            >
-              {loading ? 'Recalculando...' : 'Recalcular'}
-            </Button>
+              label={loading ? 'Recalculando...' : 'Recalcular'}
+            />
           </div>
         </ModalBody>
       </ModalContent>

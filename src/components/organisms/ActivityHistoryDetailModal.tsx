@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
 import { getReservationsByActivity } from '../../services/actividadesService';
 
 interface Reservation {
@@ -130,7 +130,7 @@ const ActivityHistoryDetailModal: React.FC<ActivityHistoryDetailModalProps> = ({
                 <div>
                   <label className="block text-sm font-medium">Estado</label>
                   <div className="text-sm">
-                    <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
+                    <span className="px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-800">
                       Finalizada
                     </span>
                   </div>

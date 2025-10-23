@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-   import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+   import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
+   import CustomButton from '../atoms/Boton';
    import { getReservationsByActivity, confirmUsage } from '../../services/actividadesService';
    import apiClient from '../../lib/axios/axios';
    import FinalizeActivityModal from './FinalizeActivityModal';
@@ -162,7 +163,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
         <ModalContent>
           <ModalHeader>
             <h2 className="text-2xl font-semibold">Actividades</h2>
-            <Button variant="light" onClick={onClose}>✕</Button>
           </ModalHeader>
           <ModalBody>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -193,7 +193,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                         </div>
                       </div>
                       {res.cantidadUsada === undefined && (
-                        <Button
+                        <CustomButton
                           size="sm"
                           color="primary"
                           className="mt-2"
@@ -212,9 +212,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                               }
                             }
                           }}
-                        >
-                          Confirmar Uso
-                        </Button>
+                          label="Confirmar Uso"
+                        />
                       )}
                     </div>
                   ))}
@@ -263,15 +262,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <div className="p-2 border rounded min-h-[80px]">{descripcion}</div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" onClick={() => setIsEditing(!isEditing)}>
-                    {isEditing ? 'Cancelar' : 'Actualizar'}
-                  </Button>
-                  <Button color="danger" onClick={handleDelete}>
-                    Eliminar
-                  </Button>
-                  <Button color="success" onClick={() => setIsFinalizeModalOpen(true)}>
-                    Finalizar Actividad
-                  </Button>
+                  <CustomButton variant="ghost" onClick={() => setIsEditing(!isEditing)} label={isEditing ? 'Cancelar' : 'Actualizar'} />
+                  <CustomButton color="danger" onClick={handleDelete} label="Eliminar" />
+                  <CustomButton color="success" onClick={() => setIsFinalizeModalOpen(true)} label="Finalizar Actividad" />
                 </div>
               </div>
             </div>

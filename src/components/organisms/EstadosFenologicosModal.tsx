@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Input, Textarea } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import Table from '../atoms/Table';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import type { EstadoFenologico } from '../../types/cultivos.types';
 import { getEstadosFenologicos, createEstadoFenologico, updateEstadoFenologico, deleteEstadoFenologico } from '../../services/estadosFenologicosService';
 
@@ -158,19 +159,22 @@ const EstadosFenologicosModal: React.FC<EstadosFenologicosModalProps> = ({ isOpe
                     <td className="px-4 py-2">{estado.descripcion || '-'}</td>
                     <td className="px-4 py-2">{estado.orden}</td>
                     <td className="px-4 py-2">
-                      <div className="flex gap-2">
+                      <div className="flex gap-1">
                         <CustomButton
-                          label="Editar"
+                          icon={<PencilIcon className="w-4 h-4" />}
+                          tooltip="Editar"
                           onClick={() => handleEdit(estado)}
+                          color="secondary"
+                          variant="light"
                           size="sm"
-                          variant="bordered"
                         />
                         <CustomButton
-                          label="Eliminar"
+                          icon={<TrashIcon className="w-4 h-4" />}
+                          tooltip="Eliminar"
                           onClick={() => handleDelete(estado.id)}
-                          size="sm"
                           color="danger"
-                          variant="bordered"
+                          variant="light"
+                          size="sm"
                         />
                       </div>
                     </td>

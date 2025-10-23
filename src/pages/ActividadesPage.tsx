@@ -106,25 +106,26 @@ const ActividadesPage: React.FC = () => {
 
   return (
     <div ref={pageRef} className="flex flex-col gap-4 overflow-hidden" style={{ height: '100%' }}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0 pt-6">
-        <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Actividades</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Seleccionar Mes:</label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date || new Date())}
-              dateFormat="MM/yyyy"
-              showMonthYearPicker
-              className="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-auto"
-            />
+      {/* Calendar Container with Header */}
+      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md w-full overflow-hidden overflow-x-auto flex-1 md:min-w-[768px] flex flex-col">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0">
+          <h1 className="text-2xl font-bold text-left whitespace-nowrap pb-4">Gestión de Actividades</h1>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Seleccionar Mes:</label>
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date || new Date())}
+                dateFormat="MM/yyyy"
+                showMonthYearPicker
+                className="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-auto"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Calendar */}
-      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md w-full overflow-hidden overflow-x-auto flex-1 md:min-w-[768px]">
+        {/* Calendar */}
         <Calendar
           localizer={localizer}
           culture="es"
@@ -144,7 +145,7 @@ const ActividadesPage: React.FC = () => {
               const isOffRange = value.getMonth() !== selectedDate.getMonth();
               return (
                 <div
-                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-green-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''} cursor-pointer`}
+                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-primary-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''} cursor-pointer`}
                   style={{ minHeight: '80px' }}
                   onClick={async () => {
                     try {
@@ -200,7 +201,7 @@ const ActividadesPage: React.FC = () => {
               setIsModalOpen(true);
             }
           }}
-          style={{ height: '600px' }}
+          style={{ flex: 1 }}
           messages={{
             allDay: 'Todo el día',
             previous: 'Anterior',

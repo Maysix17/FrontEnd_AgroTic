@@ -143,12 +143,12 @@ const VariedadPage = () => {
           </div>
 
           {message && (
-            <p className="text-center text-green-600 text-sm">{message}</p>
+            <p className="text-center text-primary-600 text-sm">{message}</p>
           )}
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-medium"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-md font-medium"
           >
             {editId ? "Actualizar" : "Registrar"}
           </button>

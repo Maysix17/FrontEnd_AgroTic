@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, Button } from '@heroui/react';
+import { Modal, ModalContent } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import ImageUpload from '../atoms/ImagenUpload';
 import Swal from 'sweetalert2';
@@ -370,9 +370,9 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
 
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button onClick={onClose} variant="light">Cancelar</Button>
+            <CustomButton onClick={onClose} variant="light" label="Cancelar" />
             <CustomButton
-              text={isLoading ? (editItem ? 'Actualizando...' : 'Registrando...') : (editItem ? 'Actualizar Producto' : 'Registrar Producto')}
+              label={isLoading ? (editItem ? 'Actualizando...' : 'Registrando...') : (editItem ? 'Actualizar Producto' : 'Registrar Producto')}
               type="submit"
               disabled={isLoading}
             />

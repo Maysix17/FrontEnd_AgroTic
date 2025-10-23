@@ -87,7 +87,7 @@ const HarvestSellModal: React.FC<HarvestSellModalProps> = ({
            {/* Para cultivos finalizados - mostrar solo mensaje informativo */}
            {isFinalizado ? (
              <div className="text-center py-8">
-               <div className="text-green-600 text-2xl font-semibold">✅ Cultivo Finalizado</div>
+               <div className="text-primary-600 text-2xl font-semibold">✅ Cultivo Finalizado</div>
              </div>
            ) : (
             <>
@@ -103,7 +103,7 @@ const HarvestSellModal: React.FC<HarvestSellModalProps> = ({
                   <div>
                     <strong>Estado:</strong>
                     <span className={`px-2 py-1 rounded text-xs ${
-                      isFinalizado ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      isFinalizado ? 'bg-red-100 text-red-800' : 'bg-primary-100 text-primary-800'
                     }`}>
                       {isFinalizado ? 'Finalizado' : 'Activo'}
                     </span>
@@ -129,7 +129,7 @@ const HarvestSellModal: React.FC<HarvestSellModalProps> = ({
               <p className="text-xs text-orange-600 ml-2">Ya cosechado (transitorio)</p>
             )}
             {isPerenne && !isFinalizado && (
-              <p className="text-xs text-green-600 ml-2">Cultivos perennes pueden cosechar múltiples veces</p>
+              <p className="text-xs text-primary-600 ml-2">Cultivos perennes pueden cosechar múltiples veces</p>
             )}
 
             {/* Vender */}
@@ -157,10 +157,10 @@ const HarvestSellModal: React.FC<HarvestSellModalProps> = ({
               <p className="text-xs text-orange-600 ml-2">Todas las cosechas están cerradas - presiona "Cerrar venta de cosecha actual" para finalizar</p>
             )}
             {!isPerenne && hasCosecha && cosechasDisponibles.some(c => !c.cerrado) && (
-              <p className="text-xs text-green-600 ml-2">Disponible para ventas parciales mientras esté abierto</p>
+              <p className="text-xs text-primary-600 ml-2">Disponible para ventas parciales mientras esté abierto</p>
             )}
             {!isPerenne && isFinalizado && (
-              <p className="text-xs text-green-600 ml-2">Cultivos transitorios permiten ventas post-finalización</p>
+              <p className="text-xs text-primary-600 ml-2">Cultivos transitorios permiten ventas post-finalización</p>
             )}
 
             {/* Cerrar Venta de Cosecha Actual */}

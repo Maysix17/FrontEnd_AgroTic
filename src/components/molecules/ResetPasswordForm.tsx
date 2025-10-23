@@ -81,14 +81,14 @@ const ResetPasswordForm: React.FC = () => {
       {/* Mensajes de error o éxito */}
       {error && <p className="text-center text-red-500 text-sm">{error}</p>}
       {successMessage && (
-        <p className="text-center text-green-500 text-sm">{successMessage}</p>
+        <p className="text-center text-primary-500 text-sm">{successMessage}</p>
       )}
 
       {/* Botón */}
       <CustomButton
         text="Cambiar contraseña"
         type="submit"
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full disabled:bg-primary-400"
         disabled={isLoading}
       />
     </form>

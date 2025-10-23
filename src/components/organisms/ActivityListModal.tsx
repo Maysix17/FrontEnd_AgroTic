@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 
 interface Activity {
   id: string;
@@ -21,7 +22,7 @@ const ActivityListModal: React.FC<ActivityListModalProps> = ({ isOpen, onClose, 
       <ModalContent>
         <ModalHeader>
           <h2 className="text-xl font-semibold">Actividades del día</h2>
-          <Button onClick={onRegisterNew} className="ml-20">Registrar Nueva</Button>
+          <CustomButton onClick={onRegisterNew} className="ml-20" label="Registrar Nueva" />
         </ModalHeader>
         <ModalBody>
           <div className="space-y-3">

@@ -80,7 +80,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
               onChange={() =>
                 setTipoCultivoData({ ...tipoCultivoData, esPerenne: true })
               }
-              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+              className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
             />
             <label htmlFor="perenne" className="ml-2 text-sm text-gray-700">
               Perenne - Cultivos que viven más de una temporada (árboles frutales, café, etc.)
@@ -95,7 +95,7 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
               onChange={() =>
                 setTipoCultivoData({ ...tipoCultivoData, esPerenne: false })
               }
-              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500"
+              className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
             />
             <label htmlFor="transitorio" className="ml-2 text-sm text-gray-700">
               Transitorio - Cultivos que completan su ciclo en una temporada (maíz, arroz, etc.)
@@ -104,12 +104,12 @@ const TipoCultivoForm: React.FC<TipoCultivoFormProps> = ({ editId, onSuccess }) 
         </div>
       </div>
 
-      {message && <p className="text-center text-green-600">{message}</p>}
+      {message && <p className="text-center text-primary-600">{message}</p>}
 
       <CustomButton
         type="submit"
         text={editId ? 'Actualizar Tipo de Cultivo' : 'Registrar Tipo de Cultivo'}
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full"
       />
     </form>
   );

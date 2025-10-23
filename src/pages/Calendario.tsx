@@ -45,7 +45,7 @@ function Calendario() {
       />
 
       {range[0] && range[1] && (
-        <p className="mt-3 text-green-500">
+        <p className="mt-3 text-primary-500">
           Actividad desde <b>{range[0]?.toLocaleDateString()}</b> hasta <b>{range[1]?.toLocaleDateString()}</b>
         </p>
       )}
@@ -75,7 +75,7 @@ function Calendario() {
                       </p>
                     )}
                   </div>
-                  <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                  <span className="px-2 py-1 text-xs font-medium bg-primary-100 text-primary-800 rounded-full">
                     Activa
                   </span>
                 </div>

@@ -147,7 +147,7 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700">Estado del Cultivo</label>
             <span className={`px-2 py-1 rounded-full text-xs ${
-              currentCultivo.estado === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              currentCultivo.estado === 1 ? 'bg-primary-100 text-primary-800' : 'bg-red-100 text-red-800'
             }`}>
               {currentCultivo.estado === 1 ? 'En Curso' : 'Finalizado'}
             </span>

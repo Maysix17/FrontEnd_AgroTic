@@ -162,7 +162,7 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
           </ModalHeader>
           <ModalBody>
             <div className="text-center py-8">
-              <div className="text-green-600 text-lg font-semibold mb-2">✅ Cultivo Completado</div>
+              <div className="text-primary-600 text-lg font-semibold mb-2">✅ Cultivo Completado</div>
               <p className="text-gray-700">Ya registraste el cultivo, ya fue vendido y cosechado.</p>
             </div>
           </ModalBody>
@@ -228,7 +228,7 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
                           key={cosecha.id}
                           className={`flex items-center gap-2 py-2 px-2 rounded cursor-pointer transition-colors ${
                             selectedHarvests.some(h => h.id === cosecha.id)
-                              ? 'bg-green-100 border border-green-300'
+                              ? 'bg-primary-100 border border-primary-300'
                               : 'hover:bg-gray-50'
                           }`}
                         >
@@ -251,7 +251,7 @@ const VentaModal: React.FC<VentaModalProps> = ({ isOpen, onClose, cultivo, onSuc
                       ))}
                     </div>
                     {selectedHarvests.length > 0 && (
-                      <div className="mt-2 p-2 bg-green-50 rounded text-sm">
+                      <div className="mt-2 p-2 bg-primary-50 rounded text-sm">
                         <p><strong>Cosechas seleccionadas:</strong> {selectedHarvests.length}</p>
                         <p><strong>Total disponible:</strong> {totalAvailable} {cosechasDisponibles[0]?.unidadMedida || 'kg'}</p>
                       </div>

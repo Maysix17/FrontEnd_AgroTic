@@ -35,7 +35,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
       <CustomButton
         text="Iniciar sesión"
         type="submit"
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full"
       />
 
       <a

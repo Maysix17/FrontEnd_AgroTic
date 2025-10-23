@@ -110,7 +110,7 @@ const RegisterForm: React.FC<RegisterFormProps> = () => {
       <CustomButton
         text={isLoading ? "Registrando..." : "Registrarse"}
         type="submit"
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full disabled:bg-green-400"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full disabled:bg-primary-400"
         disabled={isLoading}
       />
     </form>
