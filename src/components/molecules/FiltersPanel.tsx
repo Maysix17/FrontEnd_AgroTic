@@ -279,7 +279,7 @@ const FiltersPanel: React.FC<FiltersPanelProps> = ({
         )}
 
         {/* Actions Row */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Tooltip content="Buscar con filtros actuales">
               <CustomButton
