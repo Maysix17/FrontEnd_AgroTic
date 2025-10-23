@@ -12,6 +12,12 @@ export interface ButtonProps {
   /** Contenido del botón (para compatibilidad con ButtonAccion y otros) */
   children?: ReactNode;
 
+  /** Icono del botón (para compatibilidad con IconButton) */
+  icon?: ReactNode;
+
+  /** Tooltip del botón (para compatibilidad con IconButton) */
+  tooltip?: string;
+
   /** Función que se ejecuta cuando se hace clic en el botón */
   onClick?: () => void;
 

@@ -11,6 +11,7 @@ import {
 const TipoCultivoPage = () => {
   const [tipoCultivoData, setTipoCultivoData] = useState<TipoCultivoData>({
     nombre: "",
+    esPerenne: false,
   });
   const [cultivos, setCultivos] = useState<TipoCultivoData[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
@@ -44,7 +45,7 @@ const TipoCultivoPage = () => {
         setMessage("Registro exitoso");
       }
 
-      setTipoCultivoData({ nombre: "" });
+      setTipoCultivoData({ nombre: "", esPerenne: false });
       setEditId(null);
       fetchCultivos();
     } catch (error: any) {
@@ -52,9 +53,9 @@ const TipoCultivoPage = () => {
     }
   };
 
-  const handleEdit = (id: string, nombre: string) => {
+  const handleEdit = (id: string, nombre: string, esPerenne: boolean = false) => {
     setEditId(id);
-    setTipoCultivoData({ nombre });
+    setTipoCultivoData({ nombre, esPerenne });
   };
 
   const handleDelete = async (id: string) => {
@@ -112,13 +113,51 @@ const TipoCultivoPage = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Clasificación del Cultivo
+            </label>
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="perenne-page"
+                  name="clasificacion-page"
+                  checked={tipoCultivoData.esPerenne === true}
+                  onChange={() =>
+                    setTipoCultivoData({ ...tipoCultivoData, esPerenne: true })
+                  }
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
+                />
+                <label htmlFor="perenne-page" className="ml-2 text-sm text-gray-700">
+                  Perenne - Cultivos que viven más de una temporada (árboles frutales, café, etc.)
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="transitorio-page"
+                  name="clasificacion-page"
+                  checked={tipoCultivoData.esPerenne === false}
+                  onChange={() =>
+                    setTipoCultivoData({ ...tipoCultivoData, esPerenne: false })
+                  }
+                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 focus:ring-primary-500"
+                />
+                <label htmlFor="transitorio-page" className="ml-2 text-sm text-gray-700">
+                  Transitorio - Cultivos que completan su ciclo en una temporada (maíz, arroz, etc.)
+                </label>
+              </div>
+            </div>
+          </div>
+
           {message && (
-            <p className="text-center text-green-600 text-sm">{message}</p>
+            <p className="text-center text-primary-600 text-sm">{message}</p>
           )}
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md font-medium"
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-md font-medium"
           >
             {editId ? "Actualizar" : "Registrar"}
           </button>
@@ -129,6 +168,7 @@ const TipoCultivoPage = () => {
           <thead className="bg-gray-200">
             <tr>
               <th className="p-2 border">Nombre</th>
+              <th className="p-2 border">Clasificación del Cultivo</th>
               <th className="p-2 border text-center">Acciones</th>
             </tr>
           </thead>
@@ -136,9 +176,10 @@ const TipoCultivoPage = () => {
             {cultivos.map((c) => (
               <tr key={c.id} className="hover:bg-gray-50">
                 <td className="p-2 border">{c.nombre}</td>
+                <td className="p-2 border">{c.esPerenne ? "Perene" : "Transitorio"}</td>
                 <td className="p-2 border flex justify-center gap-2">
                   <button
-                    onClick={() => handleEdit(c.id!, c.nombre)}
+                    onClick={() => handleEdit(c.id!, c.nombre, c.esPerenne || false)}
                     className="text-blue-600 hover:underline"
                   >
                     ✏️
@@ -154,7 +195,7 @@ const TipoCultivoPage = () => {
             ))}
             {cultivos.length === 0 && (
               <tr>
-                <td colSpan={2} className="text-center p-2">
+                <td colSpan={3} className="text-center p-2">
                   No hay registros aún
                 </td>
               </tr>

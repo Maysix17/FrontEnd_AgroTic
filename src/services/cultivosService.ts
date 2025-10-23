@@ -5,16 +5,46 @@ export const searchCultivos = async (
   searchData: SearchCultivoDto
 ): Promise<Cultivo[]> => {
   const response = await apiClient.post('/cultivos/search', searchData);
-  return response.data;
+  // Map backend response to nest tipoCultivo object
+  return response.data.map((item: any) => ({
+    ...item,
+    tipoCultivo: {
+      nombre: item.tipo_cultivo_nombre,
+      esPerenne: item.tipo_cultivo_es_perenne,
+    },
+  }));
 };
 
 export const getAllCultivos = async (): Promise<Cultivo[]> => {
   const response = await apiClient.get('/cultivos');
-  return response.data;
+  // Map backend response to nest tipoCultivo object
+  return response.data.map((item: any) => ({
+    ...item,
+    tipoCultivo: {
+      nombre: item.tipo_cultivo_nombre,
+      esPerenne: item.tipo_cultivo_es_perenne,
+    },
+  }));
 };
 
 export const createCultivo = async (data: CreateCultivoData): Promise<Cultivo> => {
-  const response = await apiClient.post('/cultivos', data);
+  console.log('🌱 FRONTEND - Creando cultivo con datos:', data);
+
+  // Use the correct endpoint for creating cultivos
+  const payload = {
+    tipoCultivoId: data.tipoCultivoId,
+    variedadId: data.variedadId,
+    zonaId: data.zonaId,
+    estado: 1, // Default to active
+    siembra: new Date().toISOString(),
+    cantidad_plantas_inicial: data.cantidad_plantas_inicial,
+  };
+
+  console.log('🌱 FRONTEND - Payload enviado al backend:', payload);
+
+  const response = await apiClient.post('/cultivos', payload);
+  console.log('🌱 FRONTEND - Respuesta del backend:', response.data);
+
   return response.data;
 };
 
@@ -36,4 +66,9 @@ export const getZonaByNombre = async (nombre: string): Promise<any> => {
     throw new Error(`Zona con nombre ${nombre} no encontrada`);
   }
   return zona;
+};
+
+export const finalizeCultivo = async (id: string): Promise<Cultivo> => {
+  const response = await apiClient.patch(`/cultivos/${id}/finalize`, { estado: 0 });
+  return response.data;
 };

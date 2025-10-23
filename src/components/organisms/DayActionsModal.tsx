@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 
 interface DayActionsModalProps {
   isOpen: boolean;
@@ -17,12 +18,8 @@ const DayActionsModal: React.FC<DayActionsModalProps> = ({ isOpen, onClose, onVi
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-col gap-3">
-            <Button onClick={onViewList} className="w-full">
-              Ver Lista de Actividades
-            </Button>
-            <Button onClick={onCreateNew} className="w-full" color="primary">
-              Crear Nueva Actividad
-            </Button>
+            <CustomButton onClick={onViewList} className="w-full" label="Ver Lista de Actividades" />
+            <CustomButton onClick={onCreateNew} className="w-full" color="primary" label="Crear Nueva Actividad" />
           </div>
         </ModalBody>
       </ModalContent>

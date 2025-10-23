@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Input, Select, SelectItem, Button, Chip, Textarea } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Input, Select, SelectItem, Chip, Textarea } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { format } from 'date-fns';
 import userSearchService from '../../services/userSearchService';
 import zoneSearchService from '../../services/zoneSearchService';
 import categoriaService from '../../services/categoriaService';
@@ -45,29 +47,33 @@ interface Zona {
 }
 
 interface ActividadModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedDate: Date;
-  onSave: (data: any) => void;
-}
+   isOpen: boolean;
+   onClose: () => void;
+   selectedDate: Date;
+   onSave: (data: any) => void;
+   onActivityCreated?: (dateStr: string) => void;
+ }
 
-const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave }) => {
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave, onActivityCreated }) => {
+   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
-  const [usuarioSearch, setUsuarioSearch] = useState('');
-  const [productSearch, setProductSearch] = useState('');
-  const [loteSearch, setLoteSearch] = useState('');
+   const [usuarioSearch, setUsuarioSearch] = useState('');
+   const [productSearch, setProductSearch] = useState('');
+   const [loteSearch, setLoteSearch] = useState('');
 
-  const [debouncedUsuarioSearch, setDebouncedUsuarioSearch] = useState('');
-  const [debouncedProductSearch, setDebouncedProductSearch] = useState('');
-  const [debouncedLoteSearch, setDebouncedLoteSearch] = useState('');
+   const [debouncedUsuarioSearch, setDebouncedUsuarioSearch] = useState('');
+   const [debouncedProductSearch, setDebouncedProductSearch] = useState('');
+   const [debouncedLoteSearch, setDebouncedLoteSearch] = useState('');
 
-  const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<{ [key: string]: { product: Product; qty: number; custom: boolean; isSurplus?: boolean } }>({});
-  const [selectedLote, setSelectedLote] = useState<Zona | null>(null);
+   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
+   const [selectedProducts, setSelectedProducts] = useState<{ [key: string]: { product: Product; qty: number; custom: boolean; isSurplus?: boolean } }>({});
+   const [selectedLote, setSelectedLote] = useState<Zona | null>(null);
 
-  const [categoria, setCategoria] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+   const [categoria, setCategoria] = useState('');
+   const [descripcion, setDescripcion] = useState('');
+
+   // Validation errors
+   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   const [filteredUsuarios, setFilteredUsuarios] = useState<Usuario[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -90,6 +96,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     setFilteredUsuarios([]);
     setFilteredProducts([]);
     setFilteredZonas([]);
+    setErrors({});
   };
 
   // Fetch categorias and reset form when modal opens
@@ -279,7 +286,40 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
     }
   };
 
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    if (selectedUsuarios.length === 0) {
+      newErrors.usuarios = 'Debes asignar al menos un usuario';
+    }
+
+    if (!categoria) {
+      newErrors.categoria = 'Selecciona una categoría';
+    }
+
+    if (!descripcion.trim()) {
+      newErrors.descripcion = 'Ingresa una descripción';
+    }
+
+    if (!selectedLote) {
+      newErrors.lote = 'Ingresa una ubicación';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
+    console.log('ActividadModal handleSave - selectedDate:', selectedDate);
+    console.log('ActividadModal handleSave - selectedDate type:', typeof selectedDate);
+    console.log('ActividadModal handleSave - selectedDate ISO:', selectedDate.toISOString());
+    console.log('ActividadModal handleSave - selectedDate local:', selectedDate.toLocaleDateString());
+
+    // Validate required fields
+    if (!validateForm()) {
+      return;
+    }
+
     // Validate stock availability
     const validationPromises = Object.values(selectedProducts).map(async (prod) => {
       if (prod.isSurplus) {
@@ -327,7 +367,17 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       descripcion,
       lote: selectedLote?.id
     };
+    console.log('ActividadModal handleSave - data.fecha:', data.fecha);
+    console.log('ActividadModal handleSave - data.fecha ISO:', data.fecha.toISOString());
+    console.log('ActividadModal handleSave - data.fecha local:', data.fecha.toLocaleDateString());
     onSave(data);
+
+    // Notify parent component to update activity count for this date
+    if (onActivityCreated) {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      onActivityCreated(dateStr);
+    }
+
     onClose();
   };
 
@@ -336,9 +386,6 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
       <ModalContent className="bg-white p-6">
         <ModalHeader>
           <h2 className="text-2xl font-semibold">Registrar nueva actividad</h2>
-          <Button isIconOnly variant="light" onClick={onClose}>
-            <XMarkIcon className="w-6 h-6" />
-          </Button>
         </ModalHeader>
         <ModalBody>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -381,6 +428,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                     </Chip>
                   ))}
                 </div>
+                {errors.usuarios && <p className="text-red-500 text-sm mt-1">{errors.usuarios}</p>}
               </div>
             </div>
 
@@ -455,19 +503,18 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                               min="0"
                               max={availableStock}
                             />
-                            <Button
+                            <CustomButton
                               size="sm"
                               color="danger"
                               variant="light"
-                              isIconOnly
                               onClick={() => handleSelectProduct(prod.product)}
-                              className="hover:bg-red-100"
+                              className="min-w-8 h-8 p-0 hover:bg-red-100"
                             >
                               <XMarkIcon className="w-4 h-4" />
-                            </Button>
+                            </CustomButton>
                           </div>
                           {prod.qty > 0 && (
-                            <div className="text-xs text-green-600">
+                            <div className="text-xs text-primary-600">
                               Reservado: {prod.qty} {prod.product.unidadMedida?.abreviatura}
                             </div>
                           )}
@@ -475,9 +522,7 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                             <span className="text-red-500 text-sm">Excede stock disponible</span>
                           )}
                           {showSurplusButton && (
-                            <Button size="sm" variant="ghost" onClick={() => handleUseSurplus(prod.product.id)}>
-                              Usar Parcial
-                            </Button>
+                            <CustomButton size="sm" variant="ghost" onClick={() => handleUseSurplus(prod.product.id)} label="Usar Parcial" />
                           )}
                         </div>
                       </div>
@@ -491,23 +536,29 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
           {/* Bottom Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div className="space-y-4">
-              <Select
-                label="Seleccione categoría"
-                selectedKeys={categoria ? [categoria] : []}
-                onSelectionChange={(keys) => setCategoria(Array.from(keys)[0] as string)}
-              >
-                {Array.isArray(categorias) ? categorias.map((cat) => (
-                  <SelectItem key={cat.id}>
-                    {cat.nombre}
-                  </SelectItem>
-                )) : []}
-              </Select>
-              <Textarea
-                label="Descripción"
-                placeholder="Escriba..."
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-              />
+              <div>
+                <Select
+                  label="Seleccione categoría"
+                  selectedKeys={categoria ? [categoria] : []}
+                  onSelectionChange={(keys) => setCategoria(Array.from(keys)[0] as string)}
+                >
+                  {Array.isArray(categorias) ? categorias.map((cat) => (
+                    <SelectItem key={cat.id}>
+                      {cat.nombre}
+                    </SelectItem>
+                  )) : []}
+                </Select>
+                {errors.categoria && <p className="text-red-500 text-sm mt-1">{errors.categoria}</p>}
+              </div>
+              <div>
+                <Textarea
+                  label="Descripción"
+                  placeholder="Escriba..."
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                />
+                {errors.descripcion && <p className="text-red-500 text-sm mt-1">{errors.descripcion}</p>}
+              </div>
             </div>
             <div className="space-y-4">
               <div className="border rounded-lg p-4 bg-gray-50">
@@ -546,14 +597,11 @@ const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, select
                     </Chip>
                   )}
                 </div>
+                {errors.lote && <p className="text-red-500 text-sm mt-1">{errors.lote}</p>}
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="light" onClick={onClose}>
-                  Cancelar
-                </Button>
-                <Button color="primary" onClick={handleSave}>
-                  Guardar actividad
-                </Button>
+                <CustomButton variant="light" onClick={onClose} label="Cancelar" />
+                <CustomButton color="primary" onClick={handleSave} label="Guardar actividad" />
               </div>
             </div>
           </div>

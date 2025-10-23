@@ -7,8 +7,14 @@ export interface Venta {
  }
 
 export interface CreateVentaDto {
-   cantidad: number;
-   fecha: string;
-   fkCosechaId: string;
-   precioKilo?: number;
- }
+    cantidad: number;
+    fecha?: string;
+    fkCosechaId: string;
+    unidadMedida: string;
+    precioUnitario: number;
+    precioKilo?: number;
+    multipleHarvests?: Array<{
+      id: string;
+      cantidad: number;
+    }>;
+  }

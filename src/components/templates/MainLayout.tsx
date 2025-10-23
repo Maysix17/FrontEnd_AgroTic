@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Menu from "../organisms/Menu";
-import { useMenu } from "../../contexts/MenuContext"; 
+import { useMenu } from "../../contexts/MenuContext";
 
 const MainLayout: React.FC = () => {
   const { isMobileMenuOpen } = useMenu();
@@ -13,9 +13,12 @@ const MainLayout: React.FC = () => {
 
       {/*Contenedor principal */}
       <main
-        className={`flex-1 p-6 h-full overflow-y-auto transition-all duration-300 ease-in-out 
+        className={`flex-1 p-6 h-full overflow-y-auto transition-all duration-200 ease-in-out
           ${isMobileMenuOpen ? "blur-sm pointer-events-none" : ""}
-          md:ml-56 md:blur-0 md:pointer-events-auto`}
+          md:ml-20 md:blur-0 md:pointer-events-auto`}
+        style={{
+          marginLeft: '5rem' // 80px = w-20
+        }}
       >
         <Outlet />
       </main>

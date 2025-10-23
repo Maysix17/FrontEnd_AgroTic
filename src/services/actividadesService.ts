@@ -15,8 +15,8 @@ export interface Actividad {
 export interface CreateActividadData {
   descripcion: string;
   fechaAsignacion: string;
-  horasDedicadas: number;
-  observacion: string;
+  horasDedicadas?: number;
+  observacion?: string;
   estado: boolean;
   fkCultivoVariedadZonaId: string;
   fkCategoriaActividadId: string;
@@ -156,5 +156,10 @@ export const confirmUsage = async (reservaId: string, data: ConfirmUsageData): P
 
 export const getReservationsByActivity = async (actividadId: string): Promise<Reservation[]> => {
   const response = await apiClient.get(`/actividades/${actividadId}/reservas`);
+  return response.data;
+};
+
+export const getActividadesByCultivoVariedadZonaId = async (cvzId: string): Promise<any[]> => {
+  const response = await apiClient.get(`/actividades/by-cultivo-variedad-zona/${cvzId}`);
   return response.data;
 };

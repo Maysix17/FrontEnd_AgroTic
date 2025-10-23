@@ -1,203 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, Input, Textarea } from '@heroui/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Input, Textarea } from '@heroui/react';
+import CustomButton from '../atoms/Boton';
+import UpdateEstadoFenologicoModal from './UpdateEstadoFenologicoModal';
+import UpdateCantidadPlantasModal from './UpdateCantidadPlantasModal';
 
-const styles = `
-  body {
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    font-family: Arial, sans-serif;
-    padding: 20px;
-  }
-
-  .modal-content {
-    background-color: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    width: 100%;
-    border: 1px solid #ddd;
-  }
-
-  h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-  }
-
-  h3 {
-    font-size: 18px;
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 10px;
-  }
-
-  .section {
-    margin-bottom: 20px;
-    border: none;
-    box-shadow: none;
-  }
-
-  .activity-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .form-group-pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    border: none;
-    box-shadow: none;
-    background: transparent;
-  }
-
-  .form-group.full-width {
-    /* Ocupa el ancho completo */
-  }
-
-  label {
-    margin-bottom: 5px;
-    font-size: 14px;
-    color: #555;
-  }
-
-  input[type="number"],
-  input[type="text"],
-  textarea {
-    border-radius: 8px;
-    transition: border-color 0.3s;
-    background-color: #fff;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  input:focus,
-  textarea:focus {
-    border-color: #6a6a6a;
-    outline: none;
-  }
-
-  input, textarea {
-    background-color: white !important;
-  }
-
-  input[readonly] {
-    background-color: #f7f7f7;
-    color: #777;
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  .file-upload-box {
-    border: 2px dashed #ccc;
-    border-radius: 12px;
-    padding: 30px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.3s, background-color 0.3s;
-    position: relative;
-    overflow: hidden;
-    background-color: #f9f9f9;
-  }
-
-  .file-upload-box:hover {
-    border-color: #999;
-    background-color: #f0f0f0;
-  }
-
-  .file-upload-box p {
-    margin-top: 10px;
-    color: #777;
-    font-size: 14px;
-  }
-
-  .upload-icon {
-    width: 40px;
-    height: 40px;
-    color: #a0a0a0;
-    margin-top: 5px;
-  }
-
-  .button-container {
-    display: flex;
-    justify-content: flex-end;
-    padding-top: 15px;
-    grid-column: span 2;
-  }
-
-  .save-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.1s;
-  }
-
-  .save-button:hover {
-    background-color: #45a049;
-  }
-
-  .save-button:active {
-    transform: scale(0.98);
-  }
-
-  @media (max-width: 480px) {
-    .modal-content {
-      padding: 20px;
-      margin: 10px;
-    }
-
-    .form-group-pair {
-      grid-template-columns: 1fr;
-    }
-
-    .form-group.full-width {
-      /* Ya es full width */
-    }
-
-    .button-container {
-      justify-content: center;
-      grid-column: span 1;
-    }
-  }
-`;
 
 interface Activity {
-  id: string;
-  descripcion: string;
-  inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
-  usuariosAsignados?: { usuario: { nombres: string; apellidos: string; id: string }; activo: boolean }[];
-  reservas?: {
-    id: string;
-    cantidadReservada: number;
-    lote: {
-      producto: {
-        nombre: string;
-        unidadMedida: { nombre: string; abreviatura: string };
-      };
-    };
-  }[];
-}
+   id: string;
+   descripcion: string;
+   categoriaActividad?: { nombre: string };
+   cultivoVariedadZona?: {
+     id?: string;
+     zona: { nombre: string };
+     cultivoXVariedad: {
+       cultivo: { id?: string; nombre: string; ficha: { numero: string }; siembra?: string; cosecha?: string; estado?: number; estado_fenologico?: any };
+       variedad: { nombre: string; tipoCultivo: { nombre: string } };
+     };
+     cantidadPlantasInicial?: number;
+     cantidadPlantasActual?: number;
+     areaTerreno?: number;
+     rendimientoPromedio?: number;
+   };
+   inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
+   usuariosAsignados?: { usuario: { nombres: string; apellidos: string; id: string }; activo: boolean }[];
+   reservas?: {
+     id: string;
+     cantidadReservada: number;
+     lote: {
+       producto: {
+         nombre: string;
+         unidadMedida: { nombre: string; abreviatura: string };
+       };
+     };
+   }[];
+ }
 
 interface FinalizeActivityModalProps {
   isOpen: boolean;
@@ -214,11 +50,13 @@ interface FinalizeActivityModalProps {
 }
 
 const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, onClose, activity, onSave }) => {
-  const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
-  const [horas, setHoras] = useState('');
-  const [precioHora, setPrecioHora] = useState('');
-  const [observacion, setObservacion] = useState('');
-  const [evidencia, setEvidencia] = useState<File | null>(null);
+   const [returnedQuantities, setReturnedQuantities] = useState<{ [key: string]: number }>({});
+   const [horas, setHoras] = useState('');
+   const [precioHora, setPrecioHora] = useState('');
+   const [observacion, setObservacion] = useState('');
+   const [evidencia, setEvidencia] = useState<File | null>(null);
+   const [isUpdateEstadoModalOpen, setIsUpdateEstadoModalOpen] = useState(false);
+   const [isUpdateCantidadModalOpen, setIsUpdateCantidadModalOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && activity) {
@@ -228,6 +66,8 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
       setPrecioHora('');
       setObservacion('');
       setEvidencia(null);
+      setIsUpdateEstadoModalOpen(false);
+      setIsUpdateCantidadModalOpen(false);
     }
   }, [isOpen, activity]);
 
@@ -266,113 +106,175 @@ const FinalizeActivityModal: React.FC<FinalizeActivityModalProps> = ({ isOpen, o
 
   return (
     <>
-      <style>{styles}</style>
-      <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl">
-        <ModalContent className="modal-content">
-        <ModalHeader>
-          <h1 className="text-2xl font-bold text-center">Finalizar actividad</h1>
-          <Button isIconOnly variant="light" onClick={onClose}>
-            ✕
-          </Button>
-        </ModalHeader>
-        <ModalBody>
-          <form className="activity-form">
-            {/* Reservas realizadas */}
-            <div className="section">
-              <h3>Reservas realizadas</h3>
-              <div className="reservas-container">
-                <div className="form-group-pair">
+      <Modal isOpen={isOpen} onOpenChange={onClose} size="4xl" className="min-h-[510px]">
+        <ModalContent>
+          <ModalHeader>
+            <h2 className="text-2xl font-semibold">Finalizar actividad</h2>
+          </ModalHeader>
+          <ModalBody>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {/* Reservas realizadas */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2">Reservas realizadas</h3>
+                <div className="space-y-2 max-h-40 overflow-auto">
                   {activity?.reservas?.map((reserva) => (
-                    <div key={reserva.id} className="form-group">
-                      <label htmlFor={`return-${reserva.id}`}>
-                        {reserva.cantidadReservada} {reserva.lote.producto.unidadMedida.abreviatura} de {reserva.lote.producto.nombre}
-                      </label>
-                      <Input
-                        id={`return-${reserva.id}`}
-                        type="number"
-                        placeholder="Cantidad a devolver"
-                        value={returnedQuantities[reserva.id]?.toString() || ''}
-                        onChange={(e) => setReturnedQuantities({ ...returnedQuantities, [reserva.id]: Number(e.target.value) })}
-                        min="0"
-                        max={reserva.cantidadReservada}
-                        className="border-gray-300"
-                      />
+                    <div key={reserva.id} className="p-2 border rounded">
+                      <div className="text-sm">
+                        <div className="font-medium">{reserva.lote.producto.nombre}</div>
+                        <div>Reservado: {reserva.cantidadReservada} {reserva.lote.producto.unidadMedida.abreviatura}</div>
+                        <Input
+                          type="number"
+                          placeholder="Devolver"
+                          value={returnedQuantities[reserva.id]?.toString() || ''}
+                          onChange={(e) => setReturnedQuantities({ ...returnedQuantities, [reserva.id]: Number(e.target.value) })}
+                          min="0"
+                          max={reserva.cantidadReservada}
+                          size="sm"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
-                  ))}
+                  )) || <p className="text-gray-500">No hay reservas</p>}
+                </div>
+              </div>
+
+              {/* Información de finalización */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2">Información de finalización</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Horas dedicadas *</label>
+                    <Input
+                      type="number"
+                      placeholder="Ej: 8"
+                      value={horas}
+                      onChange={(e) => setHoras(e.target.value)}
+                      min="0"
+                      step="0.5"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Precio por hora *</label>
+                    <Input
+                      type="number"
+                      placeholder="Ej: 15000"
+                      value={precioHora}
+                      onChange={(e) => setPrecioHora(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Observación y Evidencia */}
+              <div className="border rounded-lg p-4">
+                <h3 className="font-semibold mb-2">Observación y Evidencia</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Observación</label>
+                    <Textarea
+                      placeholder="Observaciones adicionales..."
+                      value={observacion}
+                      onChange={(e) => setObservacion(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Evidencia</label>
+                    <Input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={(e) => setEvidencia(e.target.files?.[0] || null)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Horas y Precio */}
-            <div className="section">
-              <h3>Información de finalización</h3>
-              <div className="form-group-pair">
-                <div className="form-group">
-                  <label htmlFor="horas">Horas dedicadas *</label>
-                  <Input
-                    id="horas"
-                    type="number"
-                    placeholder="Ej: 8"
-                    value={horas}
-                    onChange={(e) => setHoras(e.target.value)}
-                    min="0"
-                    step="0.5"
-                    className="border-gray-300"
+            {/* Botones de actualización para observación */}
+            {activity?.categoriaActividad?.nombre === 'observación' && (
+              <div className="mb-4">
+                <h3 className="font-semibold mb-2">Actualización de Cultivo</h3>
+                <div className="flex gap-2">
+                  <CustomButton
+                    label="Actualizar Estado Fenológico"
+                    onClick={() => setIsUpdateEstadoModalOpen(true)}
+                    size="sm"
+                    variant="bordered"
+                  />
+                  <CustomButton
+                    label="Actualizar Cantidad de Plantas"
+                    onClick={() => setIsUpdateCantidadModalOpen(true)}
+                    size="sm"
+                    variant="bordered"
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="precioHora">Precio por hora *</label>
-                  <Input
-                    id="precioHora"
-                    type="number"
-                    placeholder="Ej: 15000"
-                    value={precioHora}
-                    onChange={(e) => setPrecioHora(e.target.value)}
-                    min="0"
-                    step="0.01"
-                    className="border-gray-300"
-                  />
-                </div>
               </div>
-            </div>
-
-            {/* Observación */}
-            <div className="section">
-              <h3>Observación</h3>
-              <div className="form-group full-width">
-                <Textarea
-                  placeholder="Observaciones adicionales..."
-                  value={observacion}
-                  onChange={(e) => setObservacion(e.target.value)}
-                  rows={3}
-                  className="border-gray-300"
-                />
-              </div>
-            </div>
-
-            {/* Evidencia */}
-            <div className="section">
-              <h3>Evidencia</h3>
-              <div className="form-group full-width">
-                <Input
-                  type="file"
-                  accept="image/*,application/pdf"
-                  onChange={(e) => setEvidencia(e.target.files?.[0] || null)}
-                  className="border-gray-300"
-                />
-              </div>
-            </div>
+            )}
 
             {/* Botón */}
-            <div className="button-container">
-              <Button type="button" className="save-button" onClick={handleSave}>
-                Finalizar Actividad
-              </Button>
+            <div className="flex justify-end gap-2">
+              <CustomButton
+                type="button"
+                onClick={handleSave}
+                label="Finalizar Actividad"
+                className="txs"
+              />
             </div>
-          </form>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+    {/* Update Estado Fenológico Modal */}
+    <UpdateEstadoFenologicoModal
+      isOpen={isUpdateEstadoModalOpen}
+      onClose={() => setIsUpdateEstadoModalOpen(false)}
+      cultivo={activity?.cultivoVariedadZona ? {
+        cvzid: activity.cultivoVariedadZona.id || '',
+        id: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.id || '',
+        nombrecultivo: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.nombre,
+        estado_fenologico: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico,
+        estado_fenologico_nombre: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico?.nombre,
+        ficha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.ficha?.numero || '',
+        lote: activity.cultivoVariedadZona.zona.nombre,
+        fechasiembra: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.siembra || '',
+        fechacosecha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.cosecha || '',
+        estado: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado || 1,
+        cantidad_plantas_inicial: activity.cultivoVariedadZona.cantidadPlantasInicial,
+        cantidad_plantas_actual: activity.cultivoVariedadZona.cantidadPlantasActual,
+        area_terreno: activity.cultivoVariedadZona.areaTerreno,
+        rendimiento_promedio: activity.cultivoVariedadZona.rendimientoPromedio
+      } as any : null}
+      onSuccess={() => {
+        setIsUpdateEstadoModalOpen(false);
+      }}
+    />
+
+    {/* Update Cantidad Plantas Modal */}
+    <UpdateCantidadPlantasModal
+      isOpen={isUpdateCantidadModalOpen}
+      onClose={() => setIsUpdateCantidadModalOpen(false)}
+      cultivo={activity?.cultivoVariedadZona ? {
+        cvzid: activity.cultivoVariedadZona.id || '',
+        id: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.id || '',
+        nombrecultivo: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.nombre,
+        estado_fenologico: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico,
+        estado_fenologico_nombre: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado_fenologico?.nombre,
+        ficha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.ficha?.numero || '',
+        lote: activity.cultivoVariedadZona.zona.nombre,
+        fechasiembra: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.siembra || '',
+        fechacosecha: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.cosecha || '',
+        estado: activity.cultivoVariedadZona.cultivoXVariedad.cultivo.estado || 1,
+        cantidad_plantas_inicial: activity.cultivoVariedadZona.cantidadPlantasInicial,
+        cantidad_plantas_actual: activity.cultivoVariedadZona.cantidadPlantasActual,
+        area_terreno: activity.cultivoVariedadZona.areaTerreno,
+        rendimiento_promedio: activity.cultivoVariedadZona.rendimientoPromedio
+      } as any : null}
+      onSuccess={() => {
+        setIsUpdateCantidadModalOpen(false);
+      }}
+    />
     </>
   );
 };

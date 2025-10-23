@@ -3,6 +3,7 @@ import apiClient from '../lib/axios/axios';
 export interface Categoria {
   id: string;
   nombre: string;
+  esDivisible?: boolean;
 }
 
 export interface Bodega {
@@ -63,6 +64,7 @@ export interface LoteInventario {
       precioVenta: string;
       imgUrl?: string;
       capacidadPresentacion?: number;
+      vidaUtilPromedioPorUsos?: number;
       categoria?: {
         id: string;
         nombre: string;

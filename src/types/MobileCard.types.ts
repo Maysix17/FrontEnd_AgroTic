@@ -4,10 +4,13 @@ export interface CardField {
 }
 
 export interface CardAction {
-  label: string;
+  label?: string;
+  icon?: React.ReactNode;
+  tooltip?: string;
   onClick: () => void;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
+  color?: 'primary' | 'secondary' | 'danger' | 'default';
 }
 
 export interface MobileCardProps {

@@ -8,6 +8,7 @@ import {
 } from '../../services/variedad';
 import Table from '../atoms/Table';
 import CustomButton from '../atoms/Boton';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface VariedadModalProps {
   isOpen: boolean;
@@ -58,7 +59,7 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
         <ModalHeader>
           <h2 className="text-xl font-semibold">Gestionar Variedades</h2>
         </ModalHeader>
-        <ModalBody>
+        <ModalBody className="overflow-y-auto max-h-96">
           <VariedadForm editData={editData} onSuccess={() => { fetchVariedades(); setEditData(null); }} />
           {message && <p className="text-center text-green-600 mt-4">{message}</p>}
           <div className="mt-6">
@@ -69,11 +70,23 @@ const VariedadModal: React.FC<VariedadModalProps> = ({ isOpen, onClose }) => {
                   <td className="px-4 py-2 border-b">{variedad.nombre}</td>
                   <td className="px-4 py-2 border-b">{variedad.tipoCultivo?.nombre || 'N/A'}</td>
                   <td className="px-4 py-2 border-b">
-                    <div className="flex gap-2">
-                      <CustomButton onClick={() => handleEdit(variedad)}>Editar</CustomButton>
-                      <CustomButton onClick={() => handleDelete(variedad.id!)} variant="bordered">
-                        Eliminar
-                      </CustomButton>
+                    <div className="flex gap-1">
+                      <CustomButton
+                        icon={<PencilIcon className="w-4 h-4" />}
+                        tooltip="Editar"
+                        onClick={() => handleEdit(variedad)}
+                        color="secondary"
+                        variant="light"
+                        size="sm"
+                      />
+                      <CustomButton
+                        icon={<TrashIcon className="w-4 h-4" />}
+                        tooltip="Eliminar"
+                        onClick={() => handleDelete(variedad.id!)}
+                        color="danger"
+                        variant="light"
+                        size="sm"
+                      />
                     </div>
                   </td>
                 </tr>

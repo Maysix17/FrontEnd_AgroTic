@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-   import { Modal, ModalContent, ModalHeader, ModalBody, Button } from '@heroui/react';
+   import { Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
+   import CustomButton from '../atoms/Boton';
    import { getReservationsByActivity, confirmUsage } from '../../services/actividadesService';
    import apiClient from '../../lib/axios/axios';
    import FinalizeActivityModal from './FinalizeActivityModal';
@@ -16,44 +17,45 @@ interface Reservation {
 }
 
 interface Activity {
-    id: string;
-    descripcion: string;
-    categoriaActividad: { nombre: string };
-    cultivoVariedadZona: {
-      zona: { nombre: string };
-      cultivoXVariedad: {
-        cultivo: { nombre: string; ficha: { numero: string } };
-        variedad: { nombre: string; tipoCultivo: { nombre: string } };
-      };
-    };
-    usuariosAsignados?: { usuario: { dni: number; nombres: string; apellidos: string; ficha?: { numero: number } }; activo: boolean }[];
-    inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
-    reservations?: Reservation[];
-    reservas?: {
-      id: string;
-      cantidadReservada: number;
-      lote: {
-        producto: {
-          nombre: string;
-          unidadMedida: { nombre: string; abreviatura: string };
-        };
-      };
-    }[];
-  }
+     id: string;
+     descripcion: string;
+     fechaAsignacion: string;
+     categoriaActividad: { nombre: string };
+     cultivoVariedadZona: {
+       zona: { nombre: string };
+       cultivoXVariedad: {
+         cultivo: { nombre: string; ficha: { numero: string } };
+         variedad: { nombre: string; tipoCultivo: { nombre: string } };
+       };
+     };
+     usuariosAsignados?: { usuario: { dni: number; nombres: string; apellidos: string; ficha?: { numero: number } }; activo: boolean }[];
+     inventarioUsado?: { inventario: { nombre: string; id: string; categoria: { nombre: string } }; cantidadUsada: number; activo: boolean }[];
+     reservations?: Reservation[];
+     reservas?: {
+       id: string;
+       cantidadReservada: number;
+       lote: {
+         producto: {
+           nombre: string;
+           unidadMedida: { nombre: string; abreviatura: string };
+         };
+       };
+     }[];
+   }
 
 interface ActivityDetailModalProps {
    isOpen: boolean;
    onClose: () => void;
    activity: Activity | null;
    onDelete: (id: string) => void;
- }
+  }
 
 const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
    isOpen,
    onClose,
    activity,
    onDelete,
- }) => {
+  }) => {
   const [categoria, setCategoria] = useState('');
    const [ubicacion, setUbicacion] = useState('');
    const [descripcion, setDescripcion] = useState('');
@@ -136,6 +138,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
        alert('Actividad finalizada exitosamente');
        setIsFinalizeModalOpen(false);
        onClose();
+       // Reload the page to update all activity counts
+       window.location.reload();
      } catch (error: any) {
        console.error('❌ ERROR: Error finalizing activity:', error);
        console.error('❌ ERROR: Error response:', error.response);
@@ -159,7 +163,6 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
         <ModalContent>
           <ModalHeader>
             <h2 className="text-2xl font-semibold">Actividades</h2>
-            <Button variant="light" onClick={onClose}>✕</Button>
           </ModalHeader>
           <ModalBody>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -190,7 +193,7 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                         </div>
                       </div>
                       {res.cantidadUsada === undefined && (
-                        <Button
+                        <CustomButton
                           size="sm"
                           color="primary"
                           className="mt-2"
@@ -209,9 +212,8 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                               }
                             }
                           }}
-                        >
-                          Confirmar Uso
-                        </Button>
+                          label="Confirmar Uso"
+                        />
                       )}
                     </div>
                   ))}
@@ -260,15 +262,9 @@ const ActivityDetailModal: React.FC<ActivityDetailModalProps> = ({
                   <div className="p-2 border rounded min-h-[80px]">{descripcion}</div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="ghost" onClick={() => setIsEditing(!isEditing)}>
-                    {isEditing ? 'Cancelar' : 'Actualizar'}
-                  </Button>
-                  <Button color="danger" onClick={handleDelete}>
-                    Eliminar
-                  </Button>
-                  <Button color="success" onClick={() => setIsFinalizeModalOpen(true)}>
-                    Finalizar Actividad
-                  </Button>
+                  <CustomButton variant="ghost" onClick={() => setIsEditing(!isEditing)} label={isEditing ? 'Cancelar' : 'Actualizar'} />
+                  <CustomButton color="danger" onClick={handleDelete} label="Eliminar" />
+                  <CustomButton color="success" onClick={() => setIsFinalizeModalOpen(true)} label="Finalizar Actividad" />
                 </div>
               </div>
             </div>

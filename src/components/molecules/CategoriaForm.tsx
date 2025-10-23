@@ -104,12 +104,12 @@ const CategoriaForm: React.FC<CategoriaFormProps> = ({ editId, onSuccess }) => {
         </p>
       </div>
 
-      {message && <p className="text-center text-green-600">{message}</p>}
+      {message && <p className="text-center text-primary-600">{message}</p>}
 
       <CustomButton
         type="submit"
         text={editId ? 'Actualizar Categoría' : 'Registrar Categoría'}
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full"
       />
     </form>
   );

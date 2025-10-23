@@ -1,73 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import CustomButton from '../components/atoms/Boton';
-import Table from '../components/atoms/Table';
-import MobileCard from '../components/atoms/MobileCard';
-import type { CardField, CardAction } from '../types/MobileCard.types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import GenericFiltersPanel from '../components/organisms/GenericFiltersPanel';
+import GenericDataTable from '../components/organisms/GenericDataTable';
 import UnifiedProductModal from '../components/organisms/UnifiedProductModal';
 import BodegaModal from '../components/organisms/BodegaModal';
 import CategoriaModal from '../components/organisms/CategoriaModal';
 import { inventoryService } from '../services/inventoryService';
 import type { LoteInventario } from '../services/inventoryService';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
-import InputSearch from '../components/atoms/buscador';
 import Swal from 'sweetalert2';
 import { Modal, ModalContent } from '@heroui/react';
 
 const InventoryPage: React.FC = () => {
-   const [searchInput, setSearchInput] = useState('');
-   const [allItems, setAllItems] = useState<LoteInventario[]>([]);
-   const [results, setResults] = useState<LoteInventario[]>([]);
-   const [loading, setLoading] = useState(false);
-   const [error, setError] = useState<string | null>(null);
-   const [isUnifiedProductModalOpen, setIsUnifiedProductModalOpen] = useState(false);
-     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-     const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
-     const [editItem, setEditItem] = useState<LoteInventario | null>(null);
-     const [isBodegaModalOpen, setIsBodegaModalOpen] = useState(false);
-     const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total, setTotal] = useState(0);
+    const navigate = useNavigate();
+    const [filters, setFilters] = useState<Record<string, any>>({});
+    const [allItems, setAllItems] = useState<LoteInventario[]>([]);
+    const [results, setResults] = useState<LoteInventario[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [isUnifiedProductModalOpen, setIsUnifiedProductModalOpen] = useState(false);
+      const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+      const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+      const [selectedItem, setSelectedItem] = useState<LoteInventario | null>(null);
+      const [editItem, setEditItem] = useState<LoteInventario | null>(null);
+      const [isBodegaModalOpen, setIsBodegaModalOpen] = useState(false);
+      const [isCategoriaModalOpen, setIsCategoriaModalOpen] = useState(false);
+      const [currentPage, setCurrentPage] = useState(1);
 
-  const limit = 10; // Items per page
+   const limit = 10; // Items per page
 
-  const totalPages = Math.ceil(total / limit);
 
   // Fetch all items on mount
   useEffect(() => {
     fetchAllInventory();
   }, []);
 
-  // Filter items based on search input
-  useEffect(() => {
-    if (searchInput.trim()) {
+  // Filter items based on filters
+   useEffect(() => {
+     const searchTerm = filters.buscar || '';
+     if (searchTerm.trim()) {
       const filtered = allItems.filter(item =>
-        item.producto.nombre.toLowerCase().includes(searchInput.toLowerCase()) ||
-        item.producto.sku.toLowerCase().includes(searchInput.toLowerCase())
+        item.producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.producto.sku.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setResults(filtered.slice((currentPage - 1) * limit, currentPage * limit));
-      setTotal(filtered.length);
     } else {
       setResults(allItems.slice((currentPage - 1) * limit, currentPage * limit));
-      setTotal(allItems.length);
     }
-  }, [searchInput, allItems, currentPage]);
+   }, [filters, allItems, currentPage]);
 
   const fetchAllInventory = async () => {
     console.log('Fetching all inventory');
     setLoading(true);
-    setError(null);
     try {
       // Fetch all items by setting a high limit
       const response = await inventoryService.getAll(1, 10000);
       console.log('All inventory response:', response);
       setAllItems(response.items);
       setResults(response.items.slice(0, limit));
-      setTotal(response.items.length);
     } catch (err: unknown) {
       console.error('Error fetching inventory:', err);
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Error al cargar inventario');
     } finally {
       setLoading(false);
     }
@@ -76,24 +67,17 @@ const InventoryPage: React.FC = () => {
   const fetchInventory = async (page: number) => {
     console.log('Fetching inventory for page:', page);
     setLoading(true);
-    setError(null);
     try {
       const response = await inventoryService.getAll(page, limit);
       console.log('Inventory response:', response);
       setResults(response.items);
-      setTotal(response.total);
     } catch (err: unknown) {
       console.error('Error fetching inventory:', err);
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Error al cargar inventario');
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
 
   const handleDelete = async (id: string) => {
@@ -119,178 +103,132 @@ const InventoryPage: React.FC = () => {
     }
   };
 
-  const headers = ['Código', 'Producto', 'Categoría', 'Bodega', 'Stock', 'Cantidad Disponible Total', 'Disponible para Reservar', 'Reservado', 'Acciones'];
+
+  // Filter configuration for GenericFiltersPanel
+  const mainFilters = [
+    {
+      key: 'buscar',
+      label: 'Producto',
+      type: 'text' as const,
+      placeholder: 'Buscar por nombre o código...'
+    }
+  ];
+
+  const handleFilterChange = useCallback((key: string, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    // Search is handled automatically by useEffect
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setFilters({});
+  }, []);
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-        <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Inventario</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
-          <CustomButton onClick={() => setIsUnifiedProductModalOpen(true)}>Registrar Producto</CustomButton>
-          <CustomButton onClick={() => setIsBodegaModalOpen(true)} variant="bordered">Gestionar Bodegas</CustomButton>
-          <CustomButton onClick={() => setIsCategoriaModalOpen(true)} variant="bordered">Gestionar Categorías</CustomButton>
-        </div>
-      </div>
-
-      <div className="mb-4">
-        <InputSearch
-          placeholder="Buscar por nombre o código..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+    <div className="flex flex-col w-full bg-gray-50">
+      <div className="flex flex-col gap-6" style={{ height: 'calc(0px + 93vh)', overflowY: 'auto' }}>
+        {/* Filtros usando el componente genérico */}
+        <GenericFiltersPanel
+          title="Gestión de Inventario"
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onSearch={handleSearch}
+          onClear={handleClear}
+          loading={loading}
+          mainFilters={mainFilters}
+          onCreate={() => setIsUnifiedProductModalOpen(true)}
+          onManageActions={[
+            { label: 'Gestionar Bodegas', icon: <span>🏢</span>, onClick: () => setIsBodegaModalOpen(true) },
+            { label: 'Gestionar Categorías', icon: <span>📂</span>, onClick: () => setIsCategoriaModalOpen(true) },
+            { label: 'Historial de Movimientos', icon: <span>📊</span>, onClick: () => navigate('/app/movements') }
+          ]}
         />
-      </div>
-     
 
-      {/* Desktop Table */}
-      <div className="hidden md:block">
-        {loading ? (
-          <div className="text-center py-4">Cargando...</div>
-        ) : error ? (
-          <div className="text-center py-4 text-red-500">{error}</div>
-        ) : (
-          <>
-            <Table headers={headers}>
-              {results.map((item, index) => {
-                return (
-                  <tr key={item.id || index} className="border-b">
-                    <td className="px-4 py-2">{item.producto.sku}</td>
-                    <td className="px-4 py-2">{item.producto.nombre}</td>
-                    <td className="px-4 py-2">{item.producto.categoria?.nombre || '-'}</td>
-                    <td className="px-4 py-2">{item.bodega?.nombre || '-'}</td>
-                    <td className="px-4 py-2">{item.stock || '0.00'}</td>
-                    <td className="px-4 py-2">{item.stockTotal?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
-                    <td className="px-4 py-2">{item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
-                    <td className="px-4 py-2">{item.cantidadReservada?.toFixed(2) || '0.00'} {item.unidadAbreviatura || ''}</td>
-                    <td className="px-4 py-2 flex space-x-2">
-                      <button
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsDetailsModalOpen(true);
-                        }}
-                        className="text-green-500 hover:text-green-700"
-                        title="Ver más"
-                      >
-                        <EyeIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditItem(item);
-                          setIsUnifiedProductModalOpen(true);
-                        }}
-                        className="text-blue-500 hover:text-blue-700"
-                        title="Editar"
-                      >
-                        <PencilIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="text-red-500 hover:text-red-700"
-                        title="Eliminar"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </Table>
-
-            {/* Pagination */}
-            {total > limit && (
-              <div className="flex justify-between items-center mt-4">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-                >
-                  Anterior
-                </button>
-                <span>Página {currentPage} de {totalPages}</span>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="md:hidden">
-        {loading ? (
-          <div className="text-center py-4">Cargando...</div>
-        ) : error ? (
-          <div className="text-center py-4 text-red-500">{error}</div>
-        ) : results.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">No se encontraron resultados.</div>
-        ) : (
-          <>
-            {results.map((item, index) => {
-              const fields: CardField[] = [
-                { label: 'Código', value: item.producto.sku },
-                { label: 'Producto', value: item.producto.nombre },
-                { label: 'Categoría', value: item.producto.categoria?.nombre || '-' },
-                { label: 'Bodega', value: item.bodega?.nombre || '-' },
-                { label: 'Stock', value: `${item.stock?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
-                { label: 'Cantidad Disponible Total', value: `${item.stockTotal?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
-                { label: 'Disponible para Reservar', value: `${item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
-                { label: 'Reservado', value: `${item.cantidadReservada?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
-              ];
-
-              const actions: CardAction[] = [
-                {
-                  label: 'Ver más',
-                  onClick: () => {
-                    setSelectedItem(item);
-                    setIsDetailsModalOpen(true);
-                  },
-                  size: 'sm' as const,
-                },
-                {
-                  label: 'Editar',
-                  onClick: () => {
-                    setEditItem(item);
-                    setIsUnifiedProductModalOpen(true);
-                  },
-                  size: 'sm',
-                },
-                {
-                  label: 'Eliminar',
-                  onClick: () => handleDelete(item.id),
-                  size: 'sm',
-                },
-              ];
-
-              return <MobileCard key={item.id || index} fields={fields} actions={actions} />;
-            })}
-
-            {/* Pagination */}
-            {total > limit && (
-              <div className="flex justify-between items-center mt-4">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-                >
-                  Anterior
-                </button>
-                <span>Página {currentPage} de {totalPages}</span>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded disabled:opacity-50"
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        {/* Tabla usando el componente genérico */}
+        <GenericDataTable
+          data={results}
+          columns={[
+            { key: 'producto.sku', label: 'Código', width: 'w-[10%]' },
+            { key: 'producto.nombre', label: 'Producto', width: 'w-[18%]' },
+            { key: 'producto.categoria.nombre', label: 'Categoría', width: 'w-[12%]', render: (item) => item.producto.categoria?.nombre || '-' },
+            { key: 'bodega.nombre', label: 'Bodega', width: 'w-[12%]', render: (item) => item.bodega?.nombre || '-' },
+            { key: 'stock', label: 'Stock', width: 'w-[8%]', render: (item) => item.stock || '0.00' },
+            { key: 'stockTotal', label: 'Cant. Total', width: 'w-[12%]', render: (item) => `${item.stockTotal?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+            { key: 'cantidadDisponibleParaReservar', label: 'Disponible', width: 'w-[12%]', render: (item) => `${item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+            { key: 'cantidadReservada', label: 'Reservado', width: 'w-[10%]', render: (item) => `${item.cantidadReservada?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` }
+          ]}
+          loading={loading}
+          emptyMessage="No se encontraron productos"
+          emptyDescription="No hay productos que coincidan con los filtros aplicados."
+          onClearFilters={handleClear}
+          countLabel="productos"
+          actions={(item) => (
+            <>
+              <button
+                onClick={() => {
+                  setSelectedItem(item);
+                  setIsDetailsModalOpen(true);
+                }}
+                className="text-primary-500 hover:text-primary-700"
+                title="Ver más"
+              >
+                <EyeIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setEditItem(item);
+                  setIsUnifiedProductModalOpen(true);
+                }}
+                className="text-blue-500 hover:text-blue-700"
+                title="Editar"
+              >
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="text-red-500 hover:text-red-700"
+                title="Eliminar"
+              >
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </>
+          )}
+          mobileFields={(item) => [
+            { label: 'Código', value: item.producto.sku },
+            { label: 'Producto', value: item.producto.nombre },
+            { label: 'Categoría', value: item.producto.categoria?.nombre || '-' },
+            { label: 'Bodega', value: item.bodega?.nombre || '-' },
+            { label: 'Stock', value: `${item.stock?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+            { label: 'Cant. Total', value: `${item.stockTotal?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+            { label: 'Disponible', value: `${item.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` },
+            { label: 'Reservado', value: `${item.cantidadReservada?.toFixed(2) || '0.00'} ${item.unidadAbreviatura || ''}` }
+          ]}
+          mobileActions={(item) => [
+            {
+              label: 'Ver más',
+              onClick: () => {
+                setSelectedItem(item);
+                setIsDetailsModalOpen(true);
+              },
+              size: 'sm' as const,
+            },
+            {
+              label: 'Editar',
+              onClick: () => {
+                setEditItem(item);
+                setIsUnifiedProductModalOpen(true);
+              },
+              size: 'sm',
+            },
+            {
+              label: 'Eliminar',
+              onClick: () => handleDelete(item.id),
+              size: 'sm',
+            },
+          ]}
+        />
       </div>
 
       <UnifiedProductModal
@@ -357,6 +295,9 @@ const InventoryPage: React.FC = () => {
                     <p><span className="font-medium">Descripción:</span> {selectedItem.producto.descripcion || 'No disponible'}</p>
                     <p><span className="font-medium">Precio de Compra:</span> ${parseFloat(selectedItem.producto.precioCompra).toFixed(2)}</p>
                     <p><span className="font-medium">Capacidad de Presentación:</span> {selectedItem.producto.capacidadPresentacion || 'No especificada'}</p>
+                    {selectedItem.producto.vidaUtilPromedioPorUsos && (
+                      <p><span className="font-medium">Vida Útil Promedio por Usos:</span> {selectedItem.producto.vidaUtilPromedioPorUsos} usos</p>
+                    )}
                   </div>
                 </div>
 
@@ -384,7 +325,7 @@ const InventoryPage: React.FC = () => {
                     <p className="text-sm text-gray-600">Cantidad Disponible Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">{selectedItem.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} {selectedItem.unidadAbreviatura || ''}</p>
+                    <p className="text-2xl font-bold text-primary-600">{selectedItem.cantidadDisponibleParaReservar?.toFixed(2) || '0.00'} {selectedItem.unidadAbreviatura || ''}</p>
                     <p className="text-sm text-gray-600">Disponible para Reservar</p>
                   </div>
                   <div className="text-center">

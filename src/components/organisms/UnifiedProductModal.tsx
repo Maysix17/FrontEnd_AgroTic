@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalContent, Button } from '@heroui/react';
+import { Modal, ModalContent } from '@heroui/react';
 import CustomButton from '../atoms/Boton';
 import ImageUpload from '../atoms/ImagenUpload';
 import Swal from 'sweetalert2';
@@ -28,13 +28,14 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
     capacidadPresentacion: '',
     fkCategoriaId: '',
     fkUnidadMedidaId: '',
+    vidaUtilPromedioPorUsos: '',
     // Lot inventory fields
     fkBodegaId: '',
     stock: '',
     fechaVencimiento: '',
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [, setSelectedFile] = useState<File | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);
@@ -63,6 +64,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
       capacidadPresentacion: '',
       fkCategoriaId: '',
       fkUnidadMedidaId: '',
+      vidaUtilPromedioPorUsos: '',
       fkBodegaId: '',
       stock: '',
       fechaVencimiento: '',
@@ -81,6 +83,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
         capacidadPresentacion: editItem.producto.capacidadPresentacion || '',
         fkCategoriaId: editItem.producto.categoria?.id || '',
         fkUnidadMedidaId: editItem.producto.unidadMedida?.id || '',
+        vidaUtilPromedioPorUsos: editItem.producto.vidaUtilPromedioPorUsos?.toString() || '',
         fkBodegaId: editItem.bodega?.id || '',
         stock: editItem.stock?.toString() || '',
         fechaVencimiento: editItem.fechaVencimiento ? new Date(editItem.fechaVencimiento).toISOString().split('T')[0] : '',
@@ -140,6 +143,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
         capacidadPresentacion: parseFloat(formData.capacidadPresentacion),
         fkCategoriaId: formData.fkCategoriaId || undefined,
         fkUnidadMedidaId: formData.fkUnidadMedidaId || undefined,
+        vidaUtilPromedioPorUsos: formData.vidaUtilPromedioPorUsos ? parseInt(formData.vidaUtilPromedioPorUsos) : undefined,
         fkBodegaId: formData.fkBodegaId,
         stock: parseFloat(formData.stock),
         fechaVencimiento: formData.fechaVencimiento || undefined,
@@ -281,6 +285,35 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
                 </select>
               </div>
             </div>
+
+            {/* Campo condicional para productos no divisibles */}
+            {(() => {
+              const selectedCategoria = categorias.find(cat => cat.id === formData.fkCategoriaId);
+              const esDivisible = selectedCategoria?.esDivisible ?? true;
+              if (!esDivisible) {
+                return (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vida Útil Promedio por Usos *
+                      <span className="block text-xs text-gray-500 mt-1">
+                        ¿Cuántas veces crees que puedes usar este producto antes de que ya no sirva? Ejemplo: 1.200 usos ≈ 4 años si se usa 300 veces al año.
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      name="vidaUtilPromedioPorUsos"
+                      value={formData.vidaUtilPromedioPorUsos}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="Ej: 1200"
+                      min="1"
+                      required={!esDivisible}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* Lot Inventory Information */}
@@ -337,9 +370,9 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
 
           {errors.general && <p className="text-red-500 text-sm">{errors.general}</p>}
           <div className="flex justify-end space-x-2 pt-4 border-t">
-            <Button onClick={onClose} variant="light">Cancelar</Button>
+            <CustomButton onClick={onClose} variant="light" label="Cancelar" />
             <CustomButton
-              text={isLoading ? (editItem ? 'Actualizando...' : 'Registrando...') : (editItem ? 'Actualizar Producto' : 'Registrar Producto')}
+              label={isLoading ? (editItem ? 'Actualizando...' : 'Registrando...') : (editItem ? 'Actualizar Producto' : 'Registrar Producto')}
               type="submit"
               disabled={isLoading}
             />

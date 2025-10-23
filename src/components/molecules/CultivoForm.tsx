@@ -18,9 +18,11 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
     tipoCultivoId: "",
     variedadId: "",
     zonaId: "",
+    cantidad_plantas_inicial: undefined,
   });
   const [tipoCultivos, setTipoCultivos] = useState<TipoCultivoData[]>([]);
   const [variedades, setVariedades] = useState<VariedadData[]>([]);
+  const [filteredVariedades, setFilteredVariedades] = useState<VariedadData[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
   const [message, setMessage] = useState<string>("");
 
@@ -31,6 +33,7 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         setTipoCultivos(tipos);
         const vars = await getVariedades();
         setVariedades(vars);
+        setFilteredVariedades(vars); // Inicialmente mostrar todas las variedades
         const zons = await getAllZonas();
         setZonas(zons);
       } catch (error) {
@@ -39,6 +42,20 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
     };
     fetchData();
   }, []);
+
+  // Filtrar variedades cuando cambia el tipo de cultivo seleccionado
+  useEffect(() => {
+    if (cultivoData.tipoCultivoId) {
+      const filtered = variedades.filter(v => v.fkTipoCultivoId === cultivoData.tipoCultivoId);
+      setFilteredVariedades(filtered);
+      // Resetear la variedad seleccionada si no pertenece al nuevo tipo de cultivo
+      if (cultivoData.variedadId && !filtered.find(v => v.id === cultivoData.variedadId)) {
+        setCultivoData({ ...cultivoData, variedadId: "" });
+      }
+    } else {
+      setFilteredVariedades(variedades); // Mostrar todas si no hay tipo seleccionado
+    }
+  }, [cultivoData.tipoCultivoId, variedades]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +67,7 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         tipoCultivoId: "",
         variedadId: "",
         zonaId: "",
+        cantidad_plantas_inicial: undefined,
       });
       onSuccess?.();
     } catch (err: any) {
@@ -85,8 +103,10 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
             setCultivoData({ ...cultivoData, variedadId: e.target.value })
           }
         >
-          <option value="">Seleccione una variedad</option>
-          {variedades.map((varie) => (
+          <option value="">
+            {cultivoData.tipoCultivoId ? "Seleccione una variedad" : "Primero seleccione un tipo de cultivo"}
+          </option>
+          {filteredVariedades.map((varie) => (
             <option key={varie.id} value={varie.id}>
               {varie.nombre}
             </option>
@@ -111,12 +131,30 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         </select>
       </div>
 
-      {message && <p className="text-center text-green-600">{message}</p>}
+      {/* NUEVOS CAMPOS PARA CARACTERÍSTICAS DEL CULTIVO */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Cantidad Inicial de Plantas</label>
+        <input
+          type="number"
+          className="w-full border border-gray-300 rounded-lg p-2"
+          value={cultivoData.cantidad_plantas_inicial || ""}
+          onChange={(e) =>
+            setCultivoData({
+              ...cultivoData,
+              cantidad_plantas_inicial: e.target.value ? parseInt(e.target.value) : undefined
+            })
+          }
+          placeholder="Opcional - se puede actualizar después"
+        />
+      </div>
+
+
+      {message && <p className="text-center text-primary-600">{message}</p>}
 
       <CustomButton
         type="submit"
         text="Registrar Cultivo"
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full"
       />
     </form>
   );

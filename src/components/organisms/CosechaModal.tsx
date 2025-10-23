@@ -10,14 +10,17 @@ interface CosechaModalProps {
   onClose: () => void;
   cvzId: string;
   onSuccess: () => void;
+  isPerenne?: boolean;
+  cultivo?: any; // Para mostrar información del cultivo
 }
 
-const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onSuccess }) => {
+const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onSuccess, cultivo }) => {
   const [formData, setFormData] = useState<CreateCosechaDto>({
     unidadMedida: 'kg',
     cantidad: 0,
     fecha: '',
     fkCultivosVariedadXZonaId: cvzId,
+    cantidad_plantas_cosechadas: undefined,
   });
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +34,20 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     e.preventDefault();
     if (!formData.fkCultivosVariedadXZonaId) return;
 
+    // Calcular rendimiento por planta si se proporciona cantidad de plantas cosechadas
+    const dataToSend = { ...formData };
+    if (formData.cantidad_plantas_cosechadas && formData.cantidad_plantas_cosechadas > 0) {
+      dataToSend.rendimiento_por_planta = formData.cantidad / formData.cantidad_plantas_cosechadas;
+    }
+
     setLoading(true);
     try {
-      await createCosecha(formData);
+      await createCosecha(dataToSend);
+
+      // Nota: No finalizamos automáticamente cultivos perennes después de cosechar
+      // Solo se finalizan cuando el usuario presiona el botón "Finalizar Cultivo"
+      // Los cultivos transitorios se finalizan automáticamente después de vender
+
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -52,7 +66,17 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
     <Modal isOpen={isOpen} onOpenChange={onClose} size="md">
       <ModalContent className="bg-white p-6">
         <ModalHeader>
-          <h2 className="text-xl font-semibold">Registrar Cosecha</h2>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Registrar Cosecha</h2>
+            {cultivo && (
+              <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div><strong>Cultivo:</strong> {cultivo.tipoCultivo?.nombre || 'N/A'} {cultivo.nombrecultivo || 'N/A'}</div>
+                  <div><strong>Zona:</strong> {cultivo.lote || 'N/A'}</div>
+                </div>
+              </div>
+            )}
+          </div>
         </ModalHeader>
         <form onSubmit={handleSubmit}>
           <ModalBody>
@@ -63,10 +87,12 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
                   className="w-full border rounded-lg px-3 py-2"
                   value={formData.unidadMedida}
                   onChange={(e) => handleChange('unidadMedida', e.target.value)}
-                  disabled
                 >
                   <option value="kg">Kilogramos</option>
                 </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Solo se permite cosechar en kilogramos para mantener consistencia en el sistema.
+                </p>
               </div>
               <TextInput
                 label="Cantidad"
@@ -80,6 +106,20 @@ const CosechaModal: React.FC<CosechaModalProps> = ({ isOpen, onClose, cvzId, onS
                 value={formData.fecha || ''}
                 onChange={(e) => handleChange('fecha', e.target.value)}
               />
+              <TextInput
+                label="Cantidad de Plantas Cosechadas"
+                type="number"
+                value={formData.cantidad_plantas_cosechadas?.toString() || ''}
+                onChange={(e) => handleChange('cantidad_plantas_cosechadas', parseInt(e.target.value) || undefined)}
+                placeholder="Opcional - para calcular rendimiento por planta"
+              />
+              {formData.cantidad_plantas_cosechadas && formData.cantidad > 0 && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    Rendimiento por planta: {(formData.cantidad / formData.cantidad_plantas_cosechadas).toFixed(2)} {formData.unidadMedida}/planta
+                  </p>
+                </div>
+              )}
             </div>
           </ModalBody>
           <ModalFooter>

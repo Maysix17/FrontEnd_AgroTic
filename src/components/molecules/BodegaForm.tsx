@@ -81,12 +81,12 @@ const BodegaForm: React.FC<BodegaFormProps> = ({ editId, onSuccess }) => {
         />
       </div>
 
-      {message && <p className="text-center text-green-600">{message}</p>}
+      {message && <p className="text-center text-primary-600">{message}</p>}
 
       <CustomButton
         type="submit"
         text={editId ? 'Actualizar Bodega' : 'Registrar Bodega'}
-        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 w-full"
+        className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 w-full"
       />
     </form>
   );

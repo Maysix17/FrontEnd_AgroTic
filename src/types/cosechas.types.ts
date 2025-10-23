@@ -4,6 +4,14 @@ export interface Cosecha {
   cantidad: number;
   fecha?: string;
   fkCultivosVariedadXZonaId: string;
+
+  // NUEVOS CAMPOS
+  rendimiento_por_planta?: number;
+  cantidad_plantas_cosechadas?: number;
+
+  // CAMPOS DE INVENTARIO
+  cantidadDisponible: number;
+  cerrado: boolean;
 }
 
 export interface CreateCosechaDto {
@@ -11,4 +19,8 @@ export interface CreateCosechaDto {
   cantidad: number;
   fecha?: string;
   fkCultivosVariedadXZonaId: string;
+
+  // NUEVO CAMPO
+  cantidad_plantas_cosechadas?: number;
+  rendimiento_por_planta?: number;
 }

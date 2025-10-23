@@ -29,15 +29,26 @@ const localizer = dateFnsLocalizer({
 });
 
 const ActividadesPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalDate, setModalDate] = useState(new Date());
-  const [isListModalOpen, setIsListModalOpen] = useState(false);
-  const [activities, setActivities] = useState<any[]>([]);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<any>(null);
-  const [events, setEvents] = useState<any[]>([]);
-  const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
+   const [selectedDate, setSelectedDate] = useState(new Date());
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [modalDate, setModalDate] = useState(new Date());
+   const [isListModalOpen, setIsListModalOpen] = useState(false);
+   const [activities, setActivities] = useState<any[]>([]);
+   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+   const [selectedActivity, setSelectedActivity] = useState<any>(null);
+   const [events, setEvents] = useState<any[]>([]);
+   const [activityCounts, setActivityCounts] = useState<{[key: string]: number}>({});
+
+   // Function to update activity count for a specific date
+   const updateActivityCount = async (dateStr: string) => {
+     try {
+       const count = await getActividadesCountByDate(dateStr);
+       setActivityCounts(prev => ({ ...prev, [dateStr]: count }));
+     } catch (error) {
+       console.error('Error updating activity count:', error);
+       setActivityCounts(prev => ({ ...prev, [dateStr]: 0 }));
+     }
+   };
 
   const calendarRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -65,8 +76,8 @@ const ActividadesPage: React.FC = () => {
       const formattedEvents = activities.map((activity: any) => ({
         id: activity.id,
         title: activity.descripcion || 'Actividad',
-        start: new Date(activity.fechaAsignacion),
-        end: new Date(activity.fechaAsignacion),
+        start: new Date(activity.fechaAsignacion.split('T')[0]),
+        end: new Date(activity.fechaAsignacion.split('T')[0]),
         resource: activity,
       }));
       console.log('Formatted events:', formattedEvents);
@@ -95,25 +106,26 @@ const ActividadesPage: React.FC = () => {
 
   return (
     <div ref={pageRef} className="flex flex-col gap-4 overflow-hidden" style={{ height: '100%' }}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0 pt-6">
-        <h1 className="text-2xl font-bold text-left whitespace-nowrap">Gestión de Actividades</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Seleccionar Mes:</label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={(date) => setSelectedDate(date || new Date())}
-              dateFormat="MM/yyyy"
-              showMonthYearPicker
-              className="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-auto"
-            />
+      {/* Calendar Container with Header */}
+      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md w-full overflow-hidden overflow-x-auto flex-1 md:min-w-[768px] flex flex-col">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 flex-shrink-0">
+          <h1 className="text-2xl font-bold text-left whitespace-nowrap pb-4">Gestión de Actividades</h1>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-start">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Seleccionar Mes:</label>
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date || new Date())}
+                dateFormat="MM/yyyy"
+                showMonthYearPicker
+                className="border border-gray-300 rounded-lg p-2 text-sm w-full sm:w-auto"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Calendar */}
-      <div ref={calendarRef} className="bg-white p-4 rounded-lg shadow-md w-full overflow-hidden overflow-x-auto flex-1 md:min-w-[768px]">
+        {/* Calendar */}
         <Calendar
           localizer={localizer}
           culture="es"
@@ -133,7 +145,7 @@ const ActividadesPage: React.FC = () => {
               const isOffRange = value.getMonth() !== selectedDate.getMonth();
               return (
                 <div
-                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-green-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''} cursor-pointer`}
+                  className={`relative h-full w-full border border-gray-300 ${isToday ? 'bg-primary-100' : ''} ${isOffRange ? 'bg-gray-100 text-gray-400' : ''} cursor-pointer`}
                   style={{ minHeight: '80px' }}
                   onClick={async () => {
                     try {
@@ -189,7 +201,7 @@ const ActividadesPage: React.FC = () => {
               setIsModalOpen(true);
             }
           }}
-          style={{ height: '600px' }}
+          style={{ flex: 1 }}
           messages={{
             allDay: 'Todo el día',
             previous: 'Anterior',
@@ -210,17 +222,25 @@ const ActividadesPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={modalDate}
+        onActivityCreated={updateActivityCount}
         onSave={async (data) => {
           try {
+            console.log('ActividadesPage onSave - data.fecha:', data.fecha);
+            console.log('ActividadesPage onSave - data.fecha ISO:', data.fecha.toISOString());
+            console.log('ActividadesPage onSave - data.fecha local:', data.fecha.toLocaleDateString());
+
             const actividadData = {
               descripcion: data.descripcion,
               fechaAsignacion: data.fecha,
-              horasDedicadas: 8, // default
-              observacion: data.descripcion,
+              horasDedicadas: 0, // 0 initially, set when finalizing
+              observacion: '', // empty string initially, set when finalizing
               estado: true,
               fkCultivoVariedadZonaId: data.lote, // data.lote is cvz.id from search
               fkCategoriaActividadId: data.categoria,
             };
+
+            console.log('ActividadesPage onSave - actividadData.fechaAsignacion:', actividadData.fechaAsignacion);
+            console.log('ActividadesPage onSave - actividadData.fechaAsignacion ISO:', actividadData.fechaAsignacion.toISOString());
 
             const actividad = await createActividad(actividadData);
 
@@ -278,8 +298,8 @@ const ActividadesPage: React.FC = () => {
         }}
       />
 
-      
-       
+
+
          <ActivityDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
@@ -289,6 +309,11 @@ const ActividadesPage: React.FC = () => {
             await deleteActividad(id);
             alert('Actividad eliminada');
             setIsDetailModalOpen(false);
+            // Update activity count for the deleted activity's date
+            if (selectedActivity) {
+              const activityDateStr = format(new Date(selectedActivity.fechaAsignacion), 'yyyy-MM-dd');
+              await updateActivityCount(activityDateStr);
+            }
           } catch (error) {
             console.error('Error deleting:', error);
             alert('Error al eliminar');
