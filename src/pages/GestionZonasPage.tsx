@@ -1,24 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { zonasService, mqttConfigService, type Zona, type MqttConfig } from '../services/zonasService';
 import { useMqttSocket } from '../hooks/useMqttSocket';
 import LeafletMap from '../components/molecules/LeafletMap';
 import MqttConfigModal from '../components/molecules/MqttConfigModal';
 import SensorReadingsModal from '../components/molecules/SensorReadingsModal';
-import InputSearch from '../components/atoms/InputSearch';
-import Table from '../components/atoms/Table';
+import ZonaModal from '../components/organisms/ZonaModal';
+import GenericFiltersPanel from '../components/organisms/GenericFiltersPanel';
+import GenericDataTable from '../components/organisms/GenericDataTable';
 
 const GestionZonasPage: React.FC = () => {
-  const [zonas, setZonas] = useState<Zona[]>([]);
-  const [filteredZonas, setFilteredZonas] = useState<Zona[]>([]);
-  const [selectedZona, setSelectedZona] = useState<Zona | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+   const [zonas, setZonas] = useState<Zona[]>([]);
+   const [filteredZonas, setFilteredZonas] = useState<Zona[]>([]);
+   const [selectedZona, setSelectedZona] = useState<Zona | null>(null);
+   const [filters, setFilters] = useState<Record<string, any>>({});
+   const [isLoading, setIsLoading] = useState(true);
 
   // MQTT related state
   const [mqttConfigs, setMqttConfigs] = useState<MqttConfig[]>([]);
   const [showMqttModal, setShowMqttModal] = useState(false);
   const [selectedMqttConfig, setSelectedMqttConfig] = useState<MqttConfig | undefined>();
   const [showReadingsModal, setShowReadingsModal] = useState(false);
+
+  // Zona creation modal
+  const [showZonaModal, setShowZonaModal] = useState(false);
 
   // WebSocket hook
   const { isConnected, getEstadoZona } = useMqttSocket();
@@ -29,7 +33,7 @@ const GestionZonasPage: React.FC = () => {
 
   useEffect(() => {
     filterZonas();
-  }, [zonas, searchTerm]);
+  }, [zonas, filters]);
 
   const loadData = async () => {
     try {
@@ -48,6 +52,7 @@ const GestionZonasPage: React.FC = () => {
   };
 
   const filterZonas = () => {
+    const searchTerm = filters.buscar || '';
     if (!searchTerm) {
       setFilteredZonas(zonas);
       return;
@@ -81,6 +86,15 @@ const GestionZonasPage: React.FC = () => {
     setShowMqttModal(false);
   };
 
+  const handleCreateZona = () => {
+    setShowZonaModal(true);
+  };
+
+  const handleZonaSave = () => {
+    loadData(); // Reload zones
+    setShowZonaModal(false);
+  };
+
   const getMqttStatus = (zonaId: string) => {
     const estado = getEstadoZona(zonaId);
     if (!estado) return { status: 'Sin configurar', color: 'text-gray-500' };
@@ -90,36 +104,25 @@ const GestionZonasPage: React.FC = () => {
       : { status: 'Desconectado', color: 'text-red-600' };
   };
 
-  const tableColumns = [
-    { key: 'nombre', header: 'Zona', sortable: true },
-    { key: 'tipoLote', header: 'Tipo Lote', sortable: true },
+  const handleFilterChange = useCallback((key: string, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    // Search is handled automatically by useEffect
+  }, []);
+
+  const handleClear = useCallback(() => {
+    setFilters({});
+  }, []);
+
+  // Filter configuration for GenericFiltersPanel
+  const mainFilters = [
     {
-      key: 'mqttStatus',
-      header: 'Estado MQTT',
-      render: (zona: Zona) => {
-        const { status, color } = getMqttStatus(zona.id);
-        return <span className={`font-medium ${color}`}>{status}</span>;
-      }
-    },
-    {
-      key: 'acciones',
-      header: 'Acciones',
-      render: (zona: Zona) => (
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleMqttConfig(zona)}
-            className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
-          >
-            MQTT
-          </button>
-          <button
-            onClick={() => handleViewReadings(zona)}
-            className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
-          >
-            Ver Datos
-          </button>
-        </div>
-      )
+      key: 'buscar',
+      label: 'Zona',
+      type: 'text' as const,
+      placeholder: 'Buscar por zona o tipo de lote...'
     }
   ];
 
@@ -132,104 +135,127 @@ const GestionZonasPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gestión de Zonas</h1>
-            <p className="text-gray-600 mt-1">
-              Administra zonas agrícolas y configuraciones MQTT
-              {!isConnected && (
-                <span className="ml-2 text-red-600 font-medium">
-                  (WebSocket desconectado)
-                </span>
-              )}
-            </p>
-          </div>
-          <button
-            onClick={() => alert('Funcionalidad de registrar zona pendiente')}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-          >
-            Registrar Zona
-          </button>
-        </div>
+    <div className="flex flex-col w-full bg-gray-50">
+      <div className="max-w-7xl" style={{ height: 'calc(0px + 93vh)', overflowY: 'auto' }}>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <InputSearch
-                placeholder="Buscar por zona o tipo de lote..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <select className="px-3 py-2 border rounded-lg">
-                <option value="">Todos los tipos</option>
-                <option value="campo">Campo</option>
-                <option value="invernadero">Invernadero</option>
-              </select>
-              <select className="px-3 py-2 border rounded-lg">
-                <option value="">Estado MQTT</option>
-                <option value="conectado">Conectado</option>
-                <option value="desconectado">Desconectado</option>
-                <option value="sin_config">Sin configurar</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        {/* Filtros usando el componente genérico */}
+        <GenericFiltersPanel
+          title="Gestión de Zonas"
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onSearch={handleSearch}
+          onClear={handleClear}
+          loading={isLoading}
+          mainFilters={mainFilters}
+          onCreate={handleCreateZona}
+        />
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           {/* Table */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      {tableColumns.map(col => (
-                        <th key={col.key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {col.header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredZonas.length === 0 ? (
-                      <tr>
-                        <td colSpan={tableColumns.length} className="px-4 py-8 text-center text-gray-500">
-                          No se encontraron zonas
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredZonas.map(zona => (
-                        <tr
-                          key={zona.id}
-                          onClick={() => handleZonaSelect(zona)}
-                          className={`cursor-pointer hover:bg-gray-50 ${selectedZona?.id === zona.id ? 'bg-green-50' : ''}`}
-                        >
-                          {tableColumns.map(col => (
-                            <td key={col.key} className="px-4 py-3 whitespace-nowrap">
-                              {col.render ? col.render(zona) : zona[col.key as keyof Zona]}
-                            </td>
-                          ))}
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden relative" style={{ height: 'calc(-280px + 90vh)' }}>
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-800">Resultados</h2>
+                </div>
               </div>
+              <div className="absolute top-4 right-6">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                  {filteredZonas.length} {filteredZonas.length === 1 ? 'zona' : 'zonas'}
+                </span>
+              </div>
+
+              {isLoading ? (
+                <div className="p-12 text-center">
+                  <div className="inline-flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-500"></div>
+                    <span className="text-gray-600">Cargando zonas...</span>
+                  </div>
+                </div>
+              ) : filteredZonas.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron zonas</h3>
+                  <p className="text-gray-500 mb-4">No hay zonas que coincidan con los filtros aplicados.</p>
+                  <button
+                    onClick={handleClear}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-600 bg-primary-50 hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  >
+                    Limpiar filtros
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto overflow-y-auto h-full">
+                  <table className="w-full">
+                    <thead className="bg-gray-50/50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                          Zona
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                          Tipo Lote
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                          Estado MQTT
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-100">
+                      {filteredZonas.map((zona, index) => (
+                        <tr key={`${zona.id}-${index}`} className="h-14 hover:bg-gray-50/50 transition-colors">
+                          <td className="px-6 py-3 text-sm text-gray-900 font-medium">
+                            {zona.nombre}
+                          </td>
+                          <td className="px-6 py-3 text-sm text-gray-900">
+                            {zona.tipoLote}
+                          </td>
+                          <td className="px-6 py-3 text-sm text-gray-600">
+                            <span className={`font-medium ${getMqttStatus(zona.id).color}`}>
+                              {getMqttStatus(zona.id).status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => handleMqttConfig(zona)}
+                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 whitespace-nowrap"
+                              >
+                                MQTT
+                              </button>
+                              <button
+                                onClick={() => handleViewReadings(zona)}
+                                className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200 whitespace-nowrap"
+                              >
+                                Ver Datos
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Map */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold mb-4">Mapa de Zonas</h3>
-              <div className="h-96 rounded overflow-hidden">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden relative" style={{ height: 'calc(-280px + 90vh)' }}>
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-800">Mapa de Zonas</h2>
+                </div>
+              </div>
+              <div className="w-full h-full rounded overflow-hidden flex items-center justify-center" style={{ height: '75%' }}>
                 <LeafletMap
                   zonas={filteredZonas.map(z => ({
                     id: z.id,
@@ -250,7 +276,7 @@ const GestionZonasPage: React.FC = () => {
                     if (fullZona) handleZonaSelect(fullZona);
                   }}
                   showSatellite={true}
-                  modalOpen={showMqttModal || showReadingsModal}
+                  modalOpen={showMqttModal || showReadingsModal || showZonaModal}
                 />
               </div>
             </div>
@@ -258,6 +284,14 @@ const GestionZonasPage: React.FC = () => {
         </div>
 
         {/* Modals */}
+        {showZonaModal && (
+          <ZonaModal
+            isOpen={showZonaModal}
+            onClose={() => setShowZonaModal(false)}
+            onSave={handleZonaSave}
+          />
+        )}
+
         {showMqttModal && selectedZona && (
           <MqttConfigModal
             isOpen={showMqttModal}

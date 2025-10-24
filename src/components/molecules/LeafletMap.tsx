@@ -134,7 +134,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     map.flyTo([selectedZona.coorY, selectedZona.coorX], 16, { duration: 0.8 });
   }, [selectedZona]);
 
-  return <div ref={mapRef} style={{ height, width: '100%', borderRadius: '8px', zIndex: modalOpen ? 0 : 1 }} />;
+  return <div ref={mapRef} style={{ height: '100%', width: '90%', borderRadius: '8px', zIndex: modalOpen ? 0 : 1 }} />;
 };
 
 export default LeafletMap;

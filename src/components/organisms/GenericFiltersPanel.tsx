@@ -129,7 +129,7 @@ const GenericFiltersPanel: React.FC<GenericFiltersPanelProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden py-3">
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden" style={{ paddingTop: '16px', paddingBottom: '5px' }}>
       {/* Experimental: Integrated Header */}
       <div className="px-4 py-3 border-b border-gray-100">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
@@ -265,41 +265,41 @@ const GenericFiltersPanel: React.FC<GenericFiltersPanelProps> = ({
 
       {/* Filters Content */}
       <div className={`${isMobileExpanded || 'hidden md:block'} px-4 pb-4`}>
-        {/* Main Filters Row */}
-        <div className="flex flex-col xl:flex-row md:flex-row gap-4 mb-3">
-          {mainFilters.map(field => (
-            <div key={field.key} className="w-64">
-              {renderFilterField(field)}
-            </div>
-          ))}
-        </div>
-
-        {/* Active Filters Chips */}
-        {activeFilters.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {activeFilters.map((filter) => (
-              <Chip
-                key={filter.key}
-                onClose={() => {
-                  if (typeof filter.value === 'object' && filter.value !== null) {
-                    // Handle date range removal
-                    Object.keys(filter.value).forEach(key => {
-                      onFilterChange(key, filter.value[key]);
-                    });
-                  } else {
-                    onFilterChange(filter.key, filter.value);
-                  }
-                }}
-                variant="flat"
-                color="primary"
-                size="sm"
-                className="text-xs"
-              >
-                {filter.label}
-              </Chip>
+        {/* Main Filters Row with Chips on Right */}
+        <div className="flex flex-col xl:flex-row md:flex-row gap-4 mb-3 items-center">
+          <div className="flex gap-4">
+            {mainFilters.map(field => (
+              <div key={field.key} className="w-64">
+                {renderFilterField(field)}
+              </div>
             ))}
           </div>
-        )}
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {activeFilters.map((filter) => (
+                <Chip
+                  key={filter.key}
+                  onClose={() => {
+                    if (typeof filter.value === 'object' && filter.value !== null) {
+                      // Handle date range removal
+                      Object.keys(filter.value).forEach(key => {
+                        onFilterChange(key, filter.value[key]);
+                      });
+                    } else {
+                      onFilterChange(filter.key, filter.value);
+                    }
+                  }}
+                  variant="flat"
+                  color="primary"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {filter.label}
+                </Chip>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Actions Row */}
         <div className="flex items-center justify-between">
