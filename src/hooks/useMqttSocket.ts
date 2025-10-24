@@ -33,12 +33,22 @@ export const useMqttSocket = () => {
     });
 
     socket.on('lecturaNueva', (data: LecturaNueva) => {
-      console.log('Nueva lectura MQTT:', data);
+      console.log('📨 useMqttSocket: Nueva lectura MQTT recibida:', data);
+      console.log('📊 useMqttSocket: Detalles de la lectura:', {
+        zonaId: data.zonaId,
+        numMediciones: data.mediciones.length,
+        timestamp: data.timestamp
+      });
       setLecturas(prev => [data, ...prev.slice(0, 49)]); // Mantener últimas 50 lecturas
     });
 
     socket.on('estadoConexion', (estado: EstadoMqtt) => {
-      console.log('Estado MQTT actualizado:', estado);
+      console.log('🔄 useMqttSocket: Estado MQTT actualizado:', estado);
+      console.log('📊 useMqttSocket: Estado de conexión:', {
+        zonaId: estado.zonaId,
+        conectado: estado.conectado,
+        mensaje: estado.mensaje
+      });
       setEstadosMqtt(prev => {
         const filtered = prev.filter(e => e.zonaId !== estado.zonaId);
         return [...filtered, estado];

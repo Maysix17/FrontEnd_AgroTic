@@ -6,7 +6,22 @@ import MqttConfigModal from '../components/molecules/MqttConfigModal';
 import SensorReadingsModal from '../components/molecules/SensorReadingsModal';
 import ZonaModal from '../components/organisms/ZonaModal';
 import GenericFiltersPanel from '../components/organisms/GenericFiltersPanel';
-import GenericDataTable from '../components/organisms/GenericDataTable';
+
+// Debounced search function
+const useDebouncedSearch = (callback: (filters: Record<string, any>) => void, delay: number = 500) => {
+  return useCallback(
+    (() => {
+      let timeoutId: number;
+      return (filters: Record<string, any>) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          callback(filters);
+        }, delay) as any;
+      };
+    })(),
+    [callback, delay]
+  );
+};
 
 const GestionZonasPage: React.FC = () => {
    const [zonas, setZonas] = useState<Zona[]>([]);
@@ -25,7 +40,7 @@ const GestionZonasPage: React.FC = () => {
   const [showZonaModal, setShowZonaModal] = useState(false);
 
   // WebSocket hook
-  const { isConnected, getEstadoZona } = useMqttSocket();
+  const { getEstadoZona } = useMqttSocket();
 
   useEffect(() => {
     loadData();
@@ -59,14 +74,39 @@ const GestionZonasPage: React.FC = () => {
     }
 
     const filtered = zonas.filter(zona =>
-      zona.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      zona.tipoLote.toLowerCase().includes(searchTerm.toLowerCase())
+      zona.nombre.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredZonas(filtered);
   };
 
+  // Debounced search for text inputs
+  const debouncedSearch = useDebouncedSearch(() => {
+    filterZonas();
+  });
+
   const handleZonaSelect = (zona: Zona) => {
-    setSelectedZona(zona);
+    console.log('Zona seleccionada desde tabla:', zona);
+
+    // Calculate center coordinates from polygon if center is invalid
+    let processedZona = { ...zona };
+
+    if ((parseFloat(zona.coorX.toString()) === 0 && parseFloat(zona.coorY.toString()) === 0) && zona.coordenadas && Array.isArray(zona.coordenadas) && zona.coordenadas.length > 0) {
+      // Calculate centroid of polygon
+      let totalLat = 0;
+      let totalLng = 0;
+      zona.coordenadas.forEach(coord => {
+        totalLat += coord.lat;
+        totalLng += coord.lng;
+      });
+      const centerLat = totalLat / zona.coordenadas.length;
+      const centerLng = totalLng / zona.coordenadas.length;
+
+      processedZona.coorX = centerLng;
+      processedZona.coorY = centerLat;
+      console.log('Centro calculado desde polígono:', { lat: centerLat, lng: centerLng });
+    }
+
+    setSelectedZona(processedZona);
   };
 
   const handleMqttConfig = (zona: Zona) => {
@@ -106,14 +146,22 @@ const GestionZonasPage: React.FC = () => {
 
   const handleFilterChange = useCallback((key: string, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  }, []);
+
+    // Debounced search for text inputs, immediate for selects
+    if (key === 'buscar') {
+      debouncedSearch({ ...filters, [key]: value });
+    } else {
+      filterZonas();
+    }
+  }, [filters, debouncedSearch]);
 
   const handleSearch = useCallback(() => {
-    // Search is handled automatically by useEffect
-  }, []);
+    filterZonas();
+  }, [zonas, filters]);
 
   const handleClear = useCallback(() => {
     setFilters({});
+    setFilteredZonas([]); // Clear results like CultivosPage
   }, []);
 
   // Filter configuration for GenericFiltersPanel
@@ -122,7 +170,7 @@ const GestionZonasPage: React.FC = () => {
       key: 'buscar',
       label: 'Zona',
       type: 'text' as const,
-      placeholder: 'Buscar por zona o tipo de lote...'
+      placeholder: 'Buscar por zona...'
     }
   ];
 
@@ -194,28 +242,34 @@ const GestionZonasPage: React.FC = () => {
                   <table className="w-full">
                     <thead className="bg-gray-50/50 border-b border-gray-200">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[30%]">
                           Zona
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
-                          Tipo Lote
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[30%]">
+                          Área (m²)
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[20%]">
                           Estado MQTT
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[25%]">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-[20%]">
                           Acciones
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-100">
                       {filteredZonas.map((zona, index) => (
-                        <tr key={`${zona.id}-${index}`} className="h-14 hover:bg-gray-50/50 transition-colors">
+                        <tr
+                          key={`${zona.id}-${index}`}
+                          className={`h-14 hover:bg-gray-50/50 transition-colors cursor-pointer ${
+                            selectedZona?.id === zona.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                          }`}
+                          onClick={() => handleZonaSelect(zona)}
+                        >
                           <td className="px-6 py-3 text-sm text-gray-900 font-medium">
                             {zona.nombre}
                           </td>
                           <td className="px-6 py-3 text-sm text-gray-900">
-                            {zona.tipoLote}
+                            {zona.areaMetrosCuadrados?.toLocaleString() || 'N/A'}
                           </td>
                           <td className="px-6 py-3 text-sm text-gray-600">
                             <span className={`font-medium ${getMqttStatus(zona.id).color}`}>
@@ -225,13 +279,19 @@ const GestionZonasPage: React.FC = () => {
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-1">
                               <button
-                                onClick={() => handleMqttConfig(zona)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMqttConfig(zona);
+                                }}
                                 className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200 whitespace-nowrap"
                               >
                                 MQTT
                               </button>
                               <button
-                                onClick={() => handleViewReadings(zona)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewReadings(zona);
+                                }}
                                 className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200 whitespace-nowrap"
                               >
                                 Ver Datos
@@ -272,8 +332,14 @@ const GestionZonasPage: React.FC = () => {
                     coordenadas: selectedZona.coordenadas,
                   } : undefined}
                   onZonaSelect={(zona) => {
+                    console.log('Zona seleccionada desde mapa en GestionZonasPage:', zona);
                     const fullZona = zonas.find(z => z.id === zona.id);
-                    if (fullZona) handleZonaSelect(fullZona);
+                    if (fullZona) {
+                      console.log('Zona completa encontrada:', fullZona);
+                      handleZonaSelect(fullZona);
+                    } else {
+                      console.error('No se encontró zona completa para ID:', zona.id);
+                    }
                   }}
                   showSatellite={true}
                   modalOpen={showMqttModal || showReadingsModal || showZonaModal}

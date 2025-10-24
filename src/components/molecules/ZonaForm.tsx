@@ -21,11 +21,10 @@ interface ZonaFormProps {
 const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
   const [zonaData, setZonaData] = useState({
     nombre: "",
-    tipoLote: "",
     coorX: 0,
     coorY: 0,
+    areaMetrosCuadrados: 0,
     coordenadas: null as any,
-    fkMapaId: undefined, // Sin mapa por defecto
   });
   const [message, setMessage] = useState<string>("");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -44,7 +43,7 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
       zoomControl: true,
       maxZoom: 18,
       minZoom: 12,
-    }).setView([1.8920, -76.0890], 16);
+    }).setView([1.8921903999999965, -76.0903752], 16);
 
     // Remove attribution
     map.attributionControl.remove();
@@ -84,8 +83,8 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
 
         setZonaData(prev => ({
           ...prev,
-          coorX: e.latlng.lng,
-          coorY: e.latlng.lat,
+          coorX: parseFloat(e.latlng.lng.toFixed(8)), // Higher precision for longitude
+          coorY: parseFloat(e.latlng.lat.toFixed(8)), // Higher precision for latitude
           coordenadas: null
         }));
       } else if (drawingMode === 'polygon') {
@@ -106,10 +105,30 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
           }).addTo(map);
           polygonRef.current = polygon;
 
+          // Calculate area for polygon (simple approximation)
+          const area = Math.abs(drawingPointsRef.current.reduce((acc, point, i, arr) => {
+            const next = arr[(i + 1) % arr.length];
+            return acc + (point.lng * next.lat - next.lng * point.lat);
+          }, 0) / 2) * 111319.5 * 111319.5 * Math.cos((drawingPointsRef.current[0].lat * Math.PI) / 180);
+
           setZonaData(prev => ({
             ...prev,
-            coordenadas: drawingPointsRef.current.map(p => ({ lat: p.lat, lng: p.lng }))
+            coordenadas: drawingPointsRef.current.map(p => ({
+              lat: parseFloat(p.lat.toFixed(8)),
+              lng: parseFloat(p.lng.toFixed(8))
+            })),
+            areaMetrosCuadrados: Math.round(area)
           }));
+        } else if (drawingPointsRef.current.length >= 2) {
+          // Draw temporary line for 2 points
+          const tempPolygon = L.polygon(drawingPointsRef.current, {
+            color: 'gray',
+            weight: 2,
+            opacity: 0.5,
+            fillOpacity: 0,
+            dashArray: '5, 5'
+          }).addTo(map);
+          polygonRef.current = tempPolygon;
         }
       }
     });
@@ -128,25 +147,86 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
     e.preventDefault();
 
     // Validar que se haya seleccionado una ubicación
-    if (zonaData.coorX === 0 && zonaData.coorY === 0) {
-      setMessage("Debe seleccionar una ubicación en el mapa");
+    if (zonaData.coorX === 0 && zonaData.coorY === 0 && !zonaData.coordenadas) {
+      setMessage("Debe seleccionar una ubicación o dibujar un polígono en el mapa");
       return;
     }
 
-    // Preparar datos para enviar
-    const dataToSend: any = {
-      nombre: zonaData.nombre,
-      tipoLote: zonaData.tipoLote,
-      coorX: zonaData.coorX,
-      coorY: zonaData.coorY,
-      coordenadas: zonaData.coordenadas,
-    };
-
-    if (zonaData.fkMapaId) {
-      dataToSend.fkMapaId = zonaData.fkMapaId;
+    // Validar coordenadas
+    if (zonaData.coorX < -180 || zonaData.coorX > 180) {
+      setMessage("La longitud debe estar entre -180 y 180 grados");
+      return;
+    }
+    if (zonaData.coorY < -90 || zonaData.coorY > 90) {
+      setMessage("La latitud debe estar entre -90 y 90 grados");
+      return;
     }
 
-    console.log('Datos a enviar:', dataToSend);
+    // Validar nombre
+    if (!zonaData.nombre.trim()) {
+      setMessage("El nombre de la zona es obligatorio");
+      return;
+    }
+
+    // Validar área
+    if (zonaData.areaMetrosCuadrados <= 0) {
+      setMessage("El área debe ser mayor a 0 metros cuadrados");
+      return;
+    }
+
+    // Validar polígono si existe
+    if (zonaData.coordenadas && Array.isArray(zonaData.coordenadas)) {
+      if (zonaData.coordenadas.length < 3) {
+        setMessage("Un polígono debe tener al menos 3 puntos");
+        return;
+      }
+      // Validar que las coordenadas del polígono sean válidas
+      for (const coord of zonaData.coordenadas) {
+        if (coord.lng < -180 || coord.lng > 180 || coord.lat < -90 || coord.lat > 90) {
+          setMessage("Las coordenadas del polígono deben estar dentro de los límites geográficos válidos");
+          return;
+        }
+      }
+    }
+
+    // Preparar datos para enviar en formato GeoJSON
+    let coordenadasGeoJSON: any = null;
+    if (zonaData.coordenadas) {
+      if (Array.isArray(zonaData.coordenadas)) {
+        // Es un polígono - enviar coordenadas en formato [lng, lat] para GeoJSON
+        let coordsArray = zonaData.coordenadas.map(coord => [coord.lng, coord.lat]);
+
+        // Ensure polygon is closed (first and last points must be identical for GeoJSON)
+        if (coordsArray.length >= 3) {
+          const firstPoint = coordsArray[0];
+          const lastPoint = coordsArray[coordsArray.length - 1];
+          if (firstPoint[0] !== lastPoint[0] || firstPoint[1] !== lastPoint[1]) {
+            coordsArray.push([firstPoint[0], firstPoint[1]]);
+          }
+        }
+
+        coordenadasGeoJSON = {
+          type: 'Polygon',
+          coordinates: [coordsArray]
+        };
+      } else {
+        // Es un punto - enviar coordenadas en formato [lng, lat] para GeoJSON
+        coordenadasGeoJSON = {
+          type: 'Point',
+          coordinates: [zonaData.coorX, zonaData.coorY]
+        };
+      }
+    }
+
+    const dataToSend: any = {
+      nombre: zonaData.nombre,
+      coorX: zonaData.coorX,
+      coorY: zonaData.coorY,
+      areaMetrosCuadrados: zonaData.areaMetrosCuadrados,
+      coordenadas: coordenadasGeoJSON,
+    };
+
+    console.log('Datos a enviar en formato GeoJSON:', dataToSend);
 
     try {
       const response = await zonaService.create(dataToSend);
@@ -192,6 +272,7 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
       ...prev,
       coorX: 0,
       coorY: 0,
+      areaMetrosCuadrados: 0,
       coordenadas: null
     }));
   };
@@ -207,20 +288,13 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
             onChange={(e) => setZonaData({ ...zonaData, nombre: e.target.value })}
           />
 
-          <div className="flex flex-col gap-2">
-            <label className="text-gray-700 text-sm font-medium">Tipo de Lote</label>
-            <select
-              className="w-full h-9 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              value={zonaData.tipoLote}
-              onChange={(e) => setZonaData({ ...zonaData, tipoLote: e.target.value })}
-              required
-            >
-              <option value="">Seleccionar tipo</option>
-              <option value="LOTE1">Lote 1</option>
-              <option value="LOTE2">Lote 2</option>
-              <option value="LOTE3">Lote 3</option>
-            </select>
-          </div>
+          <TextInput
+            label="Área en Metros Cuadrados"
+            placeholder="Ingrese área en m²"
+            type="number"
+            value={zonaData.areaMetrosCuadrados.toString()}
+            onChange={(e) => setZonaData({ ...zonaData, areaMetrosCuadrados: parseFloat(e.target.value) || 0 })}
+          />
         </div>
 
         {/* Drawing Controls */}
@@ -264,14 +338,14 @@ const ZonaForm: React.FC<ZonaFormProps> = ({ onClose, onSave }) => {
         </div>
 
         {/* Map */}
-        <div className="w-full h-96 border border-gray-300 rounded-md overflow-hidden">
+        <div className="w-full h-80 border border-gray-300 rounded-md overflow-hidden">
           <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
         </div>
 
         {/* Coordinates Display */}
         {(zonaData.coorX !== 0 || zonaData.coorY !== 0) && (
           <div className="text-sm text-gray-600">
-            Coordenadas: Lat {zonaData.coorY.toFixed(6)}, Lng {zonaData.coorX.toFixed(6)}
+            Coordenadas: Lat {zonaData.coorY.toFixed(8)}, Lng {zonaData.coorX.toFixed(8)}
           </div>
         )}
 

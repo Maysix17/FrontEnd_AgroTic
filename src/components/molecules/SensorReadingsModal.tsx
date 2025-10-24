@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
 import type { MedicionSensor } from '../../services/zonasService';
 import { medicionSensorService } from '../../services/zonasService';
 import { useMqttSocket } from '../../hooks/useMqttSocket';
+import CustomButton from '../atoms/Boton';
 
 interface SensorReadingsModalProps {
   isOpen: boolean;
@@ -43,10 +45,19 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
   // Effect to update sensor data with real-time MQTT readings
   useEffect(() => {
     if (isOpen && zonaId) {
+      console.log(`🔄 SensorReadingsModal: Checking for new readings for zone ${zonaId}`);
       const lecturas = getLecturasZona(zonaId);
+      console.log(`📊 SensorReadingsModal: Found ${lecturas.length} readings for zone ${zonaId}`);
+
       if (lecturas.length > 0) {
         // Get the latest reading and update sensor data
         const latestLectura = lecturas[0]; // Most recent is first
+        console.log(`📈 SensorReadingsModal: Processing latest reading:`, {
+          zonaId: latestLectura.zonaId,
+          numMediciones: latestLectura.mediciones.length,
+          timestamp: latestLectura.timestamp
+        });
+
         setSensorData(prevData => {
           const newData = { ...prevData };
           let hasUpdates = false;
@@ -54,8 +65,10 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
           latestLectura.mediciones.forEach(medicion => {
             const sensorKey = medicion.key;
             const newValue = Number(medicion.valor);
+            console.log(`🔄 SensorReadingsModal: Processing measurement: ${sensorKey} = ${newValue} ${medicion.unidad}`);
 
             if (!newData[sensorKey]) {
+              console.log(`🆕 SensorReadingsModal: New sensor detected: ${sensorKey}`);
               newData[sensorKey] = {
                 unit: medicion.unidad,
                 history: [newValue], // Initialize with first value
@@ -69,6 +82,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
               const newLastUpdate = new Date(medicion.fechaMedicion);
 
               if (newData[sensorKey].lastValue !== newValue || currentLastUpdate.getTime() !== newLastUpdate.getTime()) {
+                console.log(`📈 SensorReadingsModal: Updating sensor ${sensorKey}: ${newData[sensorKey].lastValue} → ${newValue}`);
                 newData[sensorKey].lastValue = newValue;
                 newData[sensorKey].lastUpdate = medicion.fechaMedicion;
 
@@ -79,13 +93,18 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
                   newData[sensorKey].history = newData[sensorKey].history.slice(-20);
                 }
                 hasUpdates = true;
+              } else {
+                console.log(`⏭️ SensorReadingsModal: No changes for sensor ${sensorKey}`);
               }
             }
           });
 
           // Only return new data if there were actual updates
+          console.log(`📊 SensorReadingsModal: Update result: ${hasUpdates ? 'Data updated' : 'No changes'}`);
           return hasUpdates ? newData : prevData;
         });
+      } else {
+        console.log(`⚠️ SensorReadingsModal: No readings available for zone ${zonaId}`);
       }
     }
   }, [isOpen, zonaId, getLecturasZona]);
@@ -208,16 +227,17 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-30" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto z-10">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">
-              Lecturas en Tiempo Real - {zonaNombre}
-            </h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-          </div>
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="5xl" placement="center">
+      <ModalContent>
+        {() => (
+          <>
+            <ModalHeader>
+              <h2 className="text-lg font-bold">
+                Lecturas en Tiempo Real - {zonaNombre}
+              </h2>
+            </ModalHeader>
+
+            <ModalBody className="max-h-[70vh] overflow-y-auto">
 
           {isLoading ? (
             <div className="text-center py-8">
@@ -264,23 +284,26 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
             </div>
           )}
 
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-            <button
-              onClick={loadHistoricalData}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-            >
-              Actualizar
-            </button>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </ModalBody>
+
+            <ModalFooter>
+              <CustomButton
+                type="button"
+                text="Actualizar"
+                onClick={loadHistoricalData}
+                className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2"
+              />
+              <CustomButton
+                type="button"
+                text="Cerrar"
+                onClick={onClose}
+                className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2"
+              />
+            </ModalFooter>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
   );
 };
 
