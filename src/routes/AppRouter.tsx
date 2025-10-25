@@ -3,7 +3,7 @@ import { MenuProvider } from "../contexts/MenuContext"; // ✅ IMPORTA EL CONTEX
 
 // Páginas
 import LoginPage from "../pages/LoginPage";
-import MapRegisterPage from "../pages/MapRegisterPage";
+import GestionZonasPage from "../pages/GestionZonasPage";
 import RecoverPasswordPage from "../pages/RecoverPasswordPage";
 import RegisterPage from "../pages/RegisterPage";
 import MainLayout from "../components/templates/MainLayout";
@@ -54,7 +54,7 @@ const AppRouter = () => {
           <Route path="panel-control" element={<PanelControl />} />
           <Route path="cultivos" element={<CultivosPage />} />
           <Route path="actividades" element={<ActividadesPage />} />
-          <Route path="iot" element={<MapRegisterPage />} />
+          <Route path="iot" element={<GestionZonasPage />} />
           <Route path="zapato" element={<ZapatoPage />} />
           <Route path="inventario" element={<InventoryPage />} />
           <Route path="movements" element={<MovementsPage />} />

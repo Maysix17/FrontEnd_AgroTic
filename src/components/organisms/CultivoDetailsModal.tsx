@@ -15,10 +15,13 @@ const CultivoDetailsModal: React.FC<CultivoDetailsModalProps> = ({
    onClose,
    cultivo
  }) => {
+  console.log('CultivoDetailsModal - isOpen:', isOpen, 'cultivo:', cultivo);
+
   const [currentCultivo, setCurrentCultivo] = useState<Cultivo | null>(cultivo);
 
   // Update local state when cultivo prop changes
   useEffect(() => {
+    console.log('CultivoDetailsModal - cultivo prop changed:', cultivo);
     setCurrentCultivo(cultivo);
   }, [cultivo]);
 

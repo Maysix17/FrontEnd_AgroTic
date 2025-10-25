@@ -135,8 +135,10 @@ const CultivosPage: React.FC = () => {
   };
 
   const handleOpenCultivoDetailsModal = (cultivo: Cultivo) => {
+    console.log('handleOpenCultivoDetailsModal called with cultivo:', cultivo);
     setSelectedCultivoForDetails(cultivo);
     setIsCultivoDetailsModalOpen(true);
+    console.log('Modal state set - isOpen:', true, 'cultivo:', cultivo);
   };
 
   const handleOpenFinancialAnalysisModal = (cultivo: Cultivo) => {

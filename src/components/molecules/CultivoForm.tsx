@@ -7,7 +7,7 @@ import type { Zona } from "../../services/zonasService";
 import { createCultivo } from "../../services/cultivosService";
 import { getTipoCultivos } from "../../services/tipoCultivo";
 import { getVariedades } from "../../services/variedad";
-import { getAllZonas } from "../../services/zonasService";
+import { zonasService } from "../../services/zonasService";
 
 interface CultivoFormProps {
   onSuccess?: () => void;
@@ -34,7 +34,7 @@ const CultivoForm: React.FC<CultivoFormProps> = ({ onSuccess }) => {
         const vars = await getVariedades();
         setVariedades(vars);
         setFilteredVariedades(vars); // Inicialmente mostrar todas las variedades
-        const zons = await getAllZonas();
+        const zons = await zonasService.getAllZonas();
         setZonas(zons);
       } catch (error) {
         setMessage("Error al cargar datos");
