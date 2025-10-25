@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { MedicionSensor } from '../../services/zonasService';
 import { medicionSensorService } from '../../services/zonasService';
 import { useMqttSocket } from '../../hooks/useMqttSocket';
-import { Card, CardBody, CardHeader, Button, Spinner, Badge } from '@heroui/react';
+import { Card, CardBody, CardHeader, Button, Spinner, Badge, Modal, ModalContent, ModalHeader, ModalBody } from '@heroui/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface SensorReadingsModalProps {
@@ -151,11 +151,12 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
     };
 
     return (
-      <Card className="w-full">
-        <CardHeader className="flex items-center justify-between">
+      <Card className="w-full h-100">
+        <CardHeader className="flex items-center justify-between ">
           <div className="text-center flex-1">
             <h3 className="text-xl font-bold text-gray-800 mb-1">{formatSensorKey(sensorKey)}</h3>
             <p className="text-sm text-gray-500 font-medium">{data.unit}</p>
+            
           </div>
           <Badge color="success" variant="flat" className="ml-2">
             Activo
@@ -214,22 +215,16 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="bg-white rounded-lg p-2 border border-gray-200">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mínimo</div>
-                <div className="text-lg font-bold text-blue-600 mt-1">
+                <div className="text-sm font-bold text-blue-600 mt-1">
                   {Math.min(...data.history.map(h => h.value)).toFixed(2)}
                 </div>
               </div>
-              <div className="bg-white rounded-lg p-3 border border-gray-200">
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Promedio</div>
-                <div className="text-lg font-bold text-purple-600 mt-1">
-                  {(data.history.reduce((sum, h) => sum + h.value, 0) / data.history.length).toFixed(2)}
-                </div>
-              </div>
-              <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="bg-white rounded-lg p-2 border border-gray-200">
                 <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Máximo</div>
-                <div className="text-lg font-bold text-red-600 mt-1">
+                <div className="text-sm font-bold text-red-600 mt-1">
                   {Math.max(...data.history.map(h => h.value)).toFixed(2)}
                 </div>
               </div>
@@ -241,64 +236,47 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
     );
   });
 
-  if (!isOpen) return null;
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
-      <div className="absolute inset-0 bg-black bg-opacity-30" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto z-10">
-        <Card className="w-full">
-          <CardHeader className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">
-                Lecturas en Tiempo Real - {zonaNombre}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Monitoreo de sensores MQTT en tiempo real
-              </p>
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="5xl">
+      <ModalContent>
+        <ModalHeader>
+          <div>
+            <h2 className="text-xl font-semibold">
+              Lecturas en Tiempo Real - {zonaNombre}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Monitoreo de sensores MQTT en tiempo real
+            </p>
+          </div>
+        </ModalHeader>
+
+        <ModalBody>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <Spinner size="lg" color="primary" />
+              <p className="mt-2 text-gray-600">Cargando datos...</p>
             </div>
-            <Button
-              isIconOnly
-              variant="light"
-              onPress={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              ✕
-            </Button>
-          </CardHeader>
-
-          <CardBody>
-
-            {isLoading ? (
-              <div className="text-center py-8">
-                <Spinner size="lg" color="primary" />
-                <p className="mt-2 text-gray-600">Cargando datos...</p>
+          ) : Object.keys(sensorData).length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
               </div>
-            ) : Object.keys(sensorData).length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                No hay lecturas disponibles para esta zona.
-                <br />
-                <small className="text-gray-400">Las lecturas aparecerán aquí cuando el dispositivo MQTT esté activo.</small>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(sensorData).map(([key, data]) => (
-                  <SensorCard key={key} sensorKey={key} data={data} />
-                ))}
-              </div>
-            )}
-
-          </CardBody>
-        </Card>
-      </div>
-    </div>
+              No hay lecturas disponibles para esta zona.
+              <br />
+              <small className="text-gray-400">Las lecturas aparecerán aquí cuando el dispositivo MQTT esté activo.</small>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Object.entries(sensorData).map(([key, data]) => (
+                <SensorCard key={key} sensorKey={key} data={data} />
+              ))}
+            </div>
+          )}
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   );
 };
 
