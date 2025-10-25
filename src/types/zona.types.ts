@@ -6,8 +6,7 @@ export interface Zona {
   coorY: number;
   areaMetrosCuadrados?: number;
   coordenadas?: any;
-  fkMapaId: string;
-  mapa?: any;
+  // fkMapaId eliminado - funcionalidad de mapas removida
   cultivosVariedad?: any[];
   mqttConfig?: any;
   sensores?: any[];

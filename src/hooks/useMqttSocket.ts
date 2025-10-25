@@ -15,8 +15,10 @@ export const useMqttSocket = () => {
   const [estadosMqtt, setEstadosMqtt] = useState<EstadoMqtt[]>([]);
 
   useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    console.log('Attempting to connect to WebSocket at:', apiUrl);
     // Conectar al servidor WebSocket
-    socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+    socketRef.current = io(apiUrl, {
       transports: ['websocket', 'polling'],
     });
 
@@ -47,6 +49,11 @@ export const useMqttSocket = () => {
 
     socket.on('connect_error', (error) => {
       console.error('Error de conexión WebSocket:', error);
+      console.error('Connection details:', {
+        url: apiUrl,
+        error: error.message,
+        transport: socket.io.engine.transport.name
+      });
       setIsConnected(false);
     });
 

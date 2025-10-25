@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { MedicionSensor } from '../../services/zonasService';
 import { medicionSensorService } from '../../services/zonasService';
 import { useMqttSocket } from '../../hooks/useMqttSocket';
+import { Card, CardBody, CardHeader, Button, Spinner, Badge } from '@heroui/react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface SensorReadingsModalProps {
   isOpen: boolean;
@@ -14,7 +16,7 @@ interface SensorReadingsModalProps {
 interface SensorData {
   [key: string]: {
     unit: string;
-    history: number[];
+    history: Array<{ value: number; timestamp: string }>;
     lastValue: number;
     lastUpdate: string;
   };
@@ -58,7 +60,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
             if (!newData[sensorKey]) {
               newData[sensorKey] = {
                 unit: medicion.unidad,
-                history: [newValue], // Initialize with first value
+                history: [{ value: newValue, timestamp: medicion.fechaMedicion }], // Initialize with first value
                 lastValue: newValue,
                 lastUpdate: medicion.fechaMedicion,
               };
@@ -73,7 +75,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
                 newData[sensorKey].lastUpdate = medicion.fechaMedicion;
 
                 // Always add to history for continuous chart
-                newData[sensorKey].history.push(newValue);
+                newData[sensorKey].history.push({ value: newValue, timestamp: medicion.fechaMedicion });
                 // Keep only last 20 values
                 if (newData[sensorKey].history.length > 20) {
                   newData[sensorKey].history = newData[sensorKey].history.slice(-20);
@@ -115,7 +117,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
         };
       }
 
-      data[medicion.key].history.push(medicion.valor);
+      data[medicion.key].history.push({ value: medicion.valor, timestamp: medicion.fechaMedicion });
 
       // Keep only last 20 values for sparkline
       if (data[medicion.key].history.length > 20) {
@@ -132,76 +134,95 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
     setSensorData(data);
   };
 
-  // Mini sparkline component
-  const MiniSpark = React.memo(({ values }: { values: number[] }) => {
-    if (values.length === 0) return null;
-
-    const nums = values.filter(n => !Number.isNaN(Number(n)));
-    if (nums.length === 0) return null;
-
-    // Ensure we have at least 2 points for a meaningful line
-    if (nums.length < 2) return null;
-
-    const max = Math.max(...nums);
-    const min = Math.min(...nums);
-    const range = max - min || 1; // Avoid division by zero
-    const w = 200;
-    const h = 60;
-    const pad = 4;
-
-    const points = nums
-      .map((n, i) => {
-        const x = (i / (nums.length - 1)) * (w - pad * 2) + pad;
-        const y = h - ((n - min) / range) * (h - pad * 2) - pad;
-        return `${x},${y}`;
-      })
-      .join(' ');
+  // Sensor Card Component
+  const SensorCard = React.memo(({ sensorKey, data }: { sensorKey: string; data: SensorData[string] }) => {
+    const chartData = data.history.map((point, index) => ({
+      time: index,
+      value: point.value,
+      timestamp: point.timestamp,
+    }));
 
     return (
-      <div className="mt-4">
-        <svg width={w} height={h} className="border rounded bg-gray-50">
-          {/* Grid lines for better readability */}
-          <defs>
-            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+      <Card className="w-full">
+        <CardHeader className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">{sensorKey}</h3>
+            <p className="text-sm text-gray-500">{data.unit}</p>
+          </div>
+          <Badge color="success" variant="flat">
+            Activo
+          </Badge>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-4">
+            {/* Current Value */}
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600">
+                {Number(data.lastValue).toFixed(2)}
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                Última actualización: {new Date(data.lastUpdate).toLocaleString()}
+              </div>
+            </div>
 
-          {/* Main line */}
-          <polyline
-            points={points}
-            fill="none"
-            stroke="#16a34a"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+            {/* Chart */}
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="time"
+                    tick={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [value.toFixed(2), 'Valor']}
+                    labelFormatter={(label) => `Lectura ${label + 1}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#16a34a"
+                    strokeWidth={2}
+                    dot={{ fill: '#16a34a', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: '#16a34a', strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
 
-          {/* Data points */}
-          {nums.map((n, i) => {
-            const x = (i / (nums.length - 1)) * (w - pad * 2) + pad;
-            const y = h - ((n - min) / range) * (h - pad * 2) - pad;
-            return (
-              <circle
-                key={`point-${i}-${n}`} // Unique key to prevent flickering
-                cx={x}
-                cy={y}
-                r="3"
-                fill="#16a34a"
-                stroke="white"
-                strokeWidth="1"
-              />
-            );
-          })}
-        </svg>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2 text-center text-sm">
+              <div>
+                <div className="font-semibold text-gray-700">Mín</div>
+                <div className="text-gray-500">
+                  {Math.min(...data.history.map(h => h.value)).toFixed(2)}
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-700">Prom</div>
+                <div className="text-gray-500">
+                  {(data.history.reduce((sum, h) => sum + h.value, 0) / data.history.length).toFixed(2)}
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-700">Máx</div>
+                <div className="text-gray-500">
+                  {Math.max(...data.history.map(h => h.value)).toFixed(2)}
+                </div>
+              </div>
+            </div>
 
-        {/* Value range indicator */}
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>Min: {min.toFixed(1)}</span>
-          <span>Max: {max.toFixed(1)}</span>
-        </div>
-      </div>
+            <div className="text-xs text-gray-400 text-center">
+              {data.history.length} lecturas históricas
+            </div>
+          </div>
+        </CardBody>
+      </Card>
     );
   });
 
@@ -210,75 +231,71 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
       <div className="absolute inset-0 bg-black bg-opacity-30" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto z-10">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">
-              Lecturas en Tiempo Real - {zonaNombre}
-            </h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-          </div>
-
-          {isLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-              <p className="mt-2 text-gray-600">Cargando datos...</p>
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-auto z-10">
+        <Card className="w-full">
+          <CardHeader className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold">
+                Lecturas en Tiempo Real - {zonaNombre}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Monitoreo de sensores MQTT en tiempo real
+              </p>
             </div>
-          ) : Object.keys(sensorData).length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No hay lecturas disponibles para esta zona.
-              <br />
-              <small>Las lecturas aparecerán aquí cuando el dispositivo MQTT esté activo.</small>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-              {Object.entries(sensorData).map(([key, data]) => (
-                <div key={key} className="p-6 border rounded-lg bg-white shadow-sm min-h-[200px]">
+            <Button
+              isIconOnly
+              variant="light"
+              onPress={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </Button>
+          </CardHeader>
 
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-3xl font-bold text-green-600">
-                          {Number(data.lastValue).toFixed(2)}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          Última actualización: {new Date(data.lastUpdate).toLocaleString()}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-gray-700">{key}</div>
-                        <div className="text-xs text-gray-500">{data.unit}</div>
-                      </div>
-                    </div>
+          <CardBody>
 
-                    <div className="w-full">
-                      <MiniSpark values={data.history} />
-                    </div>
-                  </div>
-
-                  <div className="mt-2 text-xs text-gray-400">
-                    {data.history.length} lecturas históricas
-                  </div>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <Spinner size="lg" color="primary" />
+                <p className="mt-2 text-gray-600">Cargando datos...</p>
+              </div>
+            ) : Object.keys(sensorData).length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                 </div>
-              ))}
-            </div>
-          )}
+                No hay lecturas disponibles para esta zona.
+                <br />
+                <small className="text-gray-400">Las lecturas aparecerán aquí cuando el dispositivo MQTT esté activo.</small>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {Object.entries(sensorData).map(([key, data]) => (
+                  <SensorCard key={key} sensorKey={key} data={data} />
+                ))}
+              </div>
+            )}
 
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-            <button
-              onClick={loadHistoricalData}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-            >
-              Actualizar
-            </button>
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
+            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
+              <Button
+                variant="bordered"
+                onPress={loadHistoricalData}
+                startContent={<Spinner size="sm" />}
+                isLoading={isLoading}
+              >
+                Actualizar
+              </Button>
+              <Button
+                color="primary"
+                onPress={onClose}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );
