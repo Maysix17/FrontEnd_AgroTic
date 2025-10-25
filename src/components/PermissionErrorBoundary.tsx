@@ -22,6 +22,13 @@ class PermissionErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Permission error boundary caught an error:', error, errorInfo);
+
+    // Check if it's a chart rendering error and don't show the fallback for those
+    if (error.message.includes('toFixed') || error.message.includes('chart') || error.message.includes('Recharts')) {
+      // Reset the error state so the component can continue rendering
+      this.setState({ hasError: false });
+      return;
+    }
   }
 
   render() {

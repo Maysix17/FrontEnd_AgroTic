@@ -174,7 +174,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
             </div>
 
             {/* Chart */}
-            <div className="h-36 bg-gray-50 rounded-lg p-2">
+            <div className="h-36 bg-gray-50 rounded-lg p-2" style={{ minHeight: '144px', minWidth: '200px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -189,7 +189,10 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
                     width={35}
                   />
                   <Tooltip
-                    formatter={(value: number) => [value.toFixed(2), 'Valor']}
+                    formatter={(value: any) => {
+                      const numValue = typeof value === 'number' ? value : parseFloat(value);
+                      return [isNaN(numValue) ? 'N/A' : numValue.toFixed(2), 'Valor'];
+                    }}
                     labelFormatter={(label) => `Lectura ${label + 1}`}
                     contentStyle={{
                       backgroundColor: '#f9fafb',
@@ -232,14 +235,13 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
               </div>
             </div>
 
-            <div className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 px-3">
-              📊 {data.history.length} lecturas históricas
-            </div>
           </div>
         </CardBody>
       </Card>
     );
   });
+
+  if (!isOpen) return null;
 
   if (!isOpen) return null;
 
@@ -293,22 +295,6 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
               </div>
             )}
 
-            <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-              <Button
-                variant="bordered"
-                onPress={loadHistoricalData}
-                startContent={<Spinner size="sm" />}
-                isLoading={isLoading}
-              >
-                Actualizar
-              </Button>
-              <Button
-                color="primary"
-                onPress={onClose}
-              >
-                Cerrar
-              </Button>
-            </div>
           </CardBody>
         </Card>
       </div>
