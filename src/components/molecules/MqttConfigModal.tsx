@@ -39,6 +39,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
     message: string;
     latency?: number;
   } | null>(null);
+  const [isConnectionValidated, setIsConnectionValidated] = useState(false);
 
   console.log('MqttConfigModal: Rendering with formData:', formData);
   console.log('MqttConfigModal: isOpen:', isOpen, 'isLoading:', isLoading, 'error:', error);
@@ -67,7 +68,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
   }, [existingConfig, zonaNombre]);
 
   const testConnection = async () => {
-    console.log('MqttConfigModal: Starting connection test with data:', {
+    console.log('MqttConfigModal: Starting real MQTT connection test with data:', {
       host: formData.host,
       port: formData.port,
       protocol: formData.protocol,
@@ -75,9 +76,11 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
     });
     setIsTestingConnection(true);
     setConnectionTestResult(null);
+    setIsConnectionValidated(false);
 
     try {
-      const response = await fetch('/api/mqtt-config/test-connection', {
+      const startTime = Date.now();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/mqtt-config/test-connection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,15 +93,44 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
+      const latency = Date.now() - startTime;
+
       console.log('MqttConfigModal: Connection test result:', result);
-      setConnectionTestResult(result);
+
+      // Actualizar resultado con latencia
+      const resultWithLatency = { ...result, latency };
+
+      setConnectionTestResult(resultWithLatency);
+
+      // Marcar como validado solo si fue exitoso
+      if (result.success) {
+        setIsConnectionValidated(true);
+      }
+
     } catch (err: any) {
       console.error('MqttConfigModal: Connection test error:', err);
+      let errorMessage = 'Error al probar conexión';
+
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        errorMessage = 'No se pudo conectar al servidor. Verifica la URL del backend.';
+      } else if (err.message.includes('HTTP 404')) {
+        errorMessage = 'Endpoint de prueba no encontrado. El backend necesita implementar /mqtt-config/test-connection.';
+      } else if (err.message.includes('HTTP 500')) {
+        errorMessage = 'Error interno del servidor. Revisa los logs del backend.';
+      } else {
+        errorMessage += ': ' + err.message;
+      }
+
       setConnectionTestResult({
         success: false,
-        message: 'Error al probar conexión: ' + err.message,
+        message: errorMessage,
       });
+      setIsConnectionValidated(false);
     } finally {
       setIsTestingConnection(false);
     }
@@ -107,6 +139,13 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('MqttConfigModal: Submitting form with data:', formData);
+
+    // Validar que se haya probado la conexión exitosamente
+    if (!isConnectionValidated) {
+      setError('Debe probar la conexión exitosamente antes de guardar la configuración.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -214,6 +253,47 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
               </label>
             </div>
 
+            {/* Botón de prueba de conexión */}
+            <div className="flex flex-col space-y-2 pt-2">
+              <div className="flex items-center space-x-3">
+                <CustomButton
+                  type="button"
+                  text={isTestingConnection ? 'Probando...' : 'Probar Conexión'}
+                  onClick={testConnection}
+                  disabled={isTestingConnection || !formData.host || !formData.port || !formData.topicBase}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+                />
+
+                {connectionTestResult && (
+                  <div className={`text-sm px-3 py-1 rounded-full flex items-center ${
+                    connectionTestResult.success
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {connectionTestResult.success ? '✓' : '✗'} {connectionTestResult.message}
+                    {connectionTestResult.latency && (
+                      <span className="ml-2 text-xs">
+                        ({connectionTestResult.latency}ms)
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Indicador de validación requerida */}
+              {!isConnectionValidated && (
+                <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+                  ⚠️ Debe probar la conexión exitosamente antes de guardar la configuración
+                </div>
+              )}
+
+              {isConnectionValidated && (
+                <div className="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-200">
+                  ✓ Conexión validada. Puede guardar la configuración.
+                </div>
+              )}
+            </div>
+
             {error && (
               <div className="text-red-600 text-sm bg-red-50 p-2 rounded-lg border border-red-200">
                 {error}
@@ -233,7 +313,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
             type="submit"
             text={isLoading ? 'Guardando...' : 'Guardar'}
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2"
-            disabled={isLoading}
+            disabled={isLoading || !isConnectionValidated}
           />
         </ModalFooter>
       </ModalContent>

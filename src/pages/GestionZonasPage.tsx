@@ -6,7 +6,6 @@ import MqttConfigModal from '../components/molecules/MqttConfigModal';
 import SensorReadingsModal from '../components/molecules/SensorReadingsModal';
 import ZonaModal from '../components/organisms/ZonaModal';
 import GenericFiltersPanel from '../components/organisms/GenericFiltersPanel';
-import GenericDataTable from '../components/organisms/GenericDataTable';
 
 const GestionZonasPage: React.FC = () => {
    const [zonas, setZonas] = useState<Zona[]>([]);
@@ -25,7 +24,7 @@ const GestionZonasPage: React.FC = () => {
   const [showZonaModal, setShowZonaModal] = useState(false);
 
   // WebSocket hook
-  const { isConnected, getEstadoZona } = useMqttSocket();
+  const { getEstadoZona } = useMqttSocket();
 
   useEffect(() => {
     loadData();
@@ -99,9 +98,28 @@ const GestionZonasPage: React.FC = () => {
     const estado = getEstadoZona(zonaId);
     if (!estado) return { status: 'Sin configurar', color: 'text-gray-500' };
 
-    return estado.conectado
-      ? { status: 'Conectado', color: 'text-green-600' }
-      : { status: 'Desconectado', color: 'text-red-600' };
+    if (estado.conectado) {
+      if (estado.mensaje && estado.mensaje.includes('Suscripción exitosa')) {
+        return { status: 'Listo para datos', color: 'text-green-600' };
+      }
+      return { status: 'Conectado', color: 'text-green-600' };
+    }
+
+    // Estados de desconexión con colores específicos
+    if (estado.mensaje && estado.mensaje.includes('Conectando')) {
+      return { status: 'Conectando...', color: 'text-yellow-600' };
+    }
+    if (estado.mensaje && estado.mensaje.includes('Reintentando')) {
+      return { status: 'Reintentando...', color: 'text-orange-600' };
+    }
+    if (estado.mensaje && estado.mensaje.includes('Error')) {
+      return { status: 'Error', color: 'text-red-600' };
+    }
+    if (estado.mensaje && estado.mensaje.includes('Offline')) {
+      return { status: 'Offline', color: 'text-gray-600' };
+    }
+
+    return { status: 'Desconectado', color: 'text-red-600' };
   };
 
   const handleFilterChange = useCallback((key: string, value: any) => {
@@ -218,9 +236,16 @@ const GestionZonasPage: React.FC = () => {
                             {zona.tipoLote}
                           </td>
                           <td className="px-6 py-3 text-sm text-gray-600">
-                            <span className={`font-medium ${getMqttStatus(zona.id).color}`}>
-                              {getMqttStatus(zona.id).status}
-                            </span>
+                            <div className="flex flex-col">
+                              <span className={`font-medium ${getMqttStatus(zona.id).color}`}>
+                                {getMqttStatus(zona.id).status}
+                              </span>
+                              {getEstadoZona(zona.id)?.mensaje && (
+                                <span className="text-xs text-gray-400 mt-1 truncate max-w-32" title={getEstadoZona(zona.id)?.mensaje}>
+                                  {getEstadoZona(zona.id)?.mensaje}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-1">
