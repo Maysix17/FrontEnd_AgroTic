@@ -142,83 +142,98 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
       timestamp: point.timestamp,
     }));
 
+    // Format sensor key for better display
+    const formatSensorKey = (key: string) => {
+      return key
+        .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+        .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+        .trim();
+    };
+
     return (
       <Card className="w-full">
         <CardHeader className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">{sensorKey}</h3>
-            <p className="text-sm text-gray-500">{data.unit}</p>
+          <div className="text-center flex-1">
+            <h3 className="text-xl font-bold text-gray-800 mb-1">{formatSensorKey(sensorKey)}</h3>
+            <p className="text-sm text-gray-500 font-medium">{data.unit}</p>
           </div>
-          <Badge color="success" variant="flat">
+          <Badge color="success" variant="flat" className="ml-2">
             Activo
           </Badge>
         </CardHeader>
         <CardBody>
           <div className="space-y-4">
             {/* Current Value */}
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-600">
+            <div className="text-center bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-4 border border-green-100">
+              <div className="text-5xl font-bold text-green-600 mb-2">
                 {Number(data.lastValue).toFixed(2)}
               </div>
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-gray-600 font-medium">
                 Última actualización: {new Date(data.lastUpdate).toLocaleString()}
               </div>
             </div>
 
             {/* Chart */}
-            <div className="h-32">
+            <div className="h-36 bg-gray-50 rounded-lg p-2">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="time"
                     tick={false}
                     axisLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 11, fill: '#6b7280' }}
                     axisLine={false}
+                    width={35}
                   />
                   <Tooltip
                     formatter={(value: number) => [value.toFixed(2), 'Valor']}
                     labelFormatter={(label) => `Lectura ${label + 1}`}
+                    contentStyle={{
+                      backgroundColor: '#f9fafb',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
                   />
                   <Line
                     type="monotone"
                     dataKey="value"
                     stroke="#16a34a"
-                    strokeWidth={2}
-                    dot={{ fill: '#16a34a', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#16a34a', strokeWidth: 2 }}
+                    strokeWidth={2.5}
+                    dot={{ fill: '#16a34a', strokeWidth: 2, r: 3 }}
+                    activeDot={{ r: 5, stroke: '#16a34a', strokeWidth: 2, fill: '#dcfce7' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 text-center text-sm">
-              <div>
-                <div className="font-semibold text-gray-700">Mín</div>
-                <div className="text-gray-500">
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mínimo</div>
+                <div className="text-lg font-bold text-blue-600 mt-1">
                   {Math.min(...data.history.map(h => h.value)).toFixed(2)}
                 </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-700">Prom</div>
-                <div className="text-gray-500">
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Promedio</div>
+                <div className="text-lg font-bold text-purple-600 mt-1">
                   {(data.history.reduce((sum, h) => sum + h.value, 0) / data.history.length).toFixed(2)}
                 </div>
               </div>
-              <div>
-                <div className="font-semibold text-gray-700">Máx</div>
-                <div className="text-gray-500">
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Máximo</div>
+                <div className="text-lg font-bold text-red-600 mt-1">
                   {Math.max(...data.history.map(h => h.value)).toFixed(2)}
                 </div>
               </div>
             </div>
 
-            <div className="text-xs text-gray-400 text-center">
-              {data.history.length} lecturas históricas
+            <div className="text-xs text-gray-500 text-center bg-gray-50 rounded-lg py-2 px-3">
+              📊 {data.history.length} lecturas históricas
             </div>
           </div>
         </CardBody>
