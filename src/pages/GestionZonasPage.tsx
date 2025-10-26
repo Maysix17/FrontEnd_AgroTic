@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { zonasService, mqttConfigService, type Zona, type MqttConfig } from '../services/zonasService';
+import { zonasService, mqttConfigService, type Zona, type MqttConfig, type ZonaMqttConfig } from '../services/zonasService';
 import { useMqttSocket } from '../hooks/useMqttSocket';
 import LeafletMap from '../components/molecules/LeafletMap';
-import MqttConfigModal from '../components/molecules/MqttConfigModal';
+import MqttSelectionModal from '../components/molecules/MqttSelectionModal';
 import SensorReadingsModal from '../components/molecules/SensorReadingsModal';
 import ZonaModal from '../components/organisms/ZonaModal';
+import MqttManagementModal from '../components/molecules/MqttManagementModal';
 import GenericFiltersPanel from '../components/organisms/GenericFiltersPanel';
 
 const GestionZonasPage: React.FC = () => {
@@ -16,12 +17,14 @@ const GestionZonasPage: React.FC = () => {
 
   // MQTT related state
   const [mqttConfigs, setMqttConfigs] = useState<MqttConfig[]>([]);
-  const [showMqttModal, setShowMqttModal] = useState(false);
-  const [selectedMqttConfig, setSelectedMqttConfig] = useState<MqttConfig | undefined>();
+  const [showMqttSelectionModal, setShowMqttSelectionModal] = useState(false);
   const [showReadingsModal, setShowReadingsModal] = useState(false);
 
   // Zona creation modal
   const [showZonaModal, setShowZonaModal] = useState(false);
+
+  // MQTT management modal
+  const [showMqttManagementModal, setShowMqttManagementModal] = useState(false);
 
   // WebSocket hook
   const { getEstadoZona } = useMqttSocket();
@@ -69,10 +72,8 @@ const GestionZonasPage: React.FC = () => {
   };
 
   const handleMqttConfig = (zona: Zona) => {
-    const config = mqttConfigs.find(c => c.fkZonaId === zona.id);
-    setSelectedMqttConfig(config);
     setSelectedZona(zona);
-    setShowMqttModal(true);
+    setShowMqttSelectionModal(true);
   };
 
   const handleViewReadings = (zona: Zona) => {
@@ -82,7 +83,7 @@ const GestionZonasPage: React.FC = () => {
 
   const handleMqttSave = () => {
     loadData(); // Reload configs
-    setShowMqttModal(false);
+    setShowMqttSelectionModal(false);
   };
 
   const handleCreateZona = () => {
@@ -94,32 +95,45 @@ const GestionZonasPage: React.FC = () => {
     setShowZonaModal(false);
   };
 
-  const getMqttStatus = (zonaId: string) => {
-    const estado = getEstadoZona(zonaId);
-    if (!estado) return { status: 'Sin configurar', color: 'text-gray-500' };
+  const getMqttStatus = async (zonaId: string) => {
+    try {
+      // Verificar si la zona tiene configuración MQTT activa
+      const activeConfig = await mqttConfigService.getActiveZonaMqttConfig(zonaId);
 
-    if (estado.conectado) {
-      if (estado.mensaje && estado.mensaje.includes('Suscripción exitosa')) {
-        return { status: 'Listo para datos', color: 'text-green-600' };
+      if (!activeConfig) {
+        return { status: 'Desconectado', color: 'text-gray-500' };
       }
-      return { status: 'Conectado', color: 'text-green-600' };
-    }
 
-    // Estados de desconexión con colores específicos
-    if (estado.mensaje && estado.mensaje.includes('Conectando')) {
-      return { status: 'Conectando...', color: 'text-yellow-600' };
-    }
-    if (estado.mensaje && estado.mensaje.includes('Reintentando')) {
-      return { status: 'Reintentando...', color: 'text-orange-600' };
-    }
-    if (estado.mensaje && estado.mensaje.includes('Error')) {
+      // Si tiene configuración activa, mostrar el estado de conexión
+      const estado = getEstadoZona(zonaId);
+      if (!estado) return { status: 'Conectado', color: 'text-green-600' };
+
+      if (estado.conectado) {
+        if (estado.mensaje && estado.mensaje.includes('Suscripción exitosa')) {
+          return { status: 'Listo para datos', color: 'text-green-600' };
+        }
+        return { status: 'Conectado', color: 'text-green-600' };
+      }
+
+      // Estados de desconexión con colores específicos
+      if (estado.mensaje && estado.mensaje.includes('Conectando')) {
+        return { status: 'Conectando...', color: 'text-yellow-600' };
+      }
+      if (estado.mensaje && estado.mensaje.includes('Reintentando')) {
+        return { status: 'Reintentando...', color: 'text-orange-600' };
+      }
+      if (estado.mensaje && estado.mensaje.includes('Error')) {
+        return { status: 'Error', color: 'text-red-600' };
+      }
+      if (estado.mensaje && estado.mensaje.includes('Offline')) {
+        return { status: 'Offline', color: 'text-gray-600' };
+      }
+
+      return { status: 'Desconectado', color: 'text-red-600' };
+    } catch (error) {
+      console.error('Error getting MQTT status:', error);
       return { status: 'Error', color: 'text-red-600' };
     }
-    if (estado.mensaje && estado.mensaje.includes('Offline')) {
-      return { status: 'Offline', color: 'text-gray-600' };
-    }
-
-    return { status: 'Desconectado', color: 'text-red-600' };
   };
 
   const handleFilterChange = useCallback((key: string, value: any) => {
@@ -166,6 +180,7 @@ const GestionZonasPage: React.FC = () => {
           loading={isLoading}
           mainFilters={mainFilters}
           onCreate={handleCreateZona}
+          onManageMqtt={() => setShowMqttManagementModal(true)}
         />
 
         {/* Main Content */}
@@ -237,14 +252,9 @@ const GestionZonasPage: React.FC = () => {
                           </td>
                           <td className="px-6 py-3 text-sm text-gray-600">
                             <div className="flex flex-col">
-                              <span className={`font-medium ${getMqttStatus(zona.id).color}`}>
-                                {getMqttStatus(zona.id).status}
+                              <span className="font-medium text-gray-500">
+                                Desconectado
                               </span>
-                              {getEstadoZona(zona.id)?.mensaje && (
-                                <span className="text-xs text-gray-400 mt-1 truncate max-w-32" title={getEstadoZona(zona.id)?.mensaje}>
-                                  {getEstadoZona(zona.id)?.mensaje}
-                                </span>
-                              )}
                             </div>
                           </td>
                           <td className="px-6 py-3">
@@ -301,7 +311,7 @@ const GestionZonasPage: React.FC = () => {
                     if (fullZona) handleZonaSelect(fullZona);
                   }}
                   showSatellite={true}
-                  modalOpen={showMqttModal || showReadingsModal || showZonaModal}
+                  modalOpen={showMqttSelectionModal || showReadingsModal || showZonaModal}
                 />
               </div>
             </div>
@@ -317,13 +327,12 @@ const GestionZonasPage: React.FC = () => {
           />
         )}
 
-        {showMqttModal && selectedZona && (
-          <MqttConfigModal
-            isOpen={showMqttModal}
-            onClose={() => setShowMqttModal(false)}
+        {showMqttSelectionModal && selectedZona && (
+          <MqttSelectionModal
+            isOpen={showMqttSelectionModal}
+            onClose={() => setShowMqttSelectionModal(false)}
             zonaId={selectedZona.id}
             zonaNombre={selectedZona.nombre}
-            existingConfig={selectedMqttConfig}
             onSave={handleMqttSave}
           />
         )}
@@ -334,7 +343,14 @@ const GestionZonasPage: React.FC = () => {
             onClose={() => setShowReadingsModal(false)}
             zonaId={selectedZona.id}
             zonaNombre={selectedZona.nombre}
-            mqttConfigId={selectedMqttConfig?.id}
+            mqttConfigId={undefined} // Will be determined by active config
+          />
+        )}
+
+        {showMqttManagementModal && (
+          <MqttManagementModal
+            isOpen={showMqttManagementModal}
+            onClose={() => setShowMqttManagementModal(false)}
           />
         )}
       </div>

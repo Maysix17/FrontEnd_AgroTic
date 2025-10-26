@@ -34,7 +34,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
   const [liveUpdates, setLiveUpdates] = useState<MedicionSensor[]>([]);
 
   // Use MQTT socket hook for real-time updates
-  const { getLecturasZona } = useMqttSocket();
+  const { lecturas } = useMqttSocket();
 
   useEffect(() => {
     if (isOpen) {
@@ -45,10 +45,11 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
   // Effect to update sensor data with real-time MQTT readings
   useEffect(() => {
     if (isOpen && zonaId) {
-      const lecturas = getLecturasZona(zonaId);
-      if (lecturas.length > 0) {
+      const zonaLecturas = lecturas.filter(l => l.zonaId === zonaId);
+      if (zonaLecturas.length > 0) {
         // Get the latest reading and update sensor data
-        const latestLectura = lecturas[0]; // Most recent is first
+        const latestLectura = zonaLecturas[0]; // Most recent is first
+        console.log('Updating sensor data with latest lectura:', latestLectura);
         setSensorData(prevData => {
           const newData = { ...prevData };
           let hasUpdates = false;
@@ -66,22 +67,16 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
               };
               hasUpdates = true;
             } else {
-              // Only update if the value or timestamp is different
-              const currentLastUpdate = new Date(newData[sensorKey].lastUpdate);
-              const newLastUpdate = new Date(medicion.fechaMedicion);
+              newData[sensorKey].lastValue = newValue;
+              newData[sensorKey].lastUpdate = medicion.fechaMedicion;
 
-              if (newData[sensorKey].lastValue !== newValue || currentLastUpdate.getTime() !== newLastUpdate.getTime()) {
-                newData[sensorKey].lastValue = newValue;
-                newData[sensorKey].lastUpdate = medicion.fechaMedicion;
-
-                // Always add to history for continuous chart
-                newData[sensorKey].history.push({ value: newValue, timestamp: medicion.fechaMedicion });
-                // Keep only last 20 values
-                if (newData[sensorKey].history.length > 20) {
-                  newData[sensorKey].history = newData[sensorKey].history.slice(-20);
-                }
-                hasUpdates = true;
+              // Always add to history for continuous chart
+              newData[sensorKey].history.push({ value: newValue, timestamp: medicion.fechaMedicion });
+              // Keep only last 20 values
+              if (newData[sensorKey].history.length > 20) {
+                newData[sensorKey].history = newData[sensorKey].history.slice(-20);
               }
+              hasUpdates = true;
             }
           });
 
@@ -90,7 +85,7 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
         });
       }
     }
-  }, [isOpen, zonaId, getLecturasZona]);
+  }, [isOpen, zonaId, lecturas]);
 
   const loadHistoricalData = async () => {
     setIsLoading(true);
@@ -176,42 +171,49 @@ const SensorReadingsModal: React.FC<SensorReadingsModalProps> = ({
 
             {/* Chart */}
             <div className="h-36 bg-gray-50 rounded-lg p-2" style={{ minHeight: '144px', minWidth: '200px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="time"
-                    tick={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: '#6b7280' }}
-                    axisLine={false}
-                    width={35}
-                  />
-                  <Tooltip
-                    formatter={(value: any) => {
-                      const numValue = typeof value === 'number' ? value : parseFloat(value);
-                      return [isNaN(numValue) ? 'N/A' : numValue.toFixed(2), 'Valor'];
-                    }}
-                    labelFormatter={(label) => `Lectura ${label + 1}`}
-                    contentStyle={{
-                      backgroundColor: '#f9fafb',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#16a34a"
-                    strokeWidth={2.5}
-                    dot={{ fill: '#16a34a', strokeWidth: 2, r: 3 }}
-                    activeDot={{ r: 5, stroke: '#16a34a', strokeWidth: 2, fill: '#dcfce7' }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis
+                      dataKey="time"
+                      tick={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#6b7280' }}
+                      axisLine={false}
+                      width={35}
+                    />
+                    <Tooltip
+                      formatter={(value: any) => {
+                        const numValue = typeof value === 'number' ? value : parseFloat(value);
+                        return [isNaN(numValue) ? 'N/A' : numValue.toFixed(2), 'Valor'];
+                      }}
+                      labelFormatter={(label) => `Lectura ${label + 1}`}
+                      contentStyle={{
+                        backgroundColor: '#f9fafb',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '12px'
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#16a34a"
+                      strokeWidth={2.5}
+                      dot={{ fill: '#16a34a', strokeWidth: 2, r: 3 }}
+                      activeDot={{ r: 5, stroke: '#16a34a', strokeWidth: 2, fill: '#dcfce7' }}
+                      connectNulls={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                  Esperando datos...
+                </div>
+              )}
             </div>
 
             {/* Stats */}

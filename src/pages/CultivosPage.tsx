@@ -16,11 +16,13 @@ import CultivoDetailsModal from "../components/organisms/CultivoDetailsModal";
 import EstadosFenologicosModal from "../components/organisms//EstadosFenologicosModal";
 import HarvestSellModal from "../components/organisms/HarvestSellModal";
 import { FinancialAnalysisModal } from "../components/organisms/FinancialAnalysisModal";
+import MqttManagementModal from "../components/molecules/MqttManagementModal";
 import {
   DocumentTextIcon,
   CurrencyDollarIcon,
   TruckIcon,
-  EyeIcon
+  EyeIcon,
+  Cog6ToothIcon
 } from "@heroicons/react/24/outline";
 
 const CultivosPage: React.FC = () => {
@@ -37,6 +39,7 @@ const CultivosPage: React.FC = () => {
   const [isEstadosFenologicosModalOpen, setIsEstadosFenologicosModalOpen] = useState(false);
   const [isHarvestSellModalOpen, setIsHarvestSellModalOpen] = useState(false);
   const [isFinancialAnalysisModalOpen, setIsFinancialAnalysisModalOpen] = useState(false);
+  const [isMqttManagementModalOpen, setIsMqttManagementModalOpen] = useState(false);
   const [selectedCultivo, setSelectedCultivo] = useState<Cultivo | null>(null);
   const [selectedCultivoForDetails, setSelectedCultivoForDetails] = useState<Cultivo | null>(null);
   const [selectedCosechaId, setSelectedCosechaId] = useState<string>("");
@@ -204,6 +207,13 @@ const CultivosPage: React.FC = () => {
           onManageTipoCultivo={() => setIsTipoCultivoModalOpen(true)}
           onManageVariedad={() => setIsVariedadModalOpen(true)}
           onManageEstados={() => setIsEstadosFenologicosModalOpen(true)}
+          onManageActions={[
+            {
+              label: "Gestionar MQTT",
+              icon: <Cog6ToothIcon className="w-4 h-4" />,
+              onClick: () => setIsMqttManagementModalOpen(true)
+            }
+          ]}
         />
 
         {/* Tabla escritorio */}
@@ -501,6 +511,11 @@ const CultivosPage: React.FC = () => {
         isOpen={isFinancialAnalysisModalOpen}
         onClose={() => setIsFinancialAnalysisModalOpen(false)}
         cosechaId={selectedCosechaId}
+      />
+
+      <MqttManagementModal
+        isOpen={isMqttManagementModalOpen}
+        onClose={() => setIsMqttManagementModalOpen(false)}
       />
     </div>
   );

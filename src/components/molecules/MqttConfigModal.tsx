@@ -26,7 +26,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
   const [formData, setFormData] = useState({
     nombre: '',
     host: 'broker.hivemq.com',
-    port: '8000',
+    port: 8000,
     protocol: 'ws',
     topicBase: 'sensors/#',
     activa: true,
@@ -50,7 +50,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
       setFormData({
         nombre: existingConfig.nombre,
         host: existingConfig.host,
-        port: existingConfig.port,
+        port: Number(existingConfig.port),
         protocol: existingConfig.protocol,
         topicBase: existingConfig.topicBase,
         activa: existingConfig.activa,
@@ -59,7 +59,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
       setFormData({
         nombre: `Config ${zonaNombre}`,
         host: 'broker.hivemq.com',
-        port: '8000',
+        port: 8000,
         protocol: 'ws',
         topicBase: 'sensors/#',
         activa: true,
@@ -136,8 +136,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     console.log('MqttConfigModal: Submitting form with data:', formData);
 
     // Validar que se haya probado la conexión exitosamente
@@ -152,8 +151,9 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
     try {
       const configData = {
         ...formData,
-        fkZonaId: zonaId,
       };
+
+      console.log('MqttConfigModal: Config data to send:', configData);
 
       if (existingConfig) {
         console.log('MqttConfigModal: Updating existing config:', existingConfig.id);
@@ -180,7 +180,7 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
   ];
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onClose} size="md">
+    <Modal isOpen={isOpen} onOpenChange={onClose} size="sm">
       <ModalContent>
         <ModalHeader>
           <h2 className="text-lg font-semibold">
@@ -188,131 +188,114 @@ const MqttConfigModal: React.FC<MqttConfigModalProps> = ({
           </h2>
         </ModalHeader>
 
-        <ModalBody>
-          <div className="text-sm text-gray-600 mb-4">
-            Zona: <strong>{zonaNombre}</strong>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <ModalBody className="max-h-96 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="space-y-3">
             <TextInput
-              label="Nombre de Configuración"
-              placeholder="Ingrese nombre"
+              label="Nombre"
+              placeholder="Configuración 1"
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-2">
               <TextInput
                 label="Host"
-                placeholder="ej: broker.hivemq.com"
+                placeholder="broker.hivemq.com"
                 value={formData.host}
                 onChange={(e) => setFormData({ ...formData, host: e.target.value })}
               />
-
               <TextInput
                 label="Puerto"
                 type="number"
-                placeholder="ej: 8000"
-                value={formData.port}
-                onChange={(e) => setFormData({ ...formData, port: e.target.value })}
+                placeholder="8000"
+                value={formData.port.toString()}
+                onChange={(e) => setFormData({ ...formData, port: parseInt(e.target.value, 10) || 0 })}
               />
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-gray-700 text-sm mb-1">Protocolo</label>
-              <select
-                className="w-full h-9 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                value={formData.protocol}
-                onChange={(e) => setFormData({ ...formData, protocol: e.target.value })}
-              >
-                {protocolOptions.map((option) => (
-                  <option key={option.key} value={option.key}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex flex-col">
+                <label className="text-gray-700 text-xs mb-1">Protocolo</label>
+                <select
+                  className="w-full h-9 px-2 py-2 border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  value={formData.protocol}
+                  onChange={(e) => setFormData({ ...formData, protocol: e.target.value })}
+                >
+                  {protocolOptions.map((option) => (
+                    <option key={option.key} value={option.key}>
+                      {option.key.toUpperCase()}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <TextInput
-              label="Base del Tópico"
-              placeholder="ej: sensors/#"
+              label="Tópico Base"
+              placeholder="sensors/#"
               value={formData.topicBase}
               onChange={(e) => setFormData({ ...formData, topicBase: e.target.value })}
             />
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="activa"
-                checked={formData.activa}
-                onChange={(e) => setFormData({ ...formData, activa: e.target.checked })}
-                className="rounded"
-              />
-              <label htmlFor="activa" className="text-sm font-medium text-gray-700">
-                Configuración Activa
-              </label>
-            </div>
-
-            {/* Botón de prueba de conexión */}
-            <div className="flex flex-col space-y-2 pt-2">
-              <div className="flex items-center space-x-3">
-                <CustomButton
-                  type="button"
-                  text={isTestingConnection ? 'Probando...' : 'Probar Conexión'}
-                  onClick={testConnection}
-                  disabled={isTestingConnection || !formData.host || !formData.port || !formData.topicBase}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm"
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="activa"
+                  checked={formData.activa}
+                  onChange={(e) => setFormData({ ...formData, activa: e.target.checked })}
+                  className="rounded"
                 />
-
-                {connectionTestResult && (
-                  <div className={`text-sm px-3 py-1 rounded-full flex items-center ${
-                    connectionTestResult.success
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {connectionTestResult.success ? '✓' : '✗'} {connectionTestResult.message}
-                    {connectionTestResult.latency && (
-                      <span className="ml-2 text-xs">
-                        ({connectionTestResult.latency}ms)
-                      </span>
-                    )}
-                  </div>
-                )}
+                <label htmlFor="activa" className="text-xs font-medium text-gray-700">
+                  Activa
+                </label>
               </div>
 
-              {/* Indicador de validación requerida */}
-              {!isConnectionValidated && (
-                <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
-                  ⚠️ Debe probar la conexión exitosamente antes de guardar la configuración
-                </div>
-              )}
-
-              {isConnectionValidated && (
-                <div className="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-200">
-                  ✓ Conexión validada. Puede guardar la configuración.
-                </div>
-              )}
+              <CustomButton
+                type="button"
+                text={isTestingConnection ? '...' : 'Probar'}
+                onClick={testConnection}
+                disabled={isTestingConnection || !formData.host || !formData.port || !formData.topicBase}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-xs"
+              />
             </div>
 
+            {connectionTestResult && (
+              <div className={`text-xs px-2 py-1 rounded flex items-center ${
+                connectionTestResult.success
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {connectionTestResult.success ? '✓' : '✗'} {connectionTestResult.message}
+                {connectionTestResult.latency && (
+                  <span className="ml-1">({connectionTestResult.latency}ms)</span>
+                )}
+              </div>
+            )}
+
+            {!isConnectionValidated && (
+              <div className="text-xs text-amber-600 bg-amber-50 p-1 rounded border border-amber-200">
+                ⚠️ Probar conexión antes de guardar
+              </div>
+            )}
+
             {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-2 rounded-lg border border-red-200">
+              <div className="text-red-600 text-xs bg-red-50 p-1 rounded border border-red-200">
                 {error}
               </div>
             )}
           </form>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter className="flex justify-end gap-2">
           <CustomButton
             type="button"
             text="Cancelar"
             onClick={onClose}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2"
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 text-sm"
           />
           <CustomButton
-            type="submit"
-            text={isLoading ? 'Guardando...' : 'Guardar'}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2"
+            type="button"
+            text={isLoading ? '...' : 'Guardar'}
+            onClick={handleSubmit}
+            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-1 text-sm"
             disabled={isLoading || !isConnectionValidated}
           />
         </ModalFooter>

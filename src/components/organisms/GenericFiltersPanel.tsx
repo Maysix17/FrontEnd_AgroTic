@@ -25,6 +25,10 @@ interface GenericFiltersPanelProps {
   // Experimental: Integrated header actions
   onExport?: () => void;
   onCreate?: () => void;
+  onManageTipoCultivo?: () => void;
+  onManageVariedad?: () => void;
+  onManageEstados?: () => void;
+  onManageMqtt?: () => void;
   onManageActions?: Array<{ label: string; icon: React.ReactNode; onClick: () => void }>;
 }
 
@@ -39,6 +43,10 @@ const GenericFiltersPanel: React.FC<GenericFiltersPanelProps> = ({
   advancedFilters = [],
   onExport,
   onCreate,
+  onManageTipoCultivo,
+  onManageVariedad,
+  onManageEstados,
+  onManageMqtt,
   onManageActions = [],
 }) => {
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
@@ -159,6 +167,54 @@ const GenericFiltersPanel: React.FC<GenericFiltersPanelProps> = ({
                   label="Nuevo"
                   icon={<PlusIcon className="w-4 h-4" />}
                   className="rounded-lg px-3 py-1 h-8"
+                />
+              </Tooltip>
+            )}
+
+            {onManageTipoCultivo && (
+              <Tooltip content="Gestionar tipos de cultivo">
+                <CustomButton
+                  variant="light"
+                  size="sm"
+                  label="Tipo Cultivo"
+                  onClick={onManageTipoCultivo}
+                  className="rounded-lg px-3 py-1 h-8 text-gray-600"
+                />
+              </Tooltip>
+            )}
+
+            {onManageVariedad && (
+              <Tooltip content="Gestionar variedades">
+                <CustomButton
+                  variant="light"
+                  size="sm"
+                  label="Variedad"
+                  onClick={onManageVariedad}
+                  className="rounded-lg px-3 py-1 h-8 text-gray-600"
+                />
+              </Tooltip>
+            )}
+
+            {onManageEstados && (
+              <Tooltip content="Gestionar estados fenológicos">
+                <CustomButton
+                  variant="light"
+                  size="sm"
+                  label="Estados"
+                  onClick={onManageEstados}
+                  className="rounded-lg px-3 py-1 h-8 text-gray-600"
+                />
+              </Tooltip>
+            )}
+
+            {onManageMqtt && (
+              <Tooltip content="Gestionar configuraciones MQTT">
+                <CustomButton
+                  variant="light"
+                  size="sm"
+                  label="MQTT"
+                  onClick={onManageMqtt}
+                  className="rounded-lg px-3 py-1 h-8 text-gray-600"
                 />
               </Tooltip>
             )}

@@ -17,11 +17,22 @@ export interface MqttConfig {
   id: string;
   nombre: string;
   host: string;
-  port: string;
+  port: number;
   protocol: string;
   topicBase: string;
   activa: boolean;
+  zonaMqttConfigs?: ZonaMqttConfig[];
+}
+
+export interface ZonaMqttConfig {
+  id: string;
+  fkMqttConfigId: string;
   fkZonaId: string;
+  estado: boolean;
+  createdAt: string;
+  updatedAt: string;
+  mqttConfig?: MqttConfig;
+  zona?: Zona;
 }
 
 export interface MedicionSensor {
@@ -85,13 +96,34 @@ class MqttConfigService {
     return response.data;
   }
 
-  async getByZona(zonaId: string): Promise<MqttConfig | null> {
+  async getByZona(zonaId: string): Promise<ZonaMqttConfig | null> {
     const response = await axios.get(`${this.baseUrl}/zona/${zonaId}`);
     return response.data;
   }
 
-  async create(config: Omit<MqttConfig, 'id'>): Promise<MqttConfig> {
+  async getZonaMqttConfigs(zonaId: string): Promise<ZonaMqttConfig[]> {
+    const response = await axios.get(`${this.baseUrl}/zona/${zonaId}/configs`);
+    return response.data;
+  }
+
+  async getActiveZonaMqttConfig(zonaId: string): Promise<ZonaMqttConfig | null> {
+    const response = await axios.get(`${this.baseUrl}/zona/${zonaId}/active`);
+    return response.data;
+  }
+
+  async assignConfigToZona(zonaId: string, configId: string): Promise<ZonaMqttConfig> {
+    const response = await axios.post(`${this.baseUrl}/assign`, { zonaId, configId });
+    return response.data;
+  }
+
+  async unassignConfigFromZona(zonaId: string, configId: string): Promise<void> {
+    await axios.post(`${this.baseUrl}/unassign`, { zonaId, configId });
+  }
+
+  async create(config: Omit<MqttConfig, 'id' | 'zonaMqttConfigs'>): Promise<MqttConfig> {
+    console.log('MqttConfigService.create: Sending data:', config);
     const response = await axios.post(this.baseUrl, config);
+    console.log('MqttConfigService.create: Response:', response.data);
     return response.data;
   }
 
