@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { type ZonaMqttConfig, type MqttConfig, mqttConfigService } from '../../services/zonasService';
 import CustomButton from '../atoms/Boton';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@heroui/react';
-import { CheckCircleIcon, XCircleIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 interface MqttSelectionModalProps {
   isOpen: boolean;
@@ -24,10 +24,12 @@ const MqttSelectionModal: React.FC<MqttSelectionModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [testingConfig, setTestingConfig] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<Record<string, { success: boolean; message: string; latency?: number }>>({});
+  const [assignmentError, setAssignmentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       loadData();
+      setAssignmentError(null); // Clear any previous errors when opening modal
     }
   }, [isOpen, zonaId]);
 
@@ -82,13 +84,19 @@ const MqttSelectionModal: React.FC<MqttSelectionModalProps> = ({
 
   const handleAssignConfig = async (configId: string) => {
     try {
-      await mqttConfigService.assignConfigToZona(zonaId, configId);
+      setAssignmentError(null); // Clear any previous error
+      const result = await mqttConfigService.assignConfigToZona(zonaId, configId);
+      if (!result.success) {
+        const { configName, zonaName } = result.error!;
+        setAssignmentError(`No se puede asignar la configuración "${configName}" a esta zona. Ya está conectada a la zona "${zonaName}". Por favor desconéctela de la otra zona primero.`);
+        return;
+      }
       await loadData(); // Reload to show updated state
       onSave();
     } catch (error: any) {
       console.error('Error assigning config:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Error al asignar configuración';
-      alert(`Error al asignar configuración: ${errorMessage}`);
+      setAssignmentError(errorMessage); // Display error in modal instead of alert
     }
   };
 
@@ -120,6 +128,22 @@ const MqttSelectionModal: React.FC<MqttSelectionModalProps> = ({
           <div className="text-sm text-gray-600 mb-4">
             Zona: <strong>{zonaNombre}</strong>
           </div>
+
+          {assignmentError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-800">{assignmentError}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {loading ? (
             <div className="text-center py-8">

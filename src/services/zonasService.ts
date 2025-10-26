@@ -111,7 +111,7 @@ class MqttConfigService {
     return response.data;
   }
 
-  async assignConfigToZona(zonaId: string, configId: string): Promise<ZonaMqttConfig> {
+  async assignConfigToZona(zonaId: string, configId: string): Promise<{ success: boolean; data?: ZonaMqttConfig; error?: { configName: string; zonaName: string } }> {
     const response = await axios.post(`${this.baseUrl}/assign`, { zonaId, configId });
     return response.data;
   }
