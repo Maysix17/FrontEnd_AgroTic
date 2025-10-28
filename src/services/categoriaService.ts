@@ -1,10 +1,22 @@
 import apiClient from '../lib/axios/axios';
+import type { CategoriaData } from '../types/categoria.types';
 
 export const categoriaService = {
-  async getAll() {
-    const response = await apiClient.get('/categoria-actividad');
+  async getAll(): Promise<CategoriaData[]> {
+    const response = await apiClient.get('/categoria');
     console.log('Categorias response:', response.data);
     return response.data || [];
+  },
+  async create(data: Omit<CategoriaData, 'id'>): Promise<CategoriaData> {
+    const response = await apiClient.post('/categoria', data);
+    return response.data;
+  },
+  async update(id: string, data: Omit<CategoriaData, 'id'>): Promise<CategoriaData> {
+    const response = await apiClient.put(`/categoria/${id}`, data);
+    return response.data;
+  },
+  async delete(id: string): Promise<void> {
+    await apiClient.delete(`/categoria/${id}`);
   },
 };
 

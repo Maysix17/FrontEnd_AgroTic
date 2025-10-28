@@ -34,7 +34,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
     fechaVencimiento: '',
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [bodegas, setBodegas] = useState<Bodega[]>([]);
   const [unidadesMedida, setUnidadesMedida] = useState<any[]>([]);
@@ -67,7 +67,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
       stock: '',
       fechaVencimiento: '',
     });
-    setSelectedFile(null);
+    // setSelectedFile(null);
     setErrors({});
   };
 
@@ -85,7 +85,7 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
         stock: editItem.stock?.toString() || '',
         fechaVencimiento: editItem.fechaVencimiento ? new Date(editItem.fechaVencimiento).toISOString().split('T')[0] : '',
       });
-      setSelectedFile(null);
+      // setSelectedFile(null);
       setErrors({});
     }
   };
@@ -122,8 +122,8 @@ const UnifiedProductModal: React.FC<UnifiedProductModalProps> = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file);
+  const handleFileSelect = (_file: File) => {
+    // setSelectedFile(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -31,10 +31,12 @@ interface Product {
   }>;
 }
 
-interface Categoria {
-  id: string;
-  nombre: string;
-}
+import type { CategoriaData } from '../../types/categoria.types';
+
+// interface Categoria {
+//   id: string;
+//   nombre: string;
+// }
 
 interface Zona {
   id: string;
@@ -52,7 +54,7 @@ interface ActividadModalProps {
 }
 
 const ActividadModal: React.FC<ActividadModalProps> = ({ isOpen, onClose, selectedDate, onSave }) => {
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaData[]>([]);
 
   const [usuarioSearch, setUsuarioSearch] = useState('');
   const [productSearch, setProductSearch] = useState('');

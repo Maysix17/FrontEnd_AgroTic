@@ -158,25 +158,9 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       setIsInitializing(true);
       console.log('PermissionContext: Checking for existing cookies...');
 
-      // Check if we have user_permissions cookie that indicates a potential session
-      const hasPermissions = Cookies.get('user_permissions') !== undefined;
-
-      console.log('PermissionContext: All cookies:', document.cookie);
-      console.log('PermissionContext: user_permissions cookie present:', hasPermissions);
-
-      if (!hasPermissions) {
-        console.log('PermissionContext: No permissions cookie found, user is not authenticated');
-        setUser(null);
-        updatePermissions([]);
-        clearClientCookies();
-        setIsAuthenticated(false);
-        setupAxiosInterceptors(refresh, navigate, logout);
-        setIsInitializing(false);
-        return;
-      }
-
+      // Check if we have HTTP-only cookies by trying to access a protected endpoint
       try {
-        console.log('PermissionContext: Tokens found, attempting to get profile...');
+        console.log('PermissionContext: Attempting to get profile to check authentication...');
         const profile = await getProfile();
         console.log('PermissionContext: Profile loaded successfully', profile);
         setUser(profile);
@@ -216,7 +200,6 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
           updatePermissions([]);
           clearClientCookies();
           setIsAuthenticated(false);
-          setIsInitializing(false);
           console.log('PermissionContext: User set as not authenticated after refresh failure');
         }
       }
@@ -225,7 +208,7 @@ export const PermissionProvider: React.FC<PermissionProviderProps> = ({ children
       setIsInitializing(false);
     };
     init();
-  }, []); // Empty dependency array to run only once
+  }, [refresh]); // Add refresh to dependencies to prevent stale closure
 
   const value: PermissionContextType = {
     user,
